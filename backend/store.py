@@ -139,7 +139,7 @@ def reserve(tenant, key, request, config, version=presentation.API_VERSION):
         saved = replay_in(conn, tenant, CREATE_REVIEW, key, payload, version)
         if saved:
             return saved, False
-        rid = config.get("spend", {}).get("reservation_id", new_id("qr"))
+        rid = new_id("qr")
         doc = dict(
             tenant_id=tenant,
             review_id=rid,
@@ -158,7 +158,7 @@ def reserve(tenant, key, request, config, version=presentation.API_VERSION):
                 k: v
                 for k, v in config.items()
                 if k
-                not in ("policy_text", "ready", "skill_snapshot", "stage_instructions", "combined_instructions", "combined_task", "spend")
+                not in ("policy_text", "ready", "skill_snapshot", "stage_instructions", "combined_instructions", "combined_task")
             }
             | dict(
                 source_kind="manual_paste",

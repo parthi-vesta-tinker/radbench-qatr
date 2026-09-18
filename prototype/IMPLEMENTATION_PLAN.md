@@ -1,4 +1,4 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates.
 
 # Revised implementation sequence — foundations first
 
@@ -9,9 +9,9 @@ It supersedes historical migrations, legacy projections and three-call targets b
 |---|---|---|
 | F1 | API/private schemas, fresh SQL schema, typed persistence, generated OpenAPI/TS | Tenant/auth, FK, error, receipt, pagination and feature contract tests |
 | F2 | Three pinned references/43 entries, new content release, tenant binding and snapshots | Hash/inventory, authority/qualifier cases, no draft leakage, input bounds |
-| F3 | One-call DBOS workflow, dispatch guard, spend ledger and atomic finalization | Zero/one controlled calls, subprocess crash matrix, concurrency and unknown outcomes |
+| F3 | One-call DBOS workflow, dispatch guard and atomic finalization | Zero/one controlled calls, subprocess crash matrix, concurrency and unknown outcomes |
 | F4 | Reconnect existing product capabilities; regenerate handoff artifacts | Python/TS/build/browser regression, exact copy, fresh-data features and honest evidence |
-| F5 | Separately authorized combined-path evaluation | Explicit permission, $1 session guard, actual usage/failures and qualified review |
+| F5 | Combined-path evaluation | Actual usage/failures and qualified clinical review |
 
 F1–F4 are the foundation build. Runtime is still 0.10.0. No microservice, historical migration,
 automatic publishing or advanced analytics expansion. The dated sequence below is superseded

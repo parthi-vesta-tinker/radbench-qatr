@@ -21,9 +21,8 @@ def test_single_dispatch_across_crash(tmp_path, point, calls, success):
     boot.write_text('''
 import os, sys
 sys.path[:0] = [os.environ['QA_TEST_PROJECT'], os.environ['QA_TEST_PROJECT']+'/tests']
-from backend import reviewer, spend
+from backend import reviewer
 from test_sdk import ControlledModel
-spend.PRICING['controlled-sdk-test'] = (1,1)
 class Calls(list):
     def append(self, instructions):
         with open(os.environ['QA_CALL_LOG'], 'a') as f:
@@ -68,12 +67,5 @@ uvicorn.run('backend.main:app',host='127.0.0.1',port=int(os.environ['QA_PORT']),
         log = tmp_path/'calls.log'
         # Explicit parentheses ensure zero-call assertion is not a conditional expression.
         assert (len(log.read_text().splitlines()) if log.exists() else 0) == calls
-        from backend import spend
-        status = spend.status('controlled-test')
-        assert 0 < status['committed_micro_usd'] <= status['ceiling']
-        if not success:
-            with spend.db() as conn:
-                reservation = conn.execute('SELECT * FROM reservations WHERE id=?',(rid,)).fetchone()
-            assert reservation['charged'] == reservation['bound']
     finally:
         server.close()

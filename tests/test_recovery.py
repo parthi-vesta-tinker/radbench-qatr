@@ -182,8 +182,7 @@ def test_skill_snapshot_survives_restart_with_invalid_installed_content(tmp_path
 import sys, os, json, hashlib
 from pathlib import Path
 sys.path[:0] = [os.environ['QA_TEST_PROJECT'], os.environ['QA_TEST_PROJECT']+'/tests']
-from backend import reviewer, spend
-spend.PRICING['controlled-sdk-test'] = (1,1)
+from backend import reviewer
 from test_sdk import ControlledModel
 class Calls(list):
     def append(self, instructions):

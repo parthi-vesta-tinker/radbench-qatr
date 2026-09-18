@@ -92,16 +92,13 @@ def test_tenant_binding_draft_isolation_and_captured_release(client, monkeypatch
         assert conn.execute("SELECT active_release FROM tenants WHERE id='vesta'").fetchone()[0] == content.VESTA_RELEASE
 
 
-def test_complete_request_context_and_budget_bounds():
+def test_complete_request_context_bounds():
     snap = skill_runtime.load_snapshot(release_id=content.VESTA_RELEASE)
     prompt = content.combined_instructions(snap)
     assert content.check_request_bound(prompt, "Report", output_tokens=6000) > 60000
     with pytest.raises(ReviewProblem) as exc:
         content.check_request_bound(prompt, "Report", output_tokens=6000, context_limit=20000)
     assert exc.value.code == "REVIEW_CONTEXT_TOO_LARGE"
-    with pytest.raises(ReviewProblem) as exc:
-        content.check_request_bound(prompt, "Report", output_tokens=6000, input_token_allowance=100)
-    assert exc.value.code == "REVIEW_BUDGET_TOO_SMALL"
     with pytest.raises(ValueError): content.binding("other", {"skill_release":"unknown"})
 
 

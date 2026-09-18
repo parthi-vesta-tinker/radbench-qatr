@@ -94,7 +94,7 @@ CREATE TRIGGER review_terminal_immutable BEFORE UPDATE ON review_records
 WHEN OLD.execution_status IN ('completed','failed','needs_input')
 BEGIN SELECT RAISE(ABORT,'Terminal review is immutable'); END;
 CREATE TABLE model_attempts (
- tenant_id TEXT NOT NULL, review_id TEXT NOT NULL, reservation_id TEXT NOT NULL UNIQUE,
+ tenant_id TEXT NOT NULL, review_id TEXT NOT NULL, attempt_id TEXT NOT NULL UNIQUE,
  outcome TEXT NOT NULL CHECK(outcome IN ('claimed','response','unknown')),
  response TEXT CHECK(response IS NULL OR json_valid(response)),
  PRIMARY KEY(tenant_id,review_id),

@@ -330,15 +330,16 @@ Everything else in this document is UI and data on top of that one change.
 Idempotency keys, `QA-Version` pinning and tenant-from-credential rules are unchanged. A new
 `skills:run` scope is worth considering so a reviewer can edit without being able to spend.
 
-## 12. Spend
+## 12. Running cost
 
-Playground runs make real model calls and therefore need budget, but must not compete with live QA:
+Not modelled. Spend authorization, ledgers and per-session ceilings were removed from the
+application by explicit user decision, and the playground does not reintroduce them. Playground
+runs make ordinary provider calls on the same path as live reviews; provider cost is managed in
+the OpenAI account.
 
-- A playground workspace draws on its **own** authorized spend session, separate from the session
-  live reviews draw on. Exhausting the playground budget must never block report QA.
-- Reservation, admission and the conservative accounting in `backend/spend.py` are reused as-is.
-- Running the full curated set is the expensive action. It is one explicit button with a visible
-  estimated cost and a confirmation, never automatic on save.
+The one limit that remains is the context window: a composed pack plus report plus bounded
+output that will not fit is rejected before dispatch, never clipped. That check applies equally
+to live and playground runs.
 
 ## 13. What must not be simplified away
 
@@ -385,8 +386,8 @@ skill readable by a non-specialist. They are separable.
 
 ## 16. Open questions
 
-1. Does a clinician need `skills:write` to run the playground, or should a separate `skills:run`
-   scope gate spending?
+1. Does a clinician need `skills:write` to run the playground, or is a separate `skills:run`
+   scope worth having for other reasons?
 2. Should a workspace pin the published pack version it forked from, and refuse to submit when
    live has moved on — or rebase like today's `source_changed` warning?
 3. How many curated examples is a credible publish gate? 54 exist today, all synthetic.

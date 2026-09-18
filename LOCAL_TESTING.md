@@ -1,50 +1,35 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates. Use the new default `.qa-data-foundation-v3`, or explicitly select an empty `QA_DATA_DIR`; application and DBOS files must start fresh together. No old data is migrated or deleted.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates. Use the new default `.qa-data-foundation-v3`, or explicitly select an empty `QA_DATA_DIR`; application and DBOS files must start fresh together. No old data is migrated or deleted.
 
-## F3: start a separately authorized test session
+## F3 startup
 
 Use fresh `.qa-data-foundation-v3` application/DBOS storage together. Old directories are
 preserved and incompatible schemas are rejected; no automatic migration/reset occurs.
 API clients must pin `QA-Version: 2026-09-18` (also the omitted-header default).
 
-The following command records explicit operator authorization for **one test session**.
-Run it only when that session has actually been authorized. All its concurrent reviews
-and API-driven evaluation calls share its ceiling. A new session is not an automatic
-retry or a way to bypass an exhausted allowance. The implementation caps each session at
-$1; it does not provide an override to exceed that limit.
-
 ```sh
-uv run python scripts/authorize_spend.py --session my-authorized-test --ceiling-usd 1.00 --hours 4 --authorization "Operator authorized this test session"
-uv run python scripts/run_local.py --model gpt-5.6-sol --spend-session my-authorized-test
-uv run python scripts/authorize_spend.py --session my-authorized-test --status
+uv run python scripts/run_local.py --model gpt-5.6-sol
 ```
 
 The launcher asks for a key without saving it. Rotate any key exposed in chat before live use.
-`QA_SPEND_LEDGER` defaults to `.qa-spend/ledger.sqlite`, **outside** `QA_DATA_DIR`;
-`QA_SPEND_SESSION` selects existing authority when launching without `run_local.py`.
-Never delete the ledger to renew an allowance. Missing/expired sessions or missing/corrupt
-ledgers block spending. Existing POST receipts remain replayable without model readiness.
+Existing POST receipts remain replayable without model readiness.
 
-Known supported pricing is pinned from the official pricing page on 2026-09-18 and expires
-2026-10-18. Standard tier/public OpenAI endpoint only. Unknown models fail closed. Reservations
-use the full serialized request, strict output schema, envelope allowance, bounded output
-(including reasoning), long-context/cache-write maximum rates and 10% headroom. No cache
-discount is assumed. A large request—especially Astra with the full catalog—may not fit $1;
-it is rejected before dispatch instead of clipping instructions or raising the ceiling.
-Recorded costs are conservative upper bounds, not invoice reconciliations or account-wide caps.
+There is no spend ledger, session authorization or cost ceiling. Reviews are admitted on
+configuration and context size alone. A request whose complete instructions and report exceed
+the context allowance is rejected before dispatch with `REVIEW_CONTEXT_TOO_LARGE`, never
+clipped. Live reviews incur ordinary provider charges; manage those in the OpenAI account.
 
 Four actual execution phases are visible: input validation, combined report review, output
 validation and comment assembly. A valid live review has one model call. Invalid input has
-zero calls; local rejection releases only an unclaimed reservation. Refusals, incomplete
-responses and invalid output fail without repair calls. A claim with no durable response
-is `MODEL_OUTCOME_UNKNOWN`, retains its full reservation and is never retried automatically.
-A durable response resumes locally after restart. Starting a fresh review is an explicit
-new submission subject to budget admission; there is no automatic rerun endpoint.
+zero calls. Refusals, incomplete responses and invalid output fail without repair calls. A
+dispatch claim with no durable response is `MODEL_OUTCOME_UNKNOWN` and is never retried
+automatically. A durable response resumes locally after restart. Starting a fresh review is
+an explicit new submission; there is no automatic rerun endpoint.
 
 `evaluate_skills.py` remains a no-call planner; its obsolete direct three-stage `--execute`
-path is retired. Use `evaluate.py` against the running F3 API for authorized evaluations.
-The metadata-only connection diagnostic does not run inference or incur model-token charges.
+path is retired. Use `evaluate.py` against the running API. The metadata-only connection
+diagnostic does not run inference or incur model-token charges.
 
-Earlier release instructions below are historical. This section governs F3 startup and budgets.
+Earlier release instructions below are historical. This section governs F3 startup.
 
 
 ## F2 tenant content configuration

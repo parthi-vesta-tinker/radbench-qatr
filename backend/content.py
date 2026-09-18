@@ -73,17 +73,14 @@ def combined_instructions(snapshot, policy=""):
     )
 
 
-def check_request_bound(instructions, report, *, output_tokens, context_limit=120000,
-                        input_token_allowance=None):
+def check_request_bound(instructions, report, *, output_tokens, context_limit=120000):
     """Conservative UTF-8 byte token bound plus envelope/schema allowance, no clipping.
 
-    F3 supplies a spend-derived input allowance after durable authorization; this helper
-    cannot authorize spend or claim a model-specific price/context window.
+    This is a context-window guard only. It does not clip instructions or the report;
+    a request that cannot fit is rejected before dispatch.
     """
     from .contracts import ReviewProblem
     input_bound = len((instructions + report).encode("utf-8")) + 16000
     if input_bound + output_tokens > context_limit:
         raise ReviewProblem("REVIEW_CONTEXT_TOO_LARGE", "Complete report and instructions exceed the context allowance.")
-    if input_token_allowance is not None and input_bound > input_token_allowance:
-        raise ReviewProblem("REVIEW_BUDGET_TOO_SMALL", "Complete instructions exceed the authorized input allowance.")
     return input_bound

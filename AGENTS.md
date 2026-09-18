@@ -1,4 +1,4 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates.
 
 # Next-build authority — 2026-09-17
 
@@ -6,9 +6,10 @@ Read [FOUNDATION_PLAN.md](prototype/FOUNDATION_PLAN.md) before implementing the 
 It supersedes older migration/legacy-projection requirements and the three-model-stage target.
 Old prototype data may be discarded at the explicit cutover; preserve history, feedback, outcomes,
 analytics and tenant Skills Studio functionality with fresh records. Keep DBOS isolation, one
-combined provider request, immutable snapshots and fail-closed spend admission. An ambiguous
-attempt must not trigger an automatic provider retry. Live tests require explicit permission and
-an aggregate session ceiling of $1 unless the user explicitly raises it.
+combined provider request and immutable snapshots. An ambiguous attempt must not trigger an
+automatic provider retry. Spend ledgers, session authorization and cost ceilings were removed
+by explicit user decision; do not reintroduce them. Provider cost is managed in the OpenAI
+account, not in this application.
 
 This revision changes planning artifacts only. Runtime remains application 0.10.0. No database
 reset, content activation or paid evaluation is implied. Pinned skills change through F2's

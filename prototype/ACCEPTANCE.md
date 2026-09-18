@@ -1,4 +1,4 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates.
 
 # Foundation acceptance — proposed next build
 
@@ -6,10 +6,10 @@ These criteria implement [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md); none is claim
 
 | ID | Required proof |
 |---|---|
-| F-01 | Fresh app/DBOS bootstrap rejects incompatible schema safely; preserves secrets/spend ledger. |
+| F-01 | Fresh app/DBOS bootstrap rejects incompatible schema safely; preserves secrets. |
 | F-02 | Public schema → OpenAPI → TypeScript generation and error contracts are reproducible. |
 | F-03 | Tenant-scoped data/receipts/drafts and foreign keys reject cross-tenant references. |
-| F-04 | Concurrent acceptance retries create one review, receipt and budget reservation. |
+| F-04 | Concurrent acceptance retries create one review, one receipt and one dispatch attempt. |
 | F-05 | Valid review uses one controlled model request; invalid input zero; no hidden retry. |
 | F-06 | Claimed/uncheckpointed requests become unknown; checkpointed responses resume locally. |
 | F-07 | Three qatr references and 43 unique IDs retain authority/qualifiers; no drafts/evals in prompt. |
@@ -17,9 +17,9 @@ These criteria implement [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md); none is claim
 | F-09 | Refusal, truncation, invalid schema/anchors/IDs and context overflow fail without repair calls. |
 | F-10 | Fresh-data history, feedback, stakeholder outcomes, analytics and authoring all work. |
 | F-11 | Exact two-group copy, no revived missed-flag line, stale copy or fictional stage progress. |
-| F-12 | Aggregate authorized $1 session admission withstands concurrency, restart and app reset. |
+| F-12 | Context-bound admission rejects an oversized request before dispatch and never clips it. |
 | F-13 | Empty operational counts are truthful; clinical metrics/unknown costs are not invented. |
-| F-14 | Live evaluation requires separate permission and evidence; old tests do not validate new code. |
+| F-14 | Live evaluation produces its own evidence; old tests do not validate new code. |
 
 ## Earlier baseline acceptance
 

@@ -21,7 +21,7 @@ microservice, agent platform, ORM rewrite, vector database or generic workflow e
 | Critical references | Import qatr's three pinned reference artifacts and complete 43-entry catalog. Preserve the distinction between source text, normalized catalog and proposed matching guidance. |
 | Tenant isolation | Authenticated tenant owns data, draft history and explicit active-package binding. Never accept tenant/package overrides from report text. |
 | Extensibility | Public API models, private model-output models and database records have separate responsibilities. Version their contracts explicitly without building legacy adapters now. |
-| Spend | Explicit authorization before live tests; at most $1 aggregate per authorized session unless the user explicitly raises it. Resetting review data must not reset spending authority. |
+| Spend | Not modelled in the application. Removed by explicit user decision; provider cost is managed in the OpenAI account. A request that cannot fit the context window is rejected before dispatch, never clipped. |
 
 Old instructions to preserve completed rows, historical API projections or pending old workflows
 are superseded for this cutover only. Durable recovery, receipt replay and immutability still
@@ -215,26 +215,16 @@ and budget admission; it never silently changes the old result. Use a new workfl
 this incompatible cutover and an empty DBOS store. Prove same-build recovery; arbitrary old-code
 replay is out of scope. Keep DBOS in control of the event loop.
 
-## 7. Session spend protection and diagnostics
+## 7. Request admission and diagnostics
 
-Do not treat an API key, an old test allowance or a fresh database as permission to spend.
-Require explicit live-test authorization tied to a durable session ID, expiry and ceiling at
-or below $1. Sum completed costs plus outstanding conservative reservations across all concurrent
-reports, diagnostics and evaluation requests in that authorized session.
+Spend authorization, pricing snapshots and the session ledger were removed by explicit user
+decision and must not be reintroduced. A review is admitted on configuration readiness and
+context size alone: the composed instructions plus the report plus the bounded output must fit
+the context allowance, or the request is rejected before dispatch with `REVIEW_CONTEXT_TOO_LARGE`.
+Instructions and report text are never clipped to make a request fit.
 
-Before acceptance, reserve the worst-case bound for full input plus bounded output/reasoning
-under a verified pricing snapshot for the configured model. Use integer currency units, round
-up, assume no cache discount and allow safety headroom. Unsupported pricing/token accounting
-means fail closed. Set the provider output limit consistently with that bound. Record actual
-usage when available; leave unknown attempts conservatively charged/reserved. Do not claim this
-is an account-wide billing cap for calls made outside this app.
-
-Keep the spend ledger outside resettable app/DBOS directories. Reserve idempotently before the
-application transaction; a crash leaves a conservative orphan reservation, not free budget.
-Reconcile using the acceptance key/review identity; refund only with evidence no attempt occurred.
-This small failure-safe reconciliation avoids pretending there is an atomic transaction across
-the ledger, application database and provider. A missing ledger must not silently recreate an
-already-authorized session with a fresh allowance. New sessions or increases require permission.
+Record actual provider usage when it is available and leave it null when it is not. Usage is
+observability, not accounting. The application makes no claim about provider billing.
 
 Structured operational logs carry request/review/workflow/attempt IDs, tenant-safe identifiers,
 phase, latency, usage and safe errors. Redact report text, prompts, API keys and policy contents

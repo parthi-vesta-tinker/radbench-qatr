@@ -1,6 +1,6 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates.
 
-F3 startup requires a separately authorized test session and fresh `.qa-data-foundation-v3` storage. See [current startup and budget instructions](LOCAL_TESTING.md#f3-start-a-separately-authorized-test-session). Earlier release commands below are historical.
+F3 startup requires fresh `.qa-data-foundation-v3` storage. See [current startup instructions](LOCAL_TESTING.md#f3-startup). Earlier release commands below are historical.
 
 
 # Revised starting point

@@ -1,12 +1,13 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates.
 
 ## F3 implementation — 2026-09-18
 
-One combined OpenAI request, atomic dispatch protection, durable response checkpoints and
-per-test-session spend admission are implemented. API 2026-09-18 / schema 4 requires fresh
+One combined OpenAI request, atomic dispatch protection and durable response checkpoints are
+implemented. Spend authorization was removed by explicit user decision; reviews are admitted on
+configuration readiness and context size alone. API 2026-09-18 / schema 4 requires fresh
 `.qa-data-foundation-v3` storage. Existing data is preserved and older schemas fail closed.
 See [F3 decisions and executed checks](FOUNDATION_CHANGELOG.md) and
-[current startup instructions](../LOCAL_TESTING.md#f3-start-a-separately-authorized-test-session).
+[current startup instructions](../LOCAL_TESTING.md#f3-startup).
 
 Verification: final full Python run **107 passed**;
 TypeScript/build and React DOM passed; 8 Playwright scenarios passed, including desktop/mobile

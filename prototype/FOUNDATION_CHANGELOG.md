@@ -1,11 +1,36 @@
 # Foundation implementation decisions and releases
 
+# Spend removal — 2026-09-18
+
+Removed by explicit user decision: "spending is not a problem", after the running application
+rejected a review with `SPEND_LIMIT_EXCEEDED`.
+
+Deleted `backend/spend.py`, `scripts/authorize_spend.py` and `tests/test_spend.py`. Removed the
+reservation step from review acceptance, claim/settle from the guarded dispatch path,
+`release_unclaimed` from failure handling, the `--spend-session` requirement from the launcher,
+and `cost_upper_bound_micro_usd` from reported metrics. `model_attempts.reservation_id` is now
+`attempt_id`; the column is written positionally, so existing databases are unaffected and
+`SCHEMA_VERSION` is unchanged.
+
+Retained: the context-window guard (`REVIEW_CONTEXT_TOO_LARGE`), at-most-once dispatch claims,
+durable response checkpoints, `MODEL_OUTCOME_UNKNOWN` with no automatic retry, and observed
+token usage as observability. `attempts.uncertain()` now decides from the attempt checkpoint
+alone: the claim is written before dispatch, so no row means the provider was never called.
+
+Verification: 100 passed, 1 deselected. The deselected case,
+`test_public_schema_and_generated_client_do_not_drift`, fails identically on the unmodified
+tree in this container — FastAPI renders 422 as "Unprocessable Entity" where the checked-in
+`prototype/openapi.json` says "Unprocessable Content". Unrelated to this change and left alone.
+
 ## F3 — Durable single-call execution — application 0.13.0 / bundle 1.17
 
 Implemented 2026-09-18. API **2026-09-18**, SQLite schema **4**, workflow application
 `foundation-f3-0.13.0`, queue `qa-reviews-f3-v1`, parent `qa.review.f3.v1`, child
 `qa.openai.combined.f3.v1`. Fresh default `.qa-data-foundation-v3`; no existing databases
 were reset or migrated. Pinned clinical content remains 0.3.0 and its hashes are unchanged.
+
+The session spend ledger described below was removed on 2026-09-18; see **Spend removal** above.
+Everything else in this entry still describes the installed behavior.
 
 ### Behavior and recovery
 
