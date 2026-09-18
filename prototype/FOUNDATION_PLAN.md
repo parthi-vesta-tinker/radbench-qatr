@@ -110,9 +110,8 @@ API resources. Most extend existing concepts; snapshots and attempts make import
 | `idempotency` | Tenant/operation/key uniqueness, request fingerprint, original response and acceptance metadata. No cross-tenant receipt reads. |
 | `model_attempts` | Unique tenant/review attempt, dispatch claim, provider request/response ID if available, usage, output/checkpoint reference and terminal outcome. Never a general event-sourcing framework. |
 
-Budget authorizations/reservations belong to a small durable spend ledger outside disposable
-review and DBOS storage; see section 7. Installed packages remain immutable files with a manifest,
-not a new content registry service or dozens of database rows for the 43 catalog entries.
+No budget or spend table exists; see section 7. Installed packages remain immutable files with a
+manifest, not a new content registry service or dozens of database rows for the 43 catalog entries.
 
 Use relational columns for identities, joins, permissions, states, timestamps and frequent filters.
 Use versioned JSON for variable snapshot/model metadata and source anchors, not a copy of the
@@ -238,8 +237,8 @@ and point the new build at fresh stores together. Re-seed only synthetic demo re
 tenant/content bindings. Do not copy old reviews, receipts, drafts or pending workflow records.
 
 A later reset helper must preview exact paths, refuse broad/root/repository targets, require
-explicit confirmation, stop or reject active workers and preserve secrets, installed releases,
-source files and the independent spend ledger. A reset also invalidates local browser review IDs;
+explicit confirmation, stop or reject active workers and preserve secrets, installed releases
+and source files. A reset also invalidates local browser review IDs;
 clear or reject stale identities without re-submitting their report text. No reset was performed
 while writing this plan. Backup/restore and migrations become gates before retained real data.
 

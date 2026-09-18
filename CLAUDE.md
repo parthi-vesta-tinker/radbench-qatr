@@ -1,14 +1,5 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates.
+# Repository instructions
 
-# Next-build handoff
+Follow [AGENTS.md](AGENTS.md) for current engineering constraints and [START_HERE.md](START_HERE.md) for the documentation order.
 
-Read [the foundation plan](prototype/FOUNDATION_PLAN.md) and AGENTS.md first. The target is fresh
-application/DBOS storage, API-first contracts and one combined model request. Preserve current
-features, not old rows or legacy adapters. Older instructions below describe the installed
-baseline and do not authorize live spend or immediate deletion.
-
-> **Current release 1.14 / application 0.10.0:** [Workspace specification](prototype/WORKSPACE_SPEC.md) and [Analytics specification](prototype/ANALYTICS_SPEC.md) govern the current UX: feedback inbox, tenant-wide analytics and stakeholder outcomes. Atomic skill evaluation is documented in [the evaluation method](qa-skills/clinical-content/evaluation/METHOD.md). [Backlog](prototype/BACKLOG.md) records deferred Test/Production isolation and adjudicated clinical metrics. Earlier release-specific text below is historical where it conflicts. See [Skills Studio specification](prototype/SKILLS_STUDIO_SPEC.md) for the new content review and draft editor.
-
-# Claude Code handoff
-
-Read AGENTS.md and START_HERE.md. The current task is the implemented local paste-and-review prototype, not the broader fleet framework. Prototype implementation is authorized. Preserve the confirmed input, flag, comments and feedback rules; continue with the next bounded task in START_HERE.md. Use README.md for run/test commands and prototype/IMPLEMENTATION_STATUS.md for tested behavior and remaining limitations.
+Current authority is limited to the root entrypoints and the documents listed in [prototype/README.md](prototype/README.md). Files under `design-history/` are archived evidence and must not guide implementation.

@@ -1,64 +1,34 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates.
+# Vesta Report QA
 
-F3 startup requires fresh `.qa-data-foundation-v3` storage. See [current startup instructions](LOCAL_TESTING.md#f3-startup). Earlier release commands below are historical.
+Application **0.13.0** · bundle **1.17** · foundation **F3** · API **2026-09-18** · schema **4**.
 
+Vesta Report QA is a local FastAPI, DBOS, OpenAI Agents SDK, React, and SQLite prototype. A user pastes report text, runs one durable combined review request, reads two copy-ready comment groups, and records feedback or stakeholder outcomes. It also includes tenant-scoped analytics and a Skills Studio draft editor.
 
-# Next build: clean-start, API-first foundations
+Start with [START_HERE.md](START_HERE.md). Use [LOCAL_TESTING.md](LOCAL_TESTING.md) for setup and test commands. Current implementation decisions and evidence live in [prototype/FOUNDATION_CHANGELOG.md](prototype/FOUNDATION_CHANGELOG.md) and [prototype/IMPLEMENTATION_STATUS.md](prototype/IMPLEMENTATION_STATUS.md).
 
-The [revised foundation plan](prototype/FOUNDATION_PLAN.md) governs the next build: fresh app/DBOS
-databases, one model request, qatr's three references/43-entry catalog, and preserved history,
-feedback, outcomes, analytics and tenant drafts. See [implementation gates](prototype/IMPLEMENTATION_PLAN.md).
-This documentation revision does not change application 0.10.0, reset data or run paid tests.
-Current startup and baseline evidence follow below.
+## Run locally
 
-> **Current release 1.14 / application 0.10.0:** [Workspace specification](prototype/WORKSPACE_SPEC.md) and [Analytics specification](prototype/ANALYTICS_SPEC.md) govern the current UX: feedback inbox, tenant-wide analytics and stakeholder outcomes. Nine independently versioned clinical skills now include 54 proposed development/held-out evaluation cases. [Backlog](prototype/BACKLOG.md) records deferred Test/Production isolation and adjudicated clinical metrics. Earlier release-specific text below is historical where it conflicts. See [Skills Studio specification](prototype/SKILLS_STUDIO_SPEC.md) for the new content review and draft editor.
-
-# Current release: Skills Studio bundle 1.14
-
-Use [LOCAL_TESTING.md](LOCAL_TESTING.md) for startup and upgrading while retaining history.
-Read [prototype/ANALYTICS_SPEC.md](prototype/ANALYTICS_SPEC.md) for current Studio UX/API decisions.
-The built UI is included. Earlier release notes below are historical where they conflict.
-
-# Vesta Report QA — skill-enabled local prototype
-
-Bundle **v1.14** · implementation **0.10.0** · 16 September 2026.
-
-Paste one report, request structured QA, copy general and critical comments independently, and save feedback. FastAPI + DBOS + OpenAI Agents SDK, React/TypeScript, local SQLite.
-
-QA Studio includes **Skills & knowledge** to inspect installed instructions, edit saved drafts,
-compare content, restore earlier revisions and export proposals. Saved drafts do not activate
-model changes; the versioned release process remains explicit. It also includes a searchable
-feedback inbox and tenant-wide analytics. Record stakeholder
-decisions without changing clinical output. Clinical performance rates stay unmeasured until an
-independent reference cohort is available; acceptance and thumbs down are not accuracy labels.
-
-Start with [LOCAL_TESTING.md](LOCAL_TESTING.md). The launcher builds a missing UI automatically:
+Install Python 3.11+, `uv`, and Node.js 22 LTS, then:
 
 ```sh
 uv sync --locked
-uv run python scripts/run_local.py --model gpt-6-astra
+uv run python scripts/run_local.py --model gpt-5.6-sol
 ```
 
-The terminal prompts for your key without saving it. Open **http://127.0.0.1:8000**.
-Use `--model gpt-5.6-sol` for Sol. The launcher runs real OpenAI only.
+The launcher builds a missing frontend and prompts for an API key without saving it. See [the live provider session instructions](LOCAL_TESTING.md#live-provider-session). Controlled tests and the demo path make no paid provider call.
 
-## Project map
+## Current architecture
 
-- `qa-skills/framework/`: independently versioned package contract, private schema and integrity validator.
-- `qa-skills/clinical-content/evaluation/suites/`: per-skill diagnostic cases; proposed, not clinically adjudicated.
-- `scripts/evaluate_skills.py` and `scripts/score_skill_evaluations.py`: bounded no-call-by-default runner and diagnostic scorer.
-- `qa-skills/clinical-content/`: nine clinical SKILL.md modules, references, registry and synthetic evaluation cases.
-- `qa-skills/lock.json`: pinned framework/content release. Clinical content is provisional, not an approved manual.
-- `backend/skill_runtime.py`: host loader, stage composition, private candidates and grounded public adaptation.
-- `backend/`: tenant-aware API, durable workflows, captured configuration, persistence and presentation.
-- `frontend/`: familiar Scope–Work–Studio interface, direct comments, three copy actions and feedback.
-- `prototype/`: blueprint, adoption specification, API design and verification record.
-- `framework/`: broader UX framework for later phases; `design-history/` preserves prior design work.
-- `tests/`, `frontend/tests/`: controlled technical tests, distinct from real model evaluation.
+- `backend/`: tenant-aware API, SQLite resources, DBOS workflows, presentation, analytics, outcomes, and knowledge drafts.
+- `frontend/`: React/TypeScript workspace and browser tests.
+- `qa-skills/framework/`: active skill schema and validator.
+- `qa-skills/clinical-content/`: pinned clinical instructions, qatr references, manifests, and evaluation fixtures.
+- `prototype/`: current specifications, generated OpenAPI, implementation evidence, and synthetic examples.
+- `tests/`: backend, workflow, recovery, contract, and controlled-provider tests.
+- `design-history/`: superseded documents and visual artifacts. Nothing in this directory is implementation authority.
 
-Every accepted review captures its report, model settings, policy and exact stage instruction bytes before dispatch.
-API idempotency prevents duplicate accepted operations; it does not guarantee exactly-once provider billing.
-New API clients pin **QA-Version: 2026-09-15**. Legacy receipts replay unchanged; old clients need the new version to create reviews or read richer section labels.
+The active runtime uses one tool-free structured provider request per admitted review. Invalid input makes zero calls. An ambiguous claimed provider attempt is never retried automatically. A request that exceeds the context allowance is rejected before dispatch rather than clipped.
 
-See [prototype/IMPLEMENTATION_STATUS.md](prototype/IMPLEMENTATION_STATUS.md) for actual results and limits.
-This release does not alter the qatr origin repository. No PACS/HL7/chat delivery, image interpretation, clinical approval or automatic learning is included.
+## Boundaries
+
+The prototype reviews report text only. It does not interpret images, edit or deliver reports, send external messages, activate Studio drafts, or establish clinical correctness. Installed clinical content remains provisional until independently reviewed and evaluated. API idempotency protects accepted operations but cannot promise exactly-once provider billing after every external failure mode.

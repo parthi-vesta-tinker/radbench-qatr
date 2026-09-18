@@ -1,23 +1,121 @@
-"""Build the standalone prototype blueprint and implementation edition; Python stdlib only."""
+"""Build a standalone reading edition from the current documentation set."""
+
+from __future__ import annotations
+
+import html
+import re
 from pathlib import Path
-import ast, html, json
-r=Path(__file__).resolve().parent
-# Reuse only the existing controlled-Markdown renderer's imports and functions.
-source=ast.parse((r.parent/'framework/render_blueprint.py').read_text(encoding="utf-8"))
-allowed=[n for n in source.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.FunctionDef))]
-ns={'r':r}
-exec(compile(ast.Module(body=allowed,type_ignores=[]),'<markdown-renderer>','exec'),ns)
-sections=[('FOUNDATION_PLAN.md','foundation','Foundation plan'),('FOUNDATION_CHANGELOG.md','changes','Implemented phases'),('WORKSPACE_SPEC.md','workspace','Workspace'),('ANALYTICS_SPEC.md','analytics','Analytics'),('SKILLS_STUDIO_SPEC.md','skills-studio','Skills Studio'),('REFINEMENT_SPEC.md','refinement','Refinement baseline'),('IMPLEMENTATION_STATUS.md','status','Built & tested'),('BLUEPRINT.md','blueprint','Blueprint'),('UX_DESIGN_SYSTEM.md','design','Design system'),('UX_STATES.md','states','UX states'),('ROADMAP.md','roadmap','Roadmap'),('API_DESIGN.md','api','API'),('IMPLEMENTATION_PLAN.md','implementation','Implementation'),('DBOS_VALIDATION.md','dbos','DBOS'),('ACCEPTANCE.md','acceptance','Acceptance'),('REVIEW_NOTES.md','review','Decisions'),('TESTING_EXPLAINED.md','testing','Sample tests'),('API_REVIEW.md','api-review','API review')]
-css='''*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:#f5f6f8;color:#20242b;font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:42px max(5vw,24px) 30px;background:white;border-bottom:1px solid #dde2e8}.brand{font-weight:650;color:#59616d}.brand b{color:#20242b}h1{font-size:38px;line-height:1.2;letter-spacing:-1px;margin:20px 0 14px;max-width:850px}header p{max-width:850px;color:#59616d}.state{font-size:13px;color:#59616d}.phasebar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#dde2e8;border:1px solid #dde2e8;max-width:1050px;margin-top:28px}.phasebar div{background:#fafbfc;padding:16px}.phasebar b{display:block;font-size:14px}.phasebar span{color:#59616d;font-size:13px}nav{position:sticky;top:0;display:flex;gap:20px;flex-wrap:wrap;padding:15px max(5vw,24px);background:#fff;border-bottom:1px solid #dde2e8;z-index:2;font-size:14px}a{color:#245bb2;text-underline-offset:3px}main{max-width:1160px;margin:auto;background:#fff;padding:16px 46px 50px}section{padding-top:20px}h2{font-size:29px;line-height:1.3;margin-top:40px;border-top:2px solid #dde2e8;padding-top:22px}h3{font-size:21px;margin-top:32px}h4{font-size:18px}p{max-width:970px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.55}td,th{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid #dde2e8}th{background:#f0f2f5;font-weight:600}.table-wrap{overflow:auto;margin:20px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f8;padding:18px;border-left:3px solid #737d8c;font-size:13px}code{font-family:ui-monospace,monospace}figure{margin:24px 0}figure img{width:100%;height:auto;border:1px solid #dde2e8}figcaption{color:#59616d;font-size:13px;margin-top:8px}footer{padding:30px;text-align:center;color:#59616d;font-size:13px}@media(max-width:700px){main{padding:12px 18px}h1{font-size:29px}nav{gap:12px;padding:12px 18px}.phasebar{grid-template-columns:repeat(2,1fr)}td,th{min-width:120px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{nav{position:static}main{padding:0}body{background:white}.phasebar{break-inside:avoid}tr{break-inside:avoid}h2,h3{break-after:avoid}}'''
-nav=''.join(f'<a href="#{key}">{label}</a>' for _,key,label in sections)
-phases=[('F1. Contracts','Fresh schema and generated types'),('F2. Content','Pinned references and tenant snapshots'),('F3. Execution','Single-call DBOS and spend guard'),('F4. Regression','Preserve features and verify artifacts'),('F5. Evaluation','Separate permission and clinical review')]
-bar=''.join(f'<div><b>{title}</b><span>{desc}</span></div>' for title,desc in phases)
-body=''.join(f'<section id="{key}">'+ns['render']((r/name).read_text(encoding="utf-8"),key)+'</section>' for name,key,_ in sections)
-data=json.loads((r/'examples/scenarios.json').read_text(encoding="utf-8"))
-body+='<section id="examples"><h2>Synthetic seed examples</h2><p>Proposed behavior for review; no clinical or model validation claimed.</p>'
-for c in data['cases']:
- body+='<h3>'+html.escape(c['acceptance_id']+' · '+c['name'])+'</h3><pre>'+html.escape(c['report_text'])+'</pre><p>'+html.escape(c['expected_behavior'])+'</p>'
-body+='</section>'
-page='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vesta Report QA — Prototype blueprint and phased plan</title><style>'+css+'</style></head><body><header><div class="brand"><b>Vesta</b> / Report QA</div><h1>Clean-start foundations for the existing QA workspace</h1><p>API-first contracts, fresh application and DBOS stores, and one combined model request. Preserve history, feedback, analytics and tenant-scoped authoring.</p><div class="state">Plan revised 17 September 2026 · Application 0.13.0 · F1–F3 implemented · F4/F5 pending</div><div class="phasebar">'+bar+'</div></header><nav>'+nav+'<a href="#examples">Examples</a></nav><main>'+body+'</main><footer>Documentation revision 2026-09-17; application 0.13.0 / bundle 1.17. F1–F3 implemented; no clinical validation implied. This is the reading edition; use README.md to run the application.</footer></body></html>'
-(r/'BLUEPRINT.html').write_text(page, encoding='utf-8')
-print('Built prototype/BLUEPRINT.html')
+
+ROOT = Path(__file__).resolve().parent
+
+SECTIONS = [
+    ("FOUNDATION_PLAN.md", "plan", "Foundation plan"),
+    ("FOUNDATION_CHANGELOG.md", "changes", "Implemented decisions"),
+    ("IMPLEMENTATION_STATUS.md", "status", "Implementation status"),
+    ("API_DESIGN.md", "api", "API contract"),
+    ("DBOS_VALIDATION.md", "dbos", "DBOS and recovery"),
+    ("WORKSPACE_SPEC.md", "workspace", "Workspace"),
+    ("ANALYTICS_SPEC.md", "analytics", "Analytics"),
+    ("SKILLS_STUDIO_SPEC.md", "skills", "Skills Studio"),
+    ("ACCEPTANCE.md", "acceptance", "Acceptance gates"),
+    ("BACKLOG.md", "backlog", "Backlog"),
+]
+
+
+def inline(value: str) -> str:
+    value = html.escape(value)
+    value = re.sub(r"`([^`]+)`", r"<code>\1</code>", value)
+    value = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", value)
+    value = re.sub(
+        r"\[([^]]+)]\((https?://[^)]+)\)", r'<a href="\2">\1</a>', value
+    )
+    return value
+
+
+def render(markdown: str, prefix: str) -> str:
+    lines = markdown.splitlines()
+    output: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if not line.strip():
+            index += 1
+            continue
+        if line.startswith("```"):
+            block: list[str] = []
+            index += 1
+            while index < len(lines) and not lines[index].startswith("```"):
+                block.append(lines[index])
+                index += 1
+            index += 1
+            output.append("<pre><code>" + html.escape("\n".join(block)) + "</code></pre>")
+            continue
+        heading = re.match(r"(#+) (.*)", line)
+        if heading:
+            level = min(len(heading.group(1)) + 1, 6)
+            slug = prefix + "-" + re.sub(
+                r"[^a-z0-9]+", "-", heading.group(2).lower()
+            ).strip("-")
+            output.append(
+                f'<h{level} id="{slug}">{inline(heading.group(2))}</h{level}>'
+            )
+            index += 1
+            continue
+        if line.startswith("|"):
+            rows: list[list[str]] = []
+            while index < len(lines) and lines[index].startswith("|"):
+                cells = lines[index].strip().strip("|").split("|")
+                if not all(
+                    re.fullmatch(r"\s*:?-+:?\s*", cell) for cell in cells
+                ):
+                    rows.append(cells)
+                index += 1
+            output.append(
+                "<div class=table-wrap><table><thead><tr>"
+                + "".join("<th>" + inline(cell.strip()) + "</th>" for cell in rows[0])
+                + "</tr></thead><tbody>"
+            )
+            for row in rows[1:]:
+                output.append(
+                    "<tr>"
+                    + "".join("<td>" + inline(cell.strip()) + "</td>" for cell in row)
+                    + "</tr>"
+                )
+            output.append("</tbody></table></div>")
+            continue
+        if re.match(r"^(- |\d+\. )", line):
+            ordered = bool(re.match(r"^\d+\.", line))
+            tag = "ol" if ordered else "ul"
+            output.append(f"<{tag}>")
+            while index < len(lines) and re.match(r"^(- |\d+\. )", lines[index]):
+                output.append(
+                    "<li>"
+                    + inline(re.sub(r"^(- |\d+\. )", "", lines[index]))
+                    + "</li>"
+                )
+                index += 1
+            output.append(f"</{tag}>")
+            continue
+        paragraph = [line]
+        index += 1
+        while (
+            index < len(lines)
+            and lines[index].strip()
+            and not re.match(r"^(#|```|\||- |\d+\. )", lines[index])
+        ):
+            paragraph.append(lines[index])
+            index += 1
+        output.append("<p>" + inline(" ".join(paragraph)) + "</p>")
+    return "\n".join(output)
+
+
+css = """*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#20242b;font:16px/1.65 system-ui,-apple-system,sans-serif}header{padding:44px max(5vw,24px);background:#20242b;color:#fff}header p{max-width:850px;color:#d5d7dc}nav{position:sticky;top:0;display:flex;gap:18px;flex-wrap:wrap;padding:14px max(5vw,24px);background:#fff;border-bottom:1px solid #dde2e8}a{color:#245bb2}main{max-width:1120px;margin:auto;background:#fff;padding:20px 46px 50px}h2{font-size:29px;border-top:2px solid #dde2e8;padding-top:22px;margin-top:42px}h3{font-size:21px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid #dde2e8}th{background:#f0f2f5}.table-wrap{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f8;padding:16px;border-left:3px solid #737d8c}code{font-family:ui-monospace,monospace}footer{text-align:center;color:#59616d;padding:28px}@media(max-width:700px){main{padding:12px 18px}nav{position:static}}@media print{nav{position:static}body{background:#fff}main{padding:0}}"""
+
+nav = "".join(f'<a href="#{key}">{label}</a>' for _, key, label in SECTIONS)
+body = "".join(
+    f'<section id="{key}">{render((ROOT / name).read_text(encoding="utf-8"), key)}</section>'
+    for name, key, _ in SECTIONS
+)
+page = f"""<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Vesta Report QA — current documentation</title><style>{css}</style></head><body><header><strong>Vesta / Report QA</strong><h1>Current foundation documentation</h1><p>Application 0.13.0 · bundle 1.17 · F1–F3 implemented · F4/F5 pending. This edition contains only active contracts and evidence.</p></header><nav>{nav}</nav><main>{body}</main><footer>Generated from the active prototype documentation. Archived design history is intentionally excluded.</footer></body></html>"""
+(ROOT / "BLUEPRINT.html").write_text(page, encoding="utf-8")
+print("Built prototype/BLUEPRINT.html from current documentation")
