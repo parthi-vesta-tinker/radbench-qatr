@@ -1,4 +1,4 @@
--- Foundation schema 3. Fresh bootstrap only: never migrate or overwrite old data.
+-- Foundation schema 4. Fresh bootstrap only: never migrate or overwrite old data.
 CREATE TABLE tenants (id TEXT PRIMARY KEY, active_release TEXT);
 CREATE TABLE review_snapshots (
  tenant_id TEXT NOT NULL REFERENCES tenants(id), id TEXT NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE observations (
 );
 CREATE TABLE feedback (
  tenant_id TEXT NOT NULL, id TEXT NOT NULL, review_id TEXT NOT NULL,
- document TEXT NOT NULL CHECK(json_valid(document)), schema_version INTEGER NOT NULL CHECK(schema_version=3),
+ document TEXT NOT NULL CHECK(json_valid(document)), schema_version INTEGER NOT NULL CHECK(schema_version=4),
  result_version INTEGER GENERATED ALWAYS AS (json_extract(document,'$.result_version')) STORED NOT NULL,
  observation_id TEXT GENERATED ALWAYS AS (json_extract(document,'$.observation_id')) STORED,
  PRIMARY KEY(tenant_id,id), UNIQUE(id),
@@ -93,3 +93,13 @@ BEGIN SELECT RAISE(ABORT,'Accepted input is immutable'); END;
 CREATE TRIGGER review_terminal_immutable BEFORE UPDATE ON review_records
 WHEN OLD.execution_status IN ('completed','failed','needs_input')
 BEGIN SELECT RAISE(ABORT,'Terminal review is immutable'); END;
+CREATE TABLE model_attempts (
+ tenant_id TEXT NOT NULL, review_id TEXT NOT NULL, reservation_id TEXT NOT NULL UNIQUE,
+ outcome TEXT NOT NULL CHECK(outcome IN ('claimed','response','unknown')),
+ response TEXT CHECK(response IS NULL OR json_valid(response)),
+ PRIMARY KEY(tenant_id,review_id),
+ FOREIGN KEY(tenant_id,review_id) REFERENCES review_records(tenant_id,id)
+);
+CREATE TRIGGER attempt_response_immutable BEFORE UPDATE ON model_attempts
+WHEN OLD.outcome='response'
+BEGIN SELECT RAISE(ABORT,'Provider response checkpoint is immutable'); END;

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Vesta Report QA API",
-    "version": "0.12.0"
+    "version": "0.13.0"
   },
   "paths": {
     "/api/v1/config": {
@@ -22,7 +22,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -96,7 +96,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -133,7 +133,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -205,7 +205,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -247,7 +247,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -319,7 +319,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -362,7 +362,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -434,7 +434,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -489,7 +489,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -573,7 +573,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -728,7 +728,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -802,7 +802,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -854,7 +854,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -928,7 +928,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -992,7 +992,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -1076,7 +1076,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1154,7 +1154,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -1228,7 +1228,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1292,7 +1292,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -1376,7 +1376,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1457,7 +1457,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -1531,7 +1531,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1675,7 +1675,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -1749,7 +1749,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1825,7 +1825,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -1899,7 +1899,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1942,7 +1942,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -2016,7 +2016,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2070,7 +2070,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -2144,7 +2144,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2210,7 +2210,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -2294,7 +2294,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2359,7 +2359,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-17",
+              "default": "2026-09-18",
               "title": "Qa-Version"
             }
           }
@@ -2433,7 +2433,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -4174,9 +4174,8 @@
             "type": "string",
             "enum": [
               "input_validation",
-              "language_review",
-              "consistency_review",
-              "critical_finding_review",
+              "combined_review",
+              "output_validation",
               "comment_assembly"
             ],
             "title": "Step Id"

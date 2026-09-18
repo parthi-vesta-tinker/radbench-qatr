@@ -27,7 +27,7 @@ def main():
     args = parser.parse_args()
     cases = json.loads(args.cases.read_text())["cases"]
     rows = []
-    headers = {"QA-Version": "2026-09-14"}
+    headers = {"QA-Version": "2026-09-18"}
     token = os.environ.get("QA_API_KEY", "")
     if token:
         headers["Authorization"] = "Bearer " + token
@@ -64,7 +64,7 @@ def main():
                     and time.monotonic() < deadline
                 ):
                     time.sleep(0.25)
-                    response = client.get("/api/v1/reviews/" + review["review_id"])
+                    response = client.get("/api/v1/reviews/" + review["id"])
                     response.raise_for_status()
                     review = response.json()
                 row["review"] = review

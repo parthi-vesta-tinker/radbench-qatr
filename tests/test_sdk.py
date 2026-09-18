@@ -1,6 +1,7 @@
 """Runs the real Agents SDK and DBOS adapter with a deterministic Model, no network."""
 
 import json
+import re
 import uuid
 import pytest
 from agents.models.interface import Model, ModelResponse
@@ -29,9 +30,10 @@ class ControlledModel(Model):
         self.calls.append(system_instructions)
         assert model_settings.store is False and not tools
         assert "radiologist_critical_flag" not in json.dumps(input)
-        stage = system_instructions.split("Execute only stage ")[1].split(".")[0]
+        stage = 'critical_finding_review'
+        checks = json.loads(re.search(r'checked_skills must contain each of these exactly once: (\[.*?\])', system_instructions).group(1))
         output = {
-            "stage": stage,
+            "checked_skills": checks,
             "input_problem": None,
             "observations": [],
             "designation": None,
@@ -88,6 +90,7 @@ class ControlledModel(Model):
             ],
             usage=Usage(requests=1, input_tokens=20, output_tokens=10, total_tokens=30),
             response_id="resp_test",
+            raw_usage=dict(input_tokens=20, output_tokens=10, total_tokens=30),
         )
 
     async def stream_response(self, *args, **kwargs):
@@ -113,7 +116,7 @@ def test_sdk_durable_path(client, monkeypatch, mode):
         assert d["execution_status"] == "failed" and d["result"] is None
     else:
         assert d["execution_status"] == "completed", d
-        assert len(calls) == 3
+        assert len(calls) == 1
         assert d["result"]["outcome"] == (
             "observations" if mode == "grounded_flag" else "no_observations"
         )
@@ -122,10 +125,10 @@ def test_sdk_durable_path(client, monkeypatch, mode):
                 d["result"]["missed_flag"] is False and d["result"]["critical_comments"]
             )
         assert (
-            sum(s.get("metrics", {}).get("total_tokens", 0) for s in d["steps"]) == 90
+            sum(s.get("metrics", {}).get("total_tokens", 0) for s in d["steps"]) == 30
         )
         assert (
             post(client, key=key, sample="critical_documented").json()["id"]
             == d["id"]
         )
-        assert len(calls) == 3
+        assert len(calls) == 1

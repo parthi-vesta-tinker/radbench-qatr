@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 ROOT = Path(__file__).resolve().parents[1]
-DATA = Path(os.environ.get("QA_DATA_DIR", str(ROOT / ".qa-data-foundation-v2"))).resolve()
-APP_VERSION = "foundation-f2-0.12.0"
+DATA = Path(os.environ.get("QA_DATA_DIR", str(ROOT / ".qa-data-foundation-v3"))).resolve()
+APP_VERSION = "foundation-f3-0.13.0"
 
 
 def runtime_config(tenant_id="vesta") -> dict:
@@ -43,10 +43,10 @@ def runtime_config(tenant_id="vesta") -> dict:
     effort = os.environ.get("QA_REASONING_EFFORT", "medium")
     if not 1000 <= max_output <= 16000 or effort not in ("low", "medium", "high"):
         raise ValueError("Invalid model output limit or reasoning effort")
-    return dict(
+    config = dict(
         mode=mode,
         model=model or None,
-        prompt_version="qa-skills-0.3.0-host-4",
+        prompt_version="qa-skills-0.3.0-combined-1",
         skill_release=snapshot["release_id"],
         combined_instructions=combined_instructions(snapshot, policy),
         skill_snapshot=snapshot,
@@ -66,3 +66,8 @@ def runtime_config(tenant_id="vesta") -> dict:
         policy_version=hashlib.sha256(policy.encode()).hexdigest() if policy else None,
         ready=mode == "demo" or bool(model and os.environ.get("OPENAI_API_KEY")),
     )
+
+    from .combined import task, CombinedOutput
+    config['combined_task'] = task(config)
+    config['stage_schema_sha256'] = hashlib.sha256(str(CombinedOutput.model_json_schema()).encode()).hexdigest()
+    return config

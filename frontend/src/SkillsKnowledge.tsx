@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api, ApiError, describeError } from './api';
 import type { KnowledgeCatalog, KnowledgeDetail, KnowledgeDraftInput } from './types';
 
-const stages: Record<string,string> = {language_review:'Language', consistency_review:'Consistency', critical_finding_review:'Critical findings'};
+const stages: Record<string,string> = {combined_review:'Combined report review', language_review:'Language', consistency_review:'Consistency', critical_finding_review:'Critical findings'};
 const kinds: Record<string,string> = {skill:'Skill', reference:'Reference', guidance:'Local guidance', catalog:'Draft catalog', policy_source:'Source wording'};
 
 export function SkillsKnowledge({active}: {active:boolean}) {

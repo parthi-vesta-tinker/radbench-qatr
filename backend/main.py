@@ -15,6 +15,7 @@ from agents import set_tracing_disabled
 from . import store, presentation, reporting, outcomes, knowledge
 from .access import AccessError, Principal, require, validate_access_config
 from .contracts import (
+    ReviewProblem,
     FeedbackInput,
     ReviewInput,
     ReviewResource,
@@ -61,6 +62,8 @@ def reconcile():
                     (s["step_id"] for s in doc["steps"] if s["status"] == "running"),
                     "input_validation",
                 )
+                from .attempts import uncertain
+                unknown = uncertain(tenant, rid, store.job(tenant, rid)[1])
                 store.update(
                     tenant,
                     rid,
@@ -68,9 +71,9 @@ def reconcile():
                     step=active,
                     step_status="failed",
                     error=dict(
-                        code="EXECUTION_STOPPED",
-                        message="Durable execution stopped before completion. Start a new review to retry.",
-                        retryable=True,
+                        code="MODEL_OUTCOME_UNKNOWN" if unknown else "EXECUTION_STOPPED",
+                        message="Durable execution stopped before completion. No automatic provider retry will occur.",
+                        retryable=False,
                     ),
                 )
         except Exception:
@@ -151,7 +154,7 @@ ERROR_RESPONSES = {
 }
 app = FastAPI(
     title="Vesta Report QA API",
-    version="0.12.0",
+    version="0.13.0",
     lifespan=lifespan,
     dependencies=[Depends(api_version)],
     responses=ERROR_RESPONSES,
@@ -354,18 +357,19 @@ def create_review(
             "MODEL_NOT_CONFIGURED",
             "Configure OPENAI_API_KEY and OPENAI_MODEL before reviewing.",
         )
-    # Conservative byte upper bound, no tokenization dependency or silent clipping.
-    if cfg["mode"] == "openai" and any(
-        len((t + payload.report_text).encode()) + 16000 + cfg["model_max_output_tokens"]
-        > 120000
-        for t in [*cfg["stage_instructions"].values(), cfg["combined_instructions"]]
-    ):
-        return error(
-            request,
-            422,
-            "REVIEW_CONTEXT_TOO_LARGE",
-            "Report and guidance exceed this prototype's context allowance. Shorten unrelated content or the supplied guidance.",
-        )
+    if cfg['mode'] == 'openai':
+        from . import spend
+        from .combined import input_bound
+        try:
+            cfg = spend.reserve(p.tenant_id, idempotency_key,
+                store.request_hash(payload.model_dump(), version), cfg,
+                input_bound(cfg, payload.report_text))
+        except ReviewProblem as exc:
+            saved = store.replay(p.tenant_id, store.CREATE_REVIEW, idempotency_key, payload.model_dump(), version)
+            if saved:
+                return respond(saved, True)
+            return error(request, 422 if exc.code == 'REVIEW_CONTEXT_TOO_LARGE' else 409,
+                         exc.code, exc.message)
     saved, created = store.reserve(p.tenant_id, idempotency_key, payload, cfg, version)
     if created:
         try:

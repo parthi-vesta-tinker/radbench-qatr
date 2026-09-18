@@ -8,8 +8,8 @@ from .contracts import (
     StepState,
 )
 
-API_VERSION = "2026-09-17"
-RECORD_SCHEMA_VERSION = 3
+API_VERSION = "2026-09-18"
+RECORD_SCHEMA_VERSION = 4
 PROVENANCE = {
     "skill_content_version",
     "skill_content_sha256",
@@ -58,6 +58,7 @@ def review(record, version=API_VERSION):
                     "output_tokens",
                     "total_tokens",
                     "model_calls",
+                    "cost_upper_bound_micro_usd",
                 },
             )
     if record.get("result") is not None:

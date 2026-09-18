@@ -17,7 +17,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     response = await fetch(url, {
       ...init,
       signal: AbortSignal.timeout(15000),
-      headers: { "QA-Version": "2026-09-17", ...init?.headers },
+      headers: { "QA-Version": "2026-09-18", ...init?.headers },
     });
   } catch (error) {
     throw new ApiError(0, "QA_CONNECTION_FAILED", window.location.protocol === "file:"

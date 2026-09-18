@@ -34,7 +34,7 @@ class Server:
             base_url=f"http://127.0.0.1:{self.port}",
             trust_env=False,
             timeout=2,
-            headers={"QA-Version": "2026-09-17"},
+            headers={"QA-Version": "2026-09-18"},
         )
         self.process = None
         self.log = (root / "server.log").open("a")
@@ -92,7 +92,7 @@ class Server:
 
 
 def test_restart_preserves_completed_steps_result_and_feedback(tmp_path):
-    server = Server(tmp_path, QA_TEST_PAUSE_AT="before_consistency_review")
+    server = Server(tmp_path, QA_TEST_PAUSE_AT="after_output_validation")
     try:
         server.start()
         sample = server.client.get("/api/v1/config").json()["samples"][0]
@@ -119,8 +119,8 @@ def test_restart_preserves_completed_steps_result_and_feedback(tmp_path):
         assert d["result"]["critical_comments"] and d["result"]["missed_flag"] is None
         events = (tmp_path / "hooks/executions.log").read_text().splitlines()
         # Completed side-effect checkpoint reused; interrupted checkpoint executes again.
-        assert events.count(rid + " after_language_review") == 1
-        assert events.count(rid + " before_consistency_review") == 2
+        assert events.count(rid + " after_combined_review") == 1
+        assert events.count(rid + " after_output_validation") == 2
         data = {"result_version": 1, "rating": "down", "reason": "other"}
         key = str(uuid.uuid4())
         feedback = server.client.post(
@@ -182,7 +182,8 @@ def test_skill_snapshot_survives_restart_with_invalid_installed_content(tmp_path
 import sys, os, json, hashlib
 from pathlib import Path
 sys.path[:0] = [os.environ['QA_TEST_PROJECT'], os.environ['QA_TEST_PROJECT']+'/tests']
-from backend import reviewer
+from backend import reviewer, spend
+spend.PRICING['controlled-sdk-test'] = (1,1)
 from test_sdk import ControlledModel
 class Calls(list):
     def append(self, instructions):
@@ -197,7 +198,7 @@ uvicorn.run('backend.main:app', host='127.0.0.1', port=int(os.environ['QA_PORT']
         QA_MODE="openai",
         OPENAI_API_KEY="controlled-no-network",
         OPENAI_MODEL="controlled-sdk-test",
-        QA_TEST_PAUSE_AT="before_consistency_review",
+        QA_TEST_PAUSE_AT="before_provider_claim",
         QA_SKILL_PACKAGE_DIR=str(package),
         QA_TEST_PROJECT=str(ROOT),
         QA_CALL_LOG=str(tmp_path / "calls.log"),
@@ -238,14 +239,7 @@ uvicorn.run('backend.main:app', host='127.0.0.1', port=int(os.environ['QA_PORT']
         assert d["result"]["outcome"] == "no_observations"
         assert server.client.get("/api/v1/config").status_code == 503
         used = (tmp_path / "calls.log").read_text().splitlines()
-        expected = [
-            hashlib.sha256(cfg["stage_instructions"][s].encode()).hexdigest()
-            for s in (
-                "language_review",
-                "consistency_review",
-                "critical_finding_review",
-            )
-        ]
+        expected = [hashlib.sha256(cfg['combined_task'].encode()).hexdigest()]
         assert used == expected
     finally:
         server.close()

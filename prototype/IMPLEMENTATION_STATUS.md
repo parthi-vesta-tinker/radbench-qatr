@@ -1,4 +1,17 @@
-> Current implementation: application **0.12.0**, bundle **1.16**, foundation **F2**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 3 and API 2026-09-17 are implemented; F2 imports the pinned qatr references and tenant-bound snapshots; single-call execution and session-spend enforcement remain F3 work.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates.
+
+## F3 implementation — 2026-09-18
+
+One combined OpenAI request, atomic dispatch protection, durable response checkpoints and
+per-test-session spend admission are implemented. API 2026-09-18 / schema 4 requires fresh
+`.qa-data-foundation-v3` storage. Existing data is preserved and older schemas fail closed.
+See [F3 decisions and executed checks](FOUNDATION_CHANGELOG.md) and
+[current startup instructions](../LOCAL_TESTING.md#f3-start-a-separately-authorized-test-session).
+
+Verification: final full Python run **107 passed**;
+TypeScript/build and React DOM passed; 8 Playwright scenarios passed, including desktop/mobile
+inspection. No paid provider requests ($0), clinical adjudication or deployment. F4/F5 remain
+separate gates. Historical evidence below is scoped to its named release.
 
 F2 adds `catalog` and `policy_source` knowledge document kinds, full qatr source attribution,
 server-controlled tenant release profiles, and immutable complete composition snapshots.

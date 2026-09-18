@@ -28,7 +28,7 @@ def seed(tenant="vesta", source="openai", status="completed", days=0, critical=F
         conn.execute("INSERT OR IGNORE INTO tenants(id) VALUES(?)", (tenant,))
         conn.execute("INSERT INTO review_snapshots VALUES(?,?,?,?)", (tenant, rid, 'controlled', '{}'))
         conn.execute("INSERT INTO review_records(tenant_id,id,snapshot_id,report_text,input_hash,created_at,execution_status,steps,provenance,api_version) VALUES(?,?,?,?,?,?,?,?,?,?)",
-                     (tenant, rid, rid, doc['input']['report_text'], doc['input_hash'], doc['created_at'], 'queued', '[]', store.canonical(doc['provenance']), '2026-09-17'))
+                     (tenant, rid, rid, doc['input']['report_text'], doc['input_hash'], doc['created_at'], 'queued', '[]', store.canonical(doc['provenance']), '2026-09-18'))
     store.update(tenant, rid, execution_status=status, result=doc['result'] if status == 'completed' else None)
     return rid
 

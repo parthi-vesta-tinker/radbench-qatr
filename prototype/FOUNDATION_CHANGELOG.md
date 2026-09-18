@@ -1,5 +1,65 @@
 # Foundation implementation decisions and releases
 
+## F3 — Durable single-call execution — application 0.13.0 / bundle 1.17
+
+Implemented 2026-09-18. API **2026-09-18**, SQLite schema **4**, workflow application
+`foundation-f3-0.13.0`, queue `qa-reviews-f3-v1`, parent `qa.review.f3.v1`, child
+`qa.openai.combined.f3.v1`. Fresh default `.qa-data-foundation-v3`; no existing databases
+were reset or migrated. Pinned clinical content remains 0.3.0 and its hashes are unchanged.
+
+### Behavior and recovery
+
+- One combined, tool-free structured request through the existing Agents SDK/DBOSRunner.
+  Complete source/catalog bytes, all selected skill instructions and the output contract
+  are captured before acceptance. Local input rejection makes zero model calls.
+- Atomic session-ledger claim executes inside the actual model method, beneath DBOS's
+  checkpoint boundary. Transport retries are disabled. A claim without a saved response
+  fails `MODEL_OUTCOME_UNKNOWN`; no automatic retry or repair call is permitted.
+- Private immutable model response checkpoints precede parsing and retain usage/response IDs.
+  Recovery reuses them even if the DBOS model checkpoint was interrupted. Completed response
+  status is checked before the SDK drops it. Refusal, tool output, malformed JSON, missing
+  coverage and invalid grounding are non-successful results, never empty successes.
+- Deterministic validation requires complete skill coverage and globally unique candidate IDs,
+  validates check ownership and exact source anchors, and preserves the two copy groups.
+  Canonical results and terminal state still commit atomically and finalize idempotently.
+- Four truthful phases replace three separately timed model stages: input validation,
+  combined report review, output validation and comment assembly. Skills Studio shows
+  combined usage; saved drafts still never activate instructions. Unknown usage/cost is null.
+- A separate `.qa-spend/ledger.sqlite` records explicit expiring per-test-session authorization,
+  stable reservations, dispatch claims and conservative charges. API retries recover original
+  receipts; orphan admission reservations are reused without doubling or silently refunding.
+  Resetting review/DBOS storage cannot renew authority. Missing ledgers/sessions fail closed.
+- Each session has its own ceiling, currently capped at $1. All concurrent calls within that
+  session share it. New sessions require separate authorization. Prices verified against
+  https://developers.openai.com/api/docs/pricing on 2026-09-18 expire 2026-10-18. Standard
+  endpoint/tier only; complete serialized request/schema, output/reasoning limit, maximum
+  long-context/cache-write rates and 10% headroom determine admission. These are conservative
+  cost bounds, not invoice reconciliation or an account-wide provider billing guarantee.
+- `authorize_spend.py` creates explicit authority; `run_local.py --spend-session ...` reuses it.
+  The old direct three-stage evaluation executor is retired so it cannot bypass this ledger.
+  The API-driven evaluation runner uses the guarded path. Metadata diagnostics run no inference.
+
+### Verification and remaining gates
+
+Final full regression run: **107 Python tests passed** after checkpoint/error hardening.
+Real process termination/restart covered before claim,
+after claim, after provider response, after application response checkpoint, after combined
+completion and after final commit. Controlled concurrency tests verified session admission and
+same-key POST replay. The actual HTTP adapter was exercised with a local mock, including HTTP
+500, incomplete response, refusal, missing usage, unknown tools and invalid check coverage.
+
+Dependency lock, generated OpenAPI/TypeScript, clinical-package hashes and bundle validation passed.
+TypeScript/Vite production build and the React DOM suite passed. Eight Playwright scenarios
+passed using local Chromium, including F3 phase labels, exact copy groups, reload, narrow layout,
+drafts, Skills Studio saves and analytics. Two historical exact-label selectors were updated
+using observed accessible roles; no product behavior was changed to satisfy them. Desktop/mobile
+screenshots were inspected. These are controlled/canned tests, not clinical evaluation.
+
+No paid OpenAI requests were made: actual provider spend **$0**. A key supplied in chat was not
+saved or used; the foundation plan requires rotation of exposed keys before future live use.
+F4 handoff/product acceptance and F5 authorized clinical/model evaluation remain separate gates.
+Same-build recovery is established; no arbitrary cross-version recovery or clinical quality claim.
+
 ## Windows source-checkout launcher fix — application 0.12.0
 
 The Git source archive excludes generated `frontend/dist`, while earlier startup wording said

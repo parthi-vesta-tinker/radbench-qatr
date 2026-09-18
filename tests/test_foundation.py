@@ -35,7 +35,7 @@ def result():
 def test_normalized_storage_snapshot_and_idempotent_completion(fresh):
     rid = accept()
     with store.db() as conn:
-        assert conn.execute("PRAGMA user_version").fetchone()[0] == 3
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == 4
         assert conn.execute("SELECT type FROM sqlite_master WHERE name='reviews'").fetchone()[0] == "view"
         assert "document" not in {row[1] for row in conn.execute("PRAGMA table_info(review_records)")}
         assert conn.execute("SELECT count(*) FROM review_snapshots").fetchone()[0] == 1
@@ -63,7 +63,7 @@ def test_tenant_result_and_observation_foreign_keys(fresh):
         payload = {"result_version": version, "rating": "up", "observation_id": observation}
         with pytest.raises(sqlite3.IntegrityError):
             with store.db() as conn:
-                conn.execute("INSERT INTO feedback(tenant_id,id,review_id,document,schema_version) VALUES(?,?,?,?,3)",
+                conn.execute("INSERT INTO feedback(tenant_id,id,review_id,document,schema_version) VALUES(?,?,?,?,4)",
                              (tenant, uuid.uuid4().hex, rid, json.dumps(payload)))
     with store.db() as conn:
         assert conn.execute("PRAGMA foreign_key_check").fetchall() == []

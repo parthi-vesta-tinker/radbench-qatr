@@ -78,7 +78,7 @@ def test_tenant_binding_draft_isolation_and_captured_release(client, monkeypatch
     assert detail.document.kind == "catalog"
     payload = knowledge.DraftInput(expected_revision=0, source_sha256=detail.document.source_sha256,
         package_sha256=detail.package_sha256, content="DRAFT MUST NEVER ENTER PROMPT", change_note="Test isolation")
-    knowledge.save("vesta", key, payload, uuid.uuid4().hex, "2026-09-17")
+    knowledge.save("vesta", key, payload, uuid.uuid4().hex, "2026-09-18")
     assert runtime_config("vesta") == cfg
     with pytest.raises(Exception) as exc: knowledge.detail("other", key)
     assert exc.value.code == "KNOWLEDGE_NOT_FOUND"

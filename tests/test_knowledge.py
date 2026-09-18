@@ -36,7 +36,7 @@ def test_catalog_truthful_runtime_mapping_and_private_sources(editorial_db, monk
     gate=next(d for d in page['items'] if d['document_id']=='skill_qa-input-adequacy')
     assert gate['runtime_use']=='host_reference' and gate['stages']==[]
     critical=next(d for d in page['items'] if d['document_id']=='skill_qa-critical-match')
-    assert critical['stages']==['critical_finding_review']
+    assert critical['stages']==['combined_review']
     response=client.get('/api/v1/knowledge/guidance_tenant')
     assert response.json()['installed_content']=='Tenant guidance only.'
     assert str(manual) not in response.text

@@ -1,6 +1,6 @@
 # Clean-start foundation implementation plan
 
-Decision revision: 2026-09-17. Status: F1/F2 implemented in 0.12.0; F3–F5 remain pending.
+Decision revision: 2026-09-17. Status: F1–F3 implemented in 0.13.0; F4/F5 remain pending.
 See [foundation changelog](FOUNDATION_CHANGELOG.md) for decisions and executed tests.
 Baseline inspected: bundle 1.14 / application 0.10.0. This document is the authority for the
 next build; [implementation status](IMPLEMENTATION_STATUS.md) remains the authority for what

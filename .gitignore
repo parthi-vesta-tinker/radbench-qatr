@@ -1,0 +1,21 @@
+# Credentials and local tenant configuration
+.env
+.env.*
+!.env.example
+.qa-*/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+# Local dependencies, caches and generated runtime output
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+test-results/
+playwright-report/
+*.log

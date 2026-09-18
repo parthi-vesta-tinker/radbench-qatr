@@ -8,9 +8,8 @@ import {
 import type { Review } from "./types";
 const stages = [
   ["input_validation", "Input validation"],
-  ["language_review", "Language review"],
-  ["consistency_review", "Consistency review"],
-  ["critical_finding_review", "Critical finding review"],
+  ["combined_review", "Combined report review"],
+  ["output_validation", "Output validation"],
   ["comment_assembly", "Comment assembly"],
 ];
 export function Studio({
@@ -35,7 +34,9 @@ export function Studio({
     next =
       "Provide the missing minimum information, then request review again.";
   else if (state === "failed")
-    next = "Check the error and retry the report when ready.";
+    next = review?.error?.code === "MODEL_OUTCOME_UNKNOWN"
+      ? "The provider outcome is unknown. This review will not be sent again automatically."
+      : "Check the error before starting a new review.";
   else if (complete && review?.result?.critical_finding_detected)
     next =
       "Copy the QA review for the radiologist. Ask them to confirm the critical designation and follow the applicable communication pathway.";

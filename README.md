@@ -1,4 +1,7 @@
-> Current implementation: application **0.12.0**, bundle **1.16**, foundation **F2**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 3 and API 2026-09-17 are implemented; F2 imports the pinned qatr references and tenant-bound snapshots; single-call execution and session-spend enforcement remain F3 work.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](prototype/FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates.
+
+F3 startup requires a separately authorized test session and fresh `.qa-data-foundation-v3` storage. See [current startup and budget instructions](LOCAL_TESTING.md#f3-start-a-separately-authorized-test-session). Earlier release commands below are historical.
+
 
 # Next build: clean-start, API-first foundations
 

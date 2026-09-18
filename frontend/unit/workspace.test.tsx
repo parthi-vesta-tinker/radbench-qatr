@@ -15,7 +15,7 @@ const {createRoot} = await import('react-dom/client');
 let root: ReturnType<typeof createRoot>;
 let requests: {text:string; key:string}[];
 const results = new Map<string, Review>();
-function review(id:string,text:string): Review { return {id,object:'qa_review', tenant_id:'vesta',api_version:'2026-09-17',input:{report_text:text},execution_status:'running',steps:[],result:null,error:null,provenance:{mode:'openai',policy_status:'provisional_no_manual'}}; }
+function review(id:string,text:string): Review { return {id,object:'qa_review', tenant_id:'vesta',api_version:'2026-09-18',input:{report_text:text},execution_status:'running',steps:[],result:null,error:null,provenance:{mode:'openai',policy_status:'provisional_no_manual'}}; }
 function button(name: string) { const node=[...document.querySelectorAll('button')].find(el=>el.getAttribute('aria-label')===name || el.textContent?.trim()===name); assert.ok(node, `Missing button: ${name}`); return node as HTMLButtonElement; }
 async function click(name:string) { await act(async()=>{button(name).click();}); }
 async function paste(text:string) { await act(async()=>{const input=document.querySelector('#report-text') as HTMLTextAreaElement; assert.ok(input && !input.readOnly); Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value')!.set!.call(input,text);input.dispatchEvent(new window.Event('input',{bubbles:true}));}); }
@@ -29,7 +29,7 @@ async function choose(label:string,value:string) { await act(async()=>{const sel
 beforeEach(()=>{
   sessionStorage.clear();localStorage.clear();results.clear();requests=[];
   document.body.innerHTML='<div id="root"></div>';root=createRoot(document.getElementById('root')!);
-  api.config=async()=>({tenant_id:'vesta',api_version:'2026-09-17',mode:'openai',ready:true,model:'configured-model',policy_status:'provisional_no_manual',samples:[]});
+  api.config=async()=>({tenant_id:'vesta',api_version:'2026-09-18',mode:'openai',ready:true,model:'configured-model',policy_status:'provisional_no_manual',samples:[]});
   api.status=async()=>({status:'ready',checked_at:new Date().toISOString(),readiness_scope:'Local checks only',components:{api:{status:'ok',message:'API responds'},dbos:{status:'ok',message:'Checkpoint store responds'},openai:{status:'configured',message:'Inference not verified'}}});
   api.history=async()=>({items:[],has_more:false,next_cursor:null});
   api.feedbackInbox=async()=>({items:[],has_more:false,next_cursor:null});

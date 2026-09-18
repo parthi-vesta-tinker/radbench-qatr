@@ -13,9 +13,8 @@ from pydantic import (
 
 STEPS = [
     "input_validation",
-    "language_review",
-    "consistency_review",
-    "critical_finding_review",
+    "combined_review",
+    "output_validation",
     "comment_assembly",
 ]
 REASONS = Literal[
@@ -327,9 +326,8 @@ class ReviewResult(BaseModel):
 class StepState(BaseModel):
     step_id: Literal[
         "input_validation",
-        "language_review",
-        "consistency_review",
-        "critical_finding_review",
+        "combined_review",
+        "output_validation",
         "comment_assembly",
     ]
     status: Literal[

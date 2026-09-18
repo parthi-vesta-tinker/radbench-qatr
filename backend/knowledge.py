@@ -138,6 +138,7 @@ def installed(tenant):
         stages=list(registry["stages"]) if policy else [], used_by=[],
         runtime_use="model_instruction" if policy else "not_configured")
     for doc in docs.values():
+        doc["stages"] = ["combined_review"] if doc["stages"] else []
         doc["source_sha256"] = digest(doc["content"])
     return snapshot, docs
 
