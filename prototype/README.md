@@ -29,3 +29,8 @@ Run the prototype using ../README.md. This folder documents the current narrow s
 - TESTING_EXPLAINED.md: what sample-report testing proves, how canned outputs are used, and what has not been evaluated by a live model.
 
 - API_REVIEW.md: audit findings, Stripe reference principles, implemented changes and scope limits.
+
+- UI_ENHANCEMENT_RESEARCH.md: observed UI problems and proposed enhancements, measured against the
+  current build. Research only — it holds no authority over the specifications above, and nothing
+  in it is implemented. Its evidence screenshots are in assets/ui-research/ and, unlike the
+  assets/implementation-*.png files, show application 0.13.0.
