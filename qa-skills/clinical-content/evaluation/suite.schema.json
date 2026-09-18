@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:vesta:web-qa:skill-evaluation-suite:1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["suite_version", "skill", "skill_version", "status", "cases"],
+  "properties": {
+    "suite_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "skill": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+    "skill_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "status": {"enum": ["proposed_not_adjudicated", "partially_adjudicated", "adjudicated"]},
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "partition", "evaluation_mode", "stage", "input", "policy_binding", "expectation_status", "expected"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Z]{2}[0-9]{2}$"},
+          "title": {"type": "string", "minLength": 1},
+          "partition": {"enum": ["development", "held_out"]},
+          "evaluation_mode": {"enum": ["deterministic_gate", "stage_model"]},
+          "stage": {"enum": ["input_validation", "language_review", "consistency_review", "critical_finding_review"]},
+          "input": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["report_text"],
+            "properties": {"report_text": {"type": "string", "minLength": 1, "maxLength": 40000}}
+          },
+          "policy_binding": {"enum": ["none", "synthetic_test_binding", "approved_binding"]},
+          "expectation_status": {"enum": ["proposed_not_adjudicated", "adjudicated"]},
+          "expected": {"type": "object", "minProperties": 1}
+        }
+      }
+    }
+  }
+}

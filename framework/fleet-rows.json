@@ -1,0 +1,70 @@
+{
+  "framework_version": "1.2",
+  "synthetic": true,
+  "rows": [
+    {
+      "case_id": "R-201",
+      "exam": "XR Chest",
+      "coverage": "complete",
+      "qa_outcome": "no_flags_detected",
+      "next_step": "HL7 acknowledged",
+      "canonical_case": true
+    },
+    {
+      "case_id": "R-202",
+      "exam": "CT Head",
+      "coverage": "in_progress",
+      "qa_outcome": "pending",
+      "next_step": "Reviewing",
+      "canonical_case": false
+    },
+    {
+      "case_id": "R-203",
+      "exam": "CT Abdomen",
+      "coverage": "limited",
+      "qa_outcome": "pending",
+      "next_step": "Missing input",
+      "canonical_case": false
+    },
+    {
+      "case_id": "R-204",
+      "exam": "XR Knee",
+      "coverage": "in_progress",
+      "qa_outcome": "pending",
+      "next_step": "Reviewing",
+      "canonical_case": false
+    },
+    {
+      "case_id": "R-205",
+      "exam": "CT Head",
+      "coverage": "in_progress",
+      "qa_outcome": "pending",
+      "next_step": "Reviewing",
+      "canonical_case": false
+    },
+    {
+      "case_id": "R-206",
+      "exam": "US Pelvis",
+      "coverage": "in_progress",
+      "qa_outcome": "pending",
+      "next_step": "Reviewing",
+      "canonical_case": false
+    },
+    {
+      "case_id": "R-207",
+      "exam": "XR Chest",
+      "coverage": "complete",
+      "qa_outcome": "issue_detected",
+      "next_step": "Awaiting clarification",
+      "canonical_case": true
+    },
+    {
+      "case_id": "R-209",
+      "exam": "XR Chest",
+      "coverage": "complete",
+      "qa_outcome": "issue_detected",
+      "next_step": "Confirm designation",
+      "canonical_case": true
+    }
+  ]
+}

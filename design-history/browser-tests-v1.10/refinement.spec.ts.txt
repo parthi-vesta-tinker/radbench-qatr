@@ -1,0 +1,56 @@
+import {test,expect} from '@playwright/test';
+
+test('aligned comments, exact exports, persistent feedback and searchable history', async ({page}) => {
+  const errors:string[]=[]; page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/');
+  await page.getByLabel('Load synthetic example').selectOption('mixed');
+  await page.getByRole('button',{name:'Review report',exact:true}).click();
+  await expect(page.getByRole('status',{name:'QA review: Completed'})).toBeVisible();
+  await expect(page.getByText(/Critical Findings missed flag/)).toHaveCount(0);
+  await expect(page.getByText('Copying does not send comments.')).toHaveCount(0);
+  const comments=await page.locator('.output').boundingBox();
+  const steps=await page.locator('.studio-section').first().boundingBox();
+  expect(Math.abs(comments!.y-steps!.y)).toBeLessThanOrEqual(2);
+  for (const label of ['Copy all comments','Copy general','Copy critical']) {
+    await page.getByRole('button',{name:label,exact:true}).click();
+    const text=await page.evaluate(()=>navigator.clipboard.readText());
+    expect(text).not.toContain('missed flag'); expect(text).toContain('QA review:');
+  }
+  await page.getByRole('button',{name:'Thumbs down'}).click();
+  await page.getByLabel('What was wrong?').selectOption('unclear_wording');
+  await page.getByLabel('Tell us more').fill('Please keep the recommendation concise.');
+  await page.getByRole('button',{name:'Save feedback'}).click();
+  await expect(page.getByText('Feedback saved.')).toBeVisible();
+  await page.reload();
+  await page.locator('.feedback-history summary').click();
+  await expect(page.getByText('Please keep the recommendation concise.')).toBeVisible();
+  await page.screenshot({path:'../prototype/assets/refinement-comments.png',fullPage:true});
+  await page.getByRole('button',{name:'Review history',exact:true}).click();
+  await page.getByLabel('Search reports').fill('silhoutte');
+  await page.getByRole('button',{name:'Search',exact:true}).click();
+  await page.getByRole('combobox',{name:'Feedback',exact:true}).selectOption('true');
+  await page.getByRole('combobox',{name:'Result',exact:true}).selectOption('critical');
+  await expect(page.locator('.report-link').first()).toBeVisible();
+  await page.screenshot({path:'../prototype/assets/refinement-history.png',fullPage:true});
+  await page.locator('.report-link').first().click();
+  await expect(page.getByRole('status',{name:'QA review: Completed'})).toBeVisible();
+  await page.setViewportSize({width:390,height:844});
+  await expect(page.getByRole('button',{name:'Review history',exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  await page.screenshot({path:'../prototype/assets/refinement-mobile.png',fullPage:true});
+  expect(errors).toEqual([]);
+});
+
+test('history navigation retains a draft and replacement requires confirmation',async ({page})=>{
+  await page.goto('/');
+  await page.getByLabel('Report input',{exact:true}).fill('An unsaved draft');
+  await page.getByRole('button',{name:'Review history',exact:true}).click();
+  await page.getByRole('button',{name:'Current report',exact:true}).click();
+  await expect(page.getByLabel('Report input',{exact:true})).toHaveValue('An unsaved draft');
+  page.once('dialog',dialog=>dialog.dismiss());
+  await page.getByRole('button',{name:'New report',exact:true}).click();
+  await expect(page.getByLabel('Report input',{exact:true})).toHaveValue('An unsaved draft');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:'New report',exact:true}).click();
+  await expect(page.getByLabel('Report input',{exact:true})).toHaveValue('');
+});

@@ -1,0 +1,101 @@
+{
+  "suite_version": "1.0.0",
+  "skill": "qa-input-adequacy",
+  "skill_version": "0.2.0",
+  "status": "proposed_not_adjudicated",
+  "cases": [
+    {
+      "id": "IN01",
+      "title": "Inline required sections",
+      "partition": "development",
+      "evaluation_mode": "deterministic_gate",
+      "stage": "input_validation",
+      "input": {
+        "report_text": "History: cough. Findings: Lungs are clear. Impression: No acute disease."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "execution_status": "accepted"
+      }
+    },
+    {
+      "id": "IN02",
+      "title": "Conclusion substitutes for impression",
+      "partition": "development",
+      "evaluation_mode": "deterministic_gate",
+      "stage": "input_validation",
+      "input": {
+        "report_text": "Findings:\nNo fracture.\nConclusion:\nNo acute osseous abnormality."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "execution_status": "accepted"
+      }
+    },
+    {
+      "id": "IN03",
+      "title": "Missing impression requests input",
+      "partition": "development",
+      "evaluation_mode": "deterministic_gate",
+      "stage": "input_validation",
+      "input": {
+        "report_text": "Findings:\nLungs are clear."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "execution_status": "needs_input",
+        "error_code": "MISSING_SECTIONS"
+      }
+    },
+    {
+      "id": "IN04",
+      "title": "Empty findings requests input",
+      "partition": "held_out",
+      "evaluation_mode": "deterministic_gate",
+      "stage": "input_validation",
+      "input": {
+        "report_text": "Findings:\n\nImpression:\nNo acute abnormality."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "execution_status": "needs_input",
+        "error_code": "INCOMPLETE_REPORT"
+      }
+    },
+    {
+      "id": "IN05",
+      "title": "Addendum prose does not create another report",
+      "partition": "held_out",
+      "evaluation_mode": "deterministic_gate",
+      "stage": "input_validation",
+      "input": {
+        "report_text": "Findings: Small left effusion.\nImpression: Small right effusion.\nAddendum: Correction to the Impression: left effusion, not right."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "execution_status": "accepted"
+      }
+    },
+    {
+      "id": "IN06",
+      "title": "Two pasted reports remain ambiguous",
+      "partition": "development",
+      "evaluation_mode": "deterministic_gate",
+      "stage": "input_validation",
+      "input": {
+        "report_text": "Findings: Left effusion. Impression: Left effusion.\nFindings: Right effusion. Impression: Right effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "execution_status": "needs_input",
+        "error_code": "AMBIGUOUS_SECTIONS"
+      }
+    }
+  ]
+}

@@ -1,0 +1,910 @@
+{
+  "catalog_id": "VESTA-CR-CATALOG",
+  "normalization_version": "0.3.0",
+  "normalization_status": "draft_for_review",
+  "source": {
+    "title": "Critical Result Notification",
+    "kind": "user_supplied_policy_text",
+    "path": "critical-result-notification-source.txt",
+    "received_on": "2026-09-10",
+    "source_version": null,
+    "effective_date": null,
+    "clinical_approver": null,
+    "original_attachment_received": false,
+    "note": "User-edited source with Title, Guidelines, Guardrails, Key terminology; address removed by user. Exact 43 source labels preserved. Source approval metadata unavailable. Proposed annotations are not policy.",
+    "source_sha256": "18A2B4D5F27292D8BA2FD21F0897CC11E1367CBE04245BA711B1CBFEBD97BEC6",
+    "last_normalized_on": "2026-09-11"
+  },
+  "notification_requirements": [
+    {
+      "id": "VESTA-CR-NOTIFY-01",
+      "source_clause": "Organizational policy requires verbal notification for all critical results within sixty (60) minutes.",
+      "mode": "verbal",
+      "maximum_minutes": 60,
+      "clock_start_event": null,
+      "clock_stop_definition": null,
+      "time_zone_rule": null
+    },
+    {
+      "id": "VESTA-CR-NOTIFY-02",
+      "source_clause": "Notification requires Vesta to make a call to the facility contact listed for critical findings, the date and time of the notification should be noted in the Impression of the final report.",
+      "caller": "Vesta",
+      "destination": "facility contact listed for critical findings",
+      "destination_directory_supplied": false,
+      "required_report_location": "Impression of the final report",
+      "report_documentation_fields": [
+        "notification_date",
+        "notification_time"
+      ],
+      "recipient_name_required_by_this_source": false,
+      "recipient_name_note": "Not explicitly required in supplied excerpt; may be a proposed improvement or required elsewhere.",
+      "failed_call_escalation": null
+    },
+    {
+      "id": "VESTA-CR-EXCEPTION-01",
+      "source_clause": "Known findings will not be called unless there is a significant change - per the doctor’s judgment *",
+      "applies_to_catalog": true,
+      "doctor_judgment_preserved": true,
+      "significant_change_definition": null,
+      "known_definition": null,
+      "doctor_judgment_evidence_standard": null,
+      "asterisk_explanation_supplied": false
+    }
+  ],
+  "routing_authority": {
+    "source": "previously_supplied_team_instruction",
+    "potential_critical": "Separate draft message for radiologist review; no add-back solely for this concern.",
+    "report_discrepancy": "Separate correction draft; follow approved worklist process.",
+    "external_actions_performed": false
+  },
+  "interpretation_status": "Proposed matching safeguards and clarification notes are not approved additions to the source policy.",
+  "unresolved_common_fields": [
+    "source approval/version",
+    "60-minute start event",
+    "notification completion evidence",
+    "unsuccessful-call escalation",
+    "known-finding/doctor-judgment evidence",
+    "uncertain diagnosis handling except explicit suspicion in abuse entry",
+    "documentation-only routing",
+    "modality/clinical population applicability where not explicit"
+  ],
+  "rules": [
+    {
+      "id": "VESTA-CR-001",
+      "source_item_number": 1,
+      "source_label": "Cerebral hemorrhage/hematoma",
+      "source_locator": "critical-result-notification-source.txt: bullet 1 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "neurologic",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Does cerebral include subarachnoid, subdural, epidural, intraventricular, and intraparenchymal hemorrhage? No acute qualifier is written; clarify chronic collections via the shared known-finding rule.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-002",
+      "source_item_number": 2,
+      "source_label": "Herniation Syndrome",
+      "source_locator": "critical-result-notification-source.txt: bullet 2 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "neurologic",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Define included herniation syndromes and whether impending or suspected herniation qualifies; do not infer syndrome from isolated mass effect.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-003",
+      "source_item_number": 3,
+      "source_label": "Acute Stroke",
+      "source_locator": "critical-result-notification-source.txt: bullet 3 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "neurologic",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve acute. Distinguish current reported stroke from prior infarct or history; suspected/age-indeterminate stroke needs clarified handling.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-004",
+      "source_item_number": 4,
+      "source_label": "Intracranial infection/empyema",
+      "source_locator": "critical-result-notification-source.txt: bullet 4 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "neurologic",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify which intracranial infections and uncertain descriptions are included; do not equate nonspecific enhancement with infection.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-005",
+      "source_item_number": 5,
+      "source_label": "Complex Skull fracture",
+      "source_locator": "critical-result-notification-source.txt: bullet 5 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "trauma",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Define complex and the qualifying report descriptors; do not convert all skull fractures to complex.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-006",
+      "source_item_number": 6,
+      "source_label": "Unstable Spine Fracture",
+      "source_locator": "critical-result-notification-source.txt: bullet 6 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "trauma",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Define instability evidence and physician determination; do not classify every vertebral fracture as unstable.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-007",
+      "source_item_number": 7,
+      "source_label": "Spinal Cord Compression, hemorrhage or infarct",
+      "source_locator": "critical-result-notification-source.txt: bullet 7 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "neurologic",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Keep the three concepts traceable to one source bullet. Clarify cauda equina/conus and spinal canal stenosis without stated cord compression.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-008",
+      "source_item_number": 8,
+      "source_label": "Airway compromise",
+      "source_locator": "critical-result-notification-source.txt: bullet 8 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "thoracic_head_neck",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify threatened versus actual compromise and relevant descriptors; narrowing alone does not automatically establish the policy label.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-009",
+      "source_item_number": 9,
+      "source_label": "Acute Arterial Occlusion",
+      "source_locator": "critical-result-notification-source.txt: bullet 9 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve acute; clarify age-indeterminate occlusion and inclusion of specific vascular territories.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-010",
+      "source_item_number": 10,
+      "source_label": "Necrotizing Fasciitis",
+      "source_locator": "critical-result-notification-source.txt: bullet 10 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "infection",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify suspected disease and descriptive findings; do not diagnose it independently from soft tissue gas alone.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-011",
+      "source_item_number": 11,
+      "source_label": "Tension Pneumothorax",
+      "source_locator": "critical-result-notification-source.txt: bullet 11 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "thoracic",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve tension. Ordinary pneumothorax is not an exact match to this item; serious out-of-list concerns must remain visible for human review.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-012",
+      "source_item_number": 12,
+      "source_label": "Pneumoperitoneum/ Free Air",
+      "source_locator": "critical-result-notification-source.txt: bullet 12 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify scope of free air and postoperative/procedural findings. Do not invent a postoperative exemption or match air in every anatomic compartment.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-013",
+      "source_item_number": 13,
+      "source_label": "Ischemic Bowel (Pneumatosis)",
+      "source_locator": "critical-result-notification-source.txt: bullet 13 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify whether pneumatosis alone is a listed trigger or requires reported ischemia; do not silently treat the parenthesis as proof of diagnostic equivalence.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-014",
+      "source_item_number": 14,
+      "source_label": "Active Hemorrhage",
+      "source_locator": "critical-result-notification-source.txt: bullet 14 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "hemorrhage",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve active; a hematoma alone does not establish active bleeding, but another catalog item may apply.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-015",
+      "source_item_number": 15,
+      "source_label": "Cardiac Tamponade",
+      "source_locator": "critical-result-notification-source.txt: bullet 15 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "cardiac",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify report-suspected tamponade; do not replace pericardial effusion with tamponade.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-016",
+      "source_item_number": 16,
+      "source_label": "Volvulus/closed loop obstruction",
+      "source_locator": "critical-result-notification-source.txt: bullet 16 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve both concepts; clarify suspected versus definite and overlap with Bowel Obstruction.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-017",
+      "source_item_number": 17,
+      "source_label": "High Grade Traumatic Visceral Injury",
+      "source_locator": "critical-result-notification-source.txt: bullet 17 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "trauma",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Define organ-specific grading reference/version and high-grade thresholds; do not invent a grade cutoff.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-018",
+      "source_item_number": 18,
+      "source_label": "Retroperitoneal hemorrhage",
+      "source_locator": "critical-result-notification-source.txt: bullet 18 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "hemorrhage",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "No active or acute qualifier is written; do not add one. Evaluate current versus historical and the shared known-finding rule.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-019",
+      "source_item_number": 19,
+      "source_label": "Bowel Obstruction",
+      "source_locator": "critical-result-notification-source.txt: bullet 19 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "No high-grade, complete, ischemic, or closed-loop restriction is written. Clarify partial obstruction and obstruction-versus-ileus uncertainty without narrowing the source.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-020",
+      "source_item_number": 20,
+      "source_label": "Appendicitis",
+      "source_locator": "critical-result-notification-source.txt: bullet 20 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "No perforation or complication restriction is written. Clarify equivocal wording, not an unsupported complicated-only threshold.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-021",
+      "source_item_number": 21,
+      "source_label": "Portal Venous Gas",
+      "source_locator": "critical-result-notification-source.txt: bullet 21 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify variants of terminology and current/historical context; do not substitute pneumobilia.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-022",
+      "source_item_number": 22,
+      "source_label": "Ectopic Pregnancy",
+      "source_locator": "critical-result-notification-source.txt: bullet 22 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "obstetric",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify suspected ectopic and pregnancy of unknown location; no rupture requirement is written.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-023",
+      "source_item_number": 23,
+      "source_label": "Placental abruption/Previa/Uterine Rupture",
+      "source_locator": "critical-result-notification-source.txt: bullet 23 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "obstetric",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve three distinct concepts under the original bullet. Define gestational/context handling and previa versus low-lying placenta; do not invent a bleeding prerequisite.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-024",
+      "source_item_number": 24,
+      "source_label": "Acute Aortic dissection",
+      "source_locator": "critical-result-notification-source.txt: bullet 24 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve acute; clarify age-indeterminate and chronic dissection with interval change.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-025",
+      "source_item_number": 25,
+      "source_label": "Ruptured aneurysm or impending rupture",
+      "source_locator": "critical-result-notification-source.txt: bullet 25 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve rupture or impending rupture. Aneurysm size alone is not a source-specified rupture threshold.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-026",
+      "source_item_number": 26,
+      "source_label": "Pulmonary Embolism",
+      "source_locator": "critical-result-notification-source.txt: bullet 26 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "thoracic_vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "No acute-only, size, or right-heart-strain threshold is written; use source wording and shared known-finding rule.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-027",
+      "source_item_number": 27,
+      "source_label": "Testicular/Ovarian torsion",
+      "source_locator": "critical-result-notification-source.txt: bullet 27 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "genitourinary",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve both organs; clarify suspected, intermittent, or resolved torsion.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-028",
+      "source_item_number": 28,
+      "source_label": "Significant line/tube misplacement",
+      "source_locator": "critical-result-notification-source.txt: bullet 28 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "devices",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Define device-specific significance and acceptable terminology; do not classify every positional variation as significant.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-029",
+      "source_item_number": 29,
+      "source_label": "Mediastinal Emphysema",
+      "source_locator": "critical-result-notification-source.txt: bullet 29 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "thoracic",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Proposed synonym pneumomediastinum needs reviewed mapping; postoperative/procedural exemptions are not supplied.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-030",
+      "source_item_number": 30,
+      "source_label": "Fetal Demise",
+      "source_locator": "critical-result-notification-source.txt: bullet 30 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "obstetric",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify gestational setting and diagnostic wording; absent cardiac activity in an incompletely characterized early pregnancy must not be independently diagnosed as demise.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-031",
+      "source_item_number": 31,
+      "source_label": "Intraabdominal abscess",
+      "source_locator": "critical-result-notification-source.txt: bullet 31 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal_infection",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify included locations and suspected abscess; no size threshold is written and generic fluid collection is not identical to abscess.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-032",
+      "source_item_number": 32,
+      "source_label": "Active Tuberculosis",
+      "source_locator": "critical-result-notification-source.txt: bullet 32 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "infection",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve active. Do not diagnose active TB from scarring, a positive screening test, or nonspecific imaging descriptors.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-033",
+      "source_item_number": 33,
+      "source_label": "Acute Cholecystitis",
+      "source_locator": "critical-result-notification-source.txt: bullet 33 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve acute; do not equate cholelithiasis or nonspecific wall thickening with acute cholecystitis.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-034",
+      "source_item_number": 34,
+      "source_label": "New DVT",
+      "source_locator": "critical-result-notification-source.txt: bullet 34 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve new; define what evidence establishes new and how age-indeterminate DVT is handled. Do not invent newness from missing priors.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-035",
+      "source_item_number": 35,
+      "source_label": "Hemothorax",
+      "source_locator": "critical-result-notification-source.txt: bullet 35 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "thoracic_hemorrhage",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Do not equate generic pleural effusion with blood; no separate size threshold is supplied.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-036",
+      "source_item_number": 36,
+      "source_label": "Nonaccidental Trauma (Suspected child/elder Abuse)",
+      "source_locator": "critical-result-notification-source.txt: bullet 36 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "trauma_safeguarding",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Suspicion is explicit in the source. Do not require confirmed abuse or infer abuse from demographics alone. Mandatory-reporting obligations are outside this document's specified workflow.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-037",
+      "source_item_number": 37,
+      "source_label": "Diverticulitis",
+      "source_locator": "critical-result-notification-source.txt: bullet 37 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "abdominal",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "No complication restriction is written. Clarify equivocal language without narrowing to perforation or abscess.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-038",
+      "source_item_number": 38,
+      "source_label": "Acute osteomyelitis",
+      "source_locator": "critical-result-notification-source.txt: bullet 38 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "infection",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Preserve acute; distinguish uncertain, chronic, and current acute descriptions without inferring diagnosis from nonspecific marrow findings.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-039",
+      "source_item_number": 39,
+      "source_label": "Pseudoaneurysm",
+      "source_locator": "critical-result-notification-source.txt: bullet 39 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "No size, site, or rupture threshold is written. Clarify scope without creating exclusions.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-040",
+      "source_item_number": 40,
+      "source_label": "SVC Syndrome",
+      "source_locator": "critical-result-notification-source.txt: bullet 40 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "thoracic_vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Define clinical/report evidence of syndrome; SVC narrowing or occlusion does not independently establish clinical syndrome.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-041",
+      "source_item_number": 41,
+      "source_label": "Critical Carotid stenosis",
+      "source_locator": "critical-result-notification-source.txt: bullet 41 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Define critical, measurement method, relevant vessels, and near-occlusion handling; do not invent a percentage.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-042",
+      "source_item_number": 42,
+      "source_label": "Carotid artery dissection",
+      "source_locator": "critical-result-notification-source.txt: bullet 42 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "vascular",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "No acute qualifier is written; do not import it from Acute Aortic dissection.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    },
+    {
+      "id": "VESTA-CR-043",
+      "source_item_number": 43,
+      "source_label": "Retained surgical instrument/sponge/Foreign body",
+      "source_locator": "critical-result-notification-source.txt: bullet 43 in finding list; excludes global clauses and address",
+      "shared_requirements": [
+        "VESTA-CR-NOTIFY-01",
+        "VESTA-CR-NOTIFY-02",
+        "VESTA-CR-EXCEPTION-01"
+      ],
+      "editorial_group": "procedural",
+      "editorial_group_status": "navigation_only_not_scope_exclusion",
+      "explicit_modality_restrictions": null,
+      "approved_aliases": [],
+      "compiled_trigger": null,
+      "review_note": "Clarify whether Foreign body means any foreign body or retained procedural material; intentional implants and devices are not automatically retained errors.",
+      "review_note_status": "proposed_clarification_not_policy",
+      "clinical_logic_approved": false
+    }
+  ],
+  "runtime_scope": {
+    "required_case_inputs": [
+      "report_text"
+    ],
+    "assessment": "core clinical report content and potential critical recognition",
+    "excluded_checks": [
+      "facility name/address completeness",
+      "radiologist name/signature",
+      "patient identifiers",
+      "report version",
+      "TAT or notification SLA",
+      "call completion",
+      "notification date/time documentation compliance"
+    ],
+    "optional_output_layers": [
+      "evidence",
+      "rule debugging"
+    ],
+    "notification_requirements_use": "preserved source context only; not runtime QA checks"
+  }
+}

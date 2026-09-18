@@ -1,0 +1,4 @@
+QA review | R-207 | Report v1 (signed)
+NON-CRITICAL QA COMMENTS
+1. Issue: Findings states "Left pleural effusion." Impression states "Right pleural effusion."
+   Action: Following your reply, please confirm the correct side and identify the amended report version if corrected.

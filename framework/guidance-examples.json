@@ -1,0 +1,95 @@
+{
+  "framework_version": "1.2",
+  "synthetic": true,
+  "schema_status": "Illustrative UI contract, not production routing",
+  "guidance": [
+    {
+      "id": "G-201",
+      "case_id": "R-201",
+      "source_id": "R-201-report-v1",
+      "source_version": 1,
+      "packet_id": null,
+      "revision": 1,
+      "actor": "system",
+      "recipient": null,
+      "next_action": "No operator action; integration handoff acknowledged.",
+      "destination": {
+        "system": "demo_hl7_interface",
+        "field": null,
+        "binding": "R-201-report-v1",
+        "mapping_status": "configured_demo"
+      },
+      "comment_section": null,
+      "state": "verified",
+      "preconditions": [
+        "DEMO-ROUTINE-HANDOFF"
+      ],
+      "completion_evidence": "ACK-201 at configured integration boundary",
+      "follow_through": [
+        "Later feedback remains possible; no routine radiologist contact required."
+      ],
+      "provenance": "Synthetic fixture handoff receipt"
+    },
+    {
+      "id": "G-207",
+      "case_id": "R-207",
+      "source_id": "R-207-report-v1",
+      "source_version": 1,
+      "packet_id": "P-207-concise",
+      "packet_revision": 1,
+      "revision": 1,
+      "actor": "qa_coordinator",
+      "recipient": "RAD-DEMO-A",
+      "next_action": "Ask for the correct side and amended report version in the existing clarification thread.",
+      "destination": {
+        "system": "external_chat_demo",
+        "field": "existing clarification thread",
+        "binding": "M-207-1 / M-207-2",
+        "mapping_status": "configured_demo"
+      },
+      "comment_section": "non_critical",
+      "state": "ready_in_demo",
+      "preconditions": [
+        "DEMO-MESSAGE-AUTHORITY",
+        "Match case, recipient and existing exchange."
+      ],
+      "completion_evidence": "Recorded clarification delivery; decision stays awaiting clarification until an unambiguous response.",
+      "follow_through": [
+        "If correction is claimed, retrieve the amended source version.",
+        "Verify change and rerun relevant QA before marking correction verified."
+      ],
+      "provenance": "Synthetic exchange and demo communication mapping"
+    },
+    {
+      "id": "G-209",
+      "case_id": "R-209",
+      "source_id": "R-209-report-v1",
+      "source_version": 1,
+      "packet_id": "P-209-concise",
+      "packet_revision": 1,
+      "revision": 1,
+      "actor": "qa_coordinator",
+      "recipient": "RAD-DEMO-B",
+      "next_action": "Request critical designation confirmation; paste critical comments into the configured QA field for R-209.",
+      "destination": {
+        "system": "Demo PACS",
+        "field": "QA comments",
+        "binding": "R-209",
+        "mapping_status": "configured_demo"
+      },
+      "comment_section": "critical",
+      "state": "ready_in_demo",
+      "preconditions": [
+        "DEMO-CRITICAL-DESIGNATION",
+        "Match case and radiologist; applicable critical communication requirements take precedence over routine batching."
+      ],
+      "completion_evidence": "PACS delivery record only; designation decision and clinician communication are tracked separately.",
+      "follow_through": [
+        "Radiologist confirms or rejects designation; ambiguous reply remains unresolved.",
+        "If confirmed, follow the applicable critical-result communication pathway.",
+        "QA records communication evidence; communication task stays open until verified, independently of the clinical decision."
+      ],
+      "provenance": "Synthetic destination mapping and DEMO-CRITICAL-DESIGNATION; no actual PACS path or clinical timing policy"
+    }
+  ]
+}

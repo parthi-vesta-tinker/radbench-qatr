@@ -1,0 +1,14 @@
+{
+  "name": "qa-input-adequacy",
+  "description": "Define minimum report content and ambiguity handling for the deterministic input gate.",
+  "version": "0.2.0",
+  "role": "gate",
+  "stages": [
+    "input_validation"
+  ],
+  "owns": [],
+  "instruction": "skills/qa-input-adequacy/SKILL.md",
+  "references": [],
+  "evaluation": "evaluation/suites/qa-input-adequacy.json",
+  "changelog": "skills/qa-input-adequacy/CHANGELOG.md"
+}

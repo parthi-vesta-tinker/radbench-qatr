@@ -1,0 +1,16 @@
+{
+  "name": "qa-terminology-errors",
+  "description": "Find actionable spelling, dictation and single-span terminology defects in supplied report text.",
+  "version": "0.2.0",
+  "role": "check",
+  "stages": [
+    "language_review"
+  ],
+  "owns": [
+    "TERM"
+  ],
+  "instruction": "skills/qa-terminology-errors/SKILL.md",
+  "references": [],
+  "evaluation": "evaluation/suites/qa-terminology-errors.json",
+  "changelog": "skills/qa-terminology-errors/CHANGELOG.md"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "qa-internal-consistency",
+  "description": "Find incompatible assertions about the same observation across the current report.",
+  "version": "0.2.0",
+  "role": "check",
+  "stages": [
+    "consistency_review"
+  ],
+  "owns": [
+    "LAT",
+    "MEAS",
+    "TECH",
+    "COMP",
+    "FIMP"
+  ],
+  "instruction": "skills/qa-internal-consistency/SKILL.md",
+  "references": [],
+  "evaluation": "evaluation/suites/qa-internal-consistency.json",
+  "changelog": "skills/qa-internal-consistency/CHANGELOG.md"
+}

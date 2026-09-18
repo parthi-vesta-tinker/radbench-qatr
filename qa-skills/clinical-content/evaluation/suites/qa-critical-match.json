@@ -1,0 +1,187 @@
+{
+  "suite_version": "1.0.0",
+  "skill": "qa-critical-match",
+  "skill_version": "0.3.0",
+  "status": "proposed_not_adjudicated",
+  "cases": [
+    {
+      "id": "CR01",
+      "title": "Explicit acute pneumothorax",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "critical_finding_review",
+      "input": {
+        "report_text": "Findings:\nAcute right pneumothorax.\nImpression:\nAcute right pneumothorax."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "CRIT",
+            "anchor_quotes": [
+              "Acute right pneumothorax."
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [],
+        "designation": {
+          "status": "unknown",
+          "anchor_quote": null
+        }
+      }
+    },
+    {
+      "id": "CR02",
+      "title": "Negated pneumothorax",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "critical_finding_review",
+      "input": {
+        "report_text": "Findings:\nNo pneumothorax.\nImpression:\nNo acute cardiopulmonary abnormality."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "respect_negation"
+        ],
+        "designation": {
+          "status": "unknown",
+          "anchor_quote": null
+        }
+      }
+    },
+    {
+      "id": "CR03",
+      "title": "Historical resolved condition",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "critical_finding_review",
+      "input": {
+        "report_text": "Findings:\nPreviously seen pneumothorax has resolved.\nImpression:\nResolved pneumothorax."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "respect_temporality"
+        ],
+        "designation": {
+          "status": "unknown",
+          "anchor_quote": null
+        }
+      }
+    },
+    {
+      "id": "CR04",
+      "title": "Suspected serious finding keeps uncertainty",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "critical_finding_review",
+      "input": {
+        "report_text": "Findings:\nPossible small subarachnoid hemorrhage; artifact cannot be excluded.\nImpression:\nPossible small subarachnoid hemorrhage."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "CRIT",
+            "anchor_quotes": [
+              "Possible small subarachnoid hemorrhage."
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "preserve_uncertainty"
+        ],
+        "designation": {
+          "status": "unknown",
+          "anchor_quote": null
+        }
+      }
+    },
+    {
+      "id": "CR05",
+      "title": "Explicit report designation",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "critical_finding_review",
+      "input": {
+        "report_text": "Critical finding flag: Yes\nFindings:\nAcute pulmonary embolism.\nImpression:\nAcute pulmonary embolism."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "CRIT",
+            "anchor_quotes": [
+              "Acute pulmonary embolism."
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [],
+        "designation": {
+          "status": "documented_flagged",
+          "anchor_quote": "Critical finding flag: Yes"
+        }
+      }
+    },
+    {
+      "id": "CR06",
+      "title": "Ordinary laterality error is not critical",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "critical_finding_review",
+      "input": {
+        "report_text": "Findings:\nSmall right pleural effusion.\nImpression:\nSmall left pleural effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "no_error_severity_inflation"
+        ],
+        "designation": {
+          "status": "unknown",
+          "anchor_quote": null
+        }
+      }
+    }
+  ]
+}

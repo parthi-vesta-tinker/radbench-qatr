@@ -1,0 +1,7 @@
+QA review | R-209 | Report v1 (signed)
+CRITICAL-REVIEW COMMENTS — CONFIRMATION NEEDED
+1. Impression states "Acute right pneumothorax." The supplied critical flag is unset. Please confirm the critical designation and follow the applicable critical-result communication pathway if confirmed.
+
+QA review | R-209 | Report v1 (signed)
+NON-CRITICAL QA COMMENTS
+1. Optional suggestion: Findings contains "silhoutte"; suggested spelling is "silhouette". If adopted, use the approved amendment pathway.

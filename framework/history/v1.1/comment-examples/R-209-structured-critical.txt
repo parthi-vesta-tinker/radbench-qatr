@@ -1,0 +1,3 @@
+QA review | R-209 | Report v1 (signed)
+CRITICAL-REVIEW COMMENTS — CONFIRMATION NEEDED
+1. Impression states "Acute right pneumothorax." The supplied critical flag is unset. Please confirm the critical designation and follow the applicable critical-result communication pathway if confirmed.

@@ -1,0 +1,62 @@
+/* Design system v0.2: graphite is selected baseline; alternate themes are studies. */
+/* Proposed semantic design tokens; no component layout or runtime implementation. */
+:root {
+  --qa-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --qa-font-body: 15px;
+  --qa-line-body: 1.5;
+  --qa-radius-control: 4px;
+  --qa-radius-panel: 6px;
+  --qa-space-1: 4px;
+  --qa-space-2: 8px;
+  --qa-space-3: 12px;
+  --qa-space-4: 16px;
+  --qa-space-6: 24px;
+  --qa-space-8: 32px;
+  --qa-motion-fast: 120ms;
+  --qa-motion-reveal: 150ms;
+}
+:root, [data-qa-theme="graphite"] {
+  --qa-canvas: #F5F6F8;
+  --qa-surface: #FFFFFF;
+  --qa-surface-subtle: #F0F2F5;
+  --qa-text: #20242B;
+  --qa-text-muted: #59616D;
+  --qa-separator: #DDE2E8;
+  --qa-control-border: #737D8C;
+  --qa-accent: #245BB2;
+  --qa-selection: #EAF1FC;
+  --qa-focus: #245BB2;
+  --qa-attention: #8A5700;
+  --qa-urgent: #B42318;
+}
+[data-qa-theme="warm-paper"] {
+  --qa-canvas: #F7F5F0;
+  --qa-surface: #FFFEFA;
+  --qa-surface-subtle: #F0EDE6;
+  --qa-text: #292823;
+  --qa-text-muted: #625F56;
+  --qa-separator: #DBD7CD;
+  --qa-control-border: #7C776B;
+  --qa-accent: #28655D;
+  --qa-selection: #EAF1EC;
+  --qa-focus: #28655D;
+  --qa-attention: #805400;
+  --qa-urgent: #A72D25;
+}
+[data-qa-theme="slate"] {
+  --qa-canvas: #15191F;
+  --qa-surface: #1D232B;
+  --qa-surface-subtle: #252D37;
+  --qa-text: #E8EDF3;
+  --qa-text-muted: #B2BDCB;
+  --qa-separator: #3A4553;
+  --qa-control-border: #7C8B9E;
+  --qa-accent: #9ABBEA;
+  --qa-selection: #24384E;
+  --qa-focus: #9ABBEA;
+  --qa-attention: #E9B86D;
+  --qa-urgent: #F1A5A5;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --qa-motion-fast: 0ms; --qa-motion-reveal: 0ms; }
+}

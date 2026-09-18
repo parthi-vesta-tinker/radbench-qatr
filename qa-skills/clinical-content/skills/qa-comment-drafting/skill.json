@@ -1,0 +1,16 @@
+{
+  "name": "qa-comment-drafting",
+  "description": "Draft concise radiologist comments for the current stage without writing clipboard formatting.",
+  "version": "0.2.0",
+  "role": "synthesis",
+  "stages": [
+    "language_review",
+    "consistency_review",
+    "critical_finding_review"
+  ],
+  "owns": [],
+  "instruction": "skills/qa-comment-drafting/SKILL.md",
+  "references": [],
+  "evaluation": "evaluation/suites/qa-comment-drafting.json",
+  "changelog": "skills/qa-comment-drafting/CHANGELOG.md"
+}

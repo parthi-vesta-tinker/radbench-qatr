@@ -1,0 +1,607 @@
+{
+  "framework_version": "1.2",
+  "synthetic": true,
+  "schema_status": "Illustrative UX contract; not a production API schema.",
+  "snapshot_at": "2026-09-13T09:18:00Z",
+  "workspace": {
+    "view": "this_shift",
+    "selected_case_id": "R-209",
+    "selected_finding_id": null,
+    "studio_tool": "qa_review",
+    "note": "Shift definition and timezone are open; this fixture is a fixed synthetic snapshot.",
+    "selected_packet_id": "P-209-concise",
+    "entry": "Default compact QA Review on case selection; comments and next step immediately visible",
+    "review_mode": "compact"
+  },
+  "cases": [
+    {
+      "id": "R-201",
+      "exam": "XR Chest",
+      "coverage": "complete",
+      "qa_outcome": "no_flags_detected",
+      "sources": [
+        {
+          "id": "R-201-report-v1",
+          "kind": "report",
+          "version": 1,
+          "availability": "available",
+          "sections": {
+            "Findings": "The lungs are clear.",
+            "Impression": "No acute finding described."
+          },
+          "authors": [
+            {
+              "id": "RAD-DEMO-A",
+              "role": "radiologist"
+            }
+          ],
+          "document_status": "final",
+          "signature": {
+            "status": "signed",
+            "signer_id": "RAD-DEMO-A",
+            "signed_at": "2026-09-13T09:09:00Z",
+            "provenance": "synthetic source metadata"
+          }
+        },
+        {
+          "id": "R-201-tech-v1",
+          "kind": "tech_sheet",
+          "version": 1,
+          "availability": "available",
+          "sections": {
+            "Exam": "XR Chest"
+          }
+        }
+      ],
+      "checks": [
+        {
+          "id": "R-201-inputs",
+          "group": "inputs",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-201-report-v1",
+            "R-201-tech-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result, not an executed model output."
+        },
+        {
+          "id": "R-201-language",
+          "group": "language",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-201-report-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result, not an executed model output."
+        },
+        {
+          "id": "R-201-consistency",
+          "group": "consistency",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-201-report-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result, not an executed model output."
+        },
+        {
+          "id": "R-201-critical_findings_text",
+          "group": "critical_findings_text",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-201-report-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result, not an executed model output."
+        }
+      ],
+      "evidence": [],
+      "findings": [],
+      "decisions": [],
+      "actions": [],
+      "communications": [],
+      "feedback": [],
+      "events": [
+        {
+          "id": "R-201-event-1",
+          "case_id": "R-201",
+          "at": "2026-09-13T09:10:00Z",
+          "type": "report_received",
+          "report_source_id": "R-201-report-v1"
+        },
+        {
+          "id": "R-201-event-2",
+          "case_id": "R-201",
+          "at": "2026-09-13T09:11:00Z",
+          "type": "checks_completed",
+          "report_source_id": "R-201-report-v1"
+        },
+        {
+          "id": "R-201-event-3",
+          "case_id": "R-201",
+          "at": "2026-09-13T09:17:00Z",
+          "type": "handoff_sent",
+          "report_source_id": "R-201-report-v1"
+        },
+        {
+          "id": "R-201-event-4",
+          "case_id": "R-201",
+          "at": "2026-09-13T09:18:00Z",
+          "type": "handoff_acknowledged",
+          "report_source_id": "R-201-report-v1"
+        }
+      ],
+      "authority": {
+        "review": "permitted_in_demo",
+        "message": "permitted_in_demo",
+        "report_edit": "human_action_only",
+        "note": "Fixture permissions only, not production authorization."
+      },
+      "handoff": {
+        "status": "acknowledged",
+        "integration": "demo_hl7_interface",
+        "report_source_id": "R-201-report-v1",
+        "policy_id": "DEMO-ROUTINE-HANDOFF",
+        "receipt": {
+          "id": "ACK-201",
+          "report_source_id": "R-201-report-v1",
+          "at": "2026-09-13T09:18:00Z",
+          "boundary": "configured outbound integration only"
+        },
+        "note": "Synthetic acknowledgement; no facility-delivery claim."
+      },
+      "review_run_id": "REVIEW-R-201-1",
+      "upstream_qa": {
+        "availability": "not_provided",
+        "records": []
+      }
+    },
+    {
+      "id": "R-207",
+      "exam": "XR Chest",
+      "coverage": "complete",
+      "qa_outcome": "issue_detected",
+      "sources": [
+        {
+          "id": "R-207-report-v1",
+          "kind": "report",
+          "version": 1,
+          "availability": "available",
+          "sections": {
+            "Findings": "Left pleural effusion.",
+            "Impression": "Right pleural effusion."
+          },
+          "authors": [
+            {
+              "id": "RAD-DEMO-A",
+              "role": "radiologist"
+            }
+          ],
+          "document_status": "final",
+          "signature": {
+            "status": "signed",
+            "signer_id": "RAD-DEMO-A",
+            "signed_at": "2026-09-13T09:09:00Z",
+            "provenance": "synthetic source metadata"
+          }
+        },
+        {
+          "id": "R-207-tech-v1",
+          "kind": "tech_sheet",
+          "version": 1,
+          "availability": "available",
+          "sections": {
+            "Exam": "XR Chest"
+          }
+        }
+      ],
+      "checks": [
+        {
+          "id": "R-207-inputs",
+          "group": "inputs",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-207-report-v1",
+            "R-207-tech-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result, not an executed model output."
+        },
+        {
+          "id": "R-207-language",
+          "group": "language",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-207-report-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result, not an executed model output."
+        },
+        {
+          "id": "R-207-consistency",
+          "group": "consistency",
+          "execution": "completed",
+          "outcome": "issue_detected",
+          "source_ids": [
+            "R-207-report-v1"
+          ],
+          "finding_ids": [
+            "F-207"
+          ],
+          "note": "Synthetic fixture result, not an executed model output."
+        },
+        {
+          "id": "R-207-critical_findings_text",
+          "group": "critical_findings_text",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-207-report-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result, not an executed model output."
+        }
+      ],
+      "evidence": [
+        {
+          "id": "E-1",
+          "source_id": "R-207-report-v1",
+          "source_version": 1,
+          "section": "Findings",
+          "location": "sentence 1",
+          "quote": "Left pleural effusion."
+        },
+        {
+          "id": "E-2",
+          "source_id": "R-207-report-v1",
+          "source_version": 1,
+          "section": "Impression",
+          "location": "sentence 1",
+          "quote": "Right pleural effusion."
+        }
+      ],
+      "findings": [
+        {
+          "id": "F-207",
+          "title": "Laterality conflict",
+          "status": "awaiting_clarification",
+          "evidence_ids": [
+            "E-1",
+            "E-2"
+          ],
+          "basis_type": "textual_comparison",
+          "basis": "Different laterality for the same stated finding.",
+          "limitations": [
+            "Report text cannot establish the correct side.",
+            "Tech sheet provides exam context only."
+          ],
+          "decision_id": "D-207",
+          "type": "discrepancy",
+          "urgency": "non_critical",
+          "routing_basis": "DEMO-ROUTING-ONLY; not a clinical classification",
+          "optional": false,
+          "confirmation_status": "needs_clarification"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "D-207",
+          "finding_id": "F-207",
+          "owner_role": "radiologist",
+          "question": "Please confirm the correct side and identify the amended report version, if a correction has been made.",
+          "status": "awaiting_clarification",
+          "response_message_id": "M-207-2"
+        }
+      ],
+      "actions": [
+        {
+          "id": "A-207-message",
+          "kind": "send_clarification",
+          "scope": {
+            "case_id": "R-207",
+            "finding_id": "F-207"
+          },
+          "actor": "qa_system",
+          "status": "performed",
+          "authorization": "demo_policy",
+          "evidence_message_id": "M-207-1"
+        }
+      ],
+      "communications": [
+        {
+          "id": "M-207-1",
+          "channel": "external_chat_demo",
+          "sender_role": "qa_system",
+          "body": "Findings states \"Left pleural effusion.\" Impression states \"Right pleural effusion.\" Please clarify the correct side and use the approved amendment pathway if a correction is needed.",
+          "at": "2026-09-13T09:13:00Z",
+          "decision_id": "D-207"
+        },
+        {
+          "id": "M-207-2",
+          "channel": "external_chat_demo",
+          "sender_role": "radiologist",
+          "body": "Already handled",
+          "at": "2026-09-13T09:16:00Z",
+          "decision_id": "D-207",
+          "interpretation": "unclear",
+          "reason": "Does not establish acceptance, correct side, or a verified report correction."
+        }
+      ],
+      "feedback": [],
+      "events": [
+        {
+          "id": "R-207-event-1",
+          "case_id": "R-207",
+          "at": "2026-09-13T09:10:00Z",
+          "type": "report_received",
+          "report_source_id": "R-207-report-v1"
+        },
+        {
+          "id": "R-207-event-2",
+          "case_id": "R-207",
+          "at": "2026-09-13T09:11:00Z",
+          "type": "checks_completed",
+          "report_source_id": "R-207-report-v1"
+        },
+        {
+          "id": "R-207-event-3",
+          "case_id": "R-207",
+          "at": "2026-09-13T09:12:00Z",
+          "type": "finding_raised",
+          "report_source_id": "R-207-report-v1"
+        },
+        {
+          "id": "R-207-event-4",
+          "case_id": "R-207",
+          "at": "2026-09-13T09:13:00Z",
+          "type": "clarification_sent",
+          "report_source_id": "R-207-report-v1"
+        },
+        {
+          "id": "R-207-event-5",
+          "case_id": "R-207",
+          "at": "2026-09-13T09:16:00Z",
+          "type": "ambiguous_reply_received",
+          "report_source_id": "R-207-report-v1"
+        }
+      ],
+      "authority": {
+        "review": "permitted_in_demo",
+        "message": "permitted_in_demo",
+        "report_edit": "human_action_only",
+        "note": "Fixture permissions only, not production authorization."
+      },
+      "handoff": {
+        "status": "held",
+        "integration": "demo_hl7_interface",
+        "report_source_id": "R-207-report-v1",
+        "reason": "Unresolved laterality decision",
+        "policy_id": "DEMO-HOLD-UNRESOLVED",
+        "note": "Illustrative policy, not an agreed clinical release rule."
+      },
+      "review_run_id": "REVIEW-R-207-1",
+      "upstream_qa": {
+        "availability": "provided",
+        "records": [
+          {
+            "id": "UP-207-1",
+            "producer": "DEMO upstream reporting QA",
+            "producer_version": "demo-1",
+            "check": "language",
+            "scope": [
+              "spelling"
+            ],
+            "source_id": "R-207-report-v1",
+            "source_version": 1,
+            "at": "2026-09-13T09:08:00Z",
+            "claimed_outcome": "no_flag_detected",
+            "evidence_status": "summary_only",
+            "evidence_ref": null,
+            "trust_status": "received_unverified",
+            "local_coverage_credit": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "R-209",
+      "exam": "XR Chest",
+      "coverage": "complete",
+      "qa_outcome": "issue_detected",
+      "sources": [
+        {
+          "id": "R-209-report-v1",
+          "kind": "report",
+          "version": 1,
+          "availability": "available",
+          "authors": [
+            {
+              "id": "RAD-DEMO-B",
+              "role": "radiologist"
+            }
+          ],
+          "document_status": "final",
+          "signature": {
+            "status": "signed",
+            "signer_id": "RAD-DEMO-B",
+            "signed_at": "2026-09-13T09:09:00Z",
+            "provenance": "synthetic source metadata"
+          },
+          "sections": {
+            "Findings": "Acute right pneumothorax. Cardiomediastinal silhoutte is unchanged.",
+            "Impression": "Acute right pneumothorax."
+          }
+        },
+        {
+          "id": "R-209-flag-v1",
+          "kind": "pacs_metadata",
+          "version": 1,
+          "availability": "available",
+          "sections": {
+            "Critical flag": "unset"
+          },
+          "provenance": "Supplied synthetic field snapshot; not inferred from a missing source"
+        }
+      ],
+      "checks": [
+        {
+          "id": "R-209-inputs",
+          "group": "inputs",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-209-report-v1",
+            "R-209-flag-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result; no AI or clinical validation."
+        },
+        {
+          "id": "R-209-language",
+          "group": "language",
+          "execution": "completed",
+          "outcome": "issue_detected",
+          "source_ids": [
+            "R-209-report-v1"
+          ],
+          "finding_ids": [
+            "F-209-language"
+          ],
+          "note": "Synthetic fixture result; no AI or clinical validation."
+        },
+        {
+          "id": "R-209-consistency",
+          "group": "consistency",
+          "execution": "completed",
+          "outcome": "no_flag_detected",
+          "source_ids": [
+            "R-209-report-v1"
+          ],
+          "finding_ids": [],
+          "note": "Synthetic fixture result; no AI or clinical validation."
+        },
+        {
+          "id": "R-209-critical_findings_text",
+          "group": "critical_findings_text",
+          "execution": "completed",
+          "outcome": "issue_detected",
+          "source_ids": [
+            "R-209-report-v1",
+            "R-209-flag-v1"
+          ],
+          "finding_ids": [
+            "F-209-critical"
+          ],
+          "note": "Synthetic fixture result; no AI or clinical validation."
+        }
+      ],
+      "evidence": [
+        {
+          "id": "E-209-1",
+          "source_id": "R-209-report-v1",
+          "source_version": 1,
+          "section": "Impression",
+          "location": "sentence 1",
+          "quote": "Acute right pneumothorax."
+        },
+        {
+          "id": "E-209-2",
+          "source_id": "R-209-flag-v1",
+          "source_version": 1,
+          "section": "Critical flag",
+          "location": "field value",
+          "quote": "unset"
+        },
+        {
+          "id": "E-209-3",
+          "source_id": "R-209-report-v1",
+          "source_version": 1,
+          "section": "Findings",
+          "location": "sentence 2",
+          "quote": "Cardiomediastinal silhoutte is unchanged."
+        }
+      ],
+      "findings": [
+        {
+          "id": "F-209-critical",
+          "type": "unmet_requirement",
+          "title": "Critical designation needs confirmation",
+          "urgency": "critical_review",
+          "confirmation_status": "confirmation_needed",
+          "status": "awaiting_decision",
+          "optional": false,
+          "evidence_ids": [
+            "E-209-1",
+            "E-209-2"
+          ],
+          "basis_type": "configured_demo_requirement",
+          "requirement_id": "DEMO-CRITICAL-DESIGNATION",
+          "basis": "Illustrative policy requires designation review when this supplied text and unset flag coexist. Not a clinical detection or release rule.",
+          "limitations": [
+            "No image review.",
+            "Report text is not an independently confirmed diagnosis.",
+            "An unset flag does not prove that a call has not occurred."
+          ],
+          "decision_id": "D-209"
+        },
+        {
+          "id": "F-209-language",
+          "type": "suggestion",
+          "title": "Spelling suggestion",
+          "urgency": "non_critical",
+          "confirmation_status": "not_applicable",
+          "status": "open",
+          "optional": true,
+          "evidence_ids": [
+            "E-209-3"
+          ],
+          "basis_type": "language_suggestion",
+          "basis": "Suggested spelling: silhouette.",
+          "limitations": [
+            "Signed-report edit authority is not granted by this suggestion."
+          ]
+        }
+      ],
+      "decisions": [
+        {
+          "id": "D-209",
+          "finding_id": "F-209-critical",
+          "owner_role": "radiologist",
+          "owner_id": "RAD-DEMO-B",
+          "question": "Confirm critical designation and applicable communication pathway.",
+          "status": "pending"
+        }
+      ],
+      "actions": [],
+      "communications": [],
+      "feedback": [],
+      "events": [],
+      "authority": {
+        "review": "permitted_in_demo",
+        "message": "permitted_in_demo",
+        "report_edit": "human_action_only",
+        "note": "Fixture permissions only, not production authorization."
+      },
+      "handoff": {
+        "status": "held",
+        "integration": "demo_hl7_interface",
+        "report_source_id": "R-209-report-v1",
+        "reason": "Critical designation decision unresolved",
+        "policy_id": "DEMO-HOLD-UNRESOLVED",
+        "note": "Illustrative policy only"
+      },
+      "review_run_id": "REVIEW-R-209-1",
+      "upstream_qa": {
+        "availability": "not_provided",
+        "records": []
+      }
+    }
+  ]
+}

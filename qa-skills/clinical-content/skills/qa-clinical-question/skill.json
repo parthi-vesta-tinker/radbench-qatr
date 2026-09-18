@@ -1,0 +1,16 @@
+{
+  "name": "qa-clinical-question",
+  "description": "Check whether an explicitly supplied clinical question is addressed anywhere in the current report.",
+  "version": "0.2.0",
+  "role": "check",
+  "stages": [
+    "consistency_review"
+  ],
+  "owns": [
+    "CQ"
+  ],
+  "instruction": "skills/qa-clinical-question/SKILL.md",
+  "references": [],
+  "evaluation": "evaluation/suites/qa-clinical-question.json",
+  "changelog": "skills/qa-clinical-question/CHANGELOG.md"
+}

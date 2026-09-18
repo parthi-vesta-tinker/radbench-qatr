@@ -1,0 +1,53 @@
+Title: Critical Result Notification
+
+Guidelines: Organizational policy requires verbal notification for all critical results within sixty (60) minutes.
+Notification requires Vesta to make a call to the facility contact listed for critical findings, the date
+and time of the notification should be noted in the Impression of the final report.
+
+Guardrails:
+Known findings will not be called unless there is a significant change - per the doctor’s judgment *
+
+Key terminology:
+● Cerebral hemorrhage/hematoma
+● Herniation Syndrome
+● Acute Stroke
+● Intracranial infection/empyema
+● Complex Skull fracture
+● Unstable Spine Fracture
+● Spinal Cord Compression, hemorrhage or infarct
+● Airway compromise
+● Acute Arterial Occlusion
+● Necrotizing Fasciitis
+● Tension Pneumothorax
+● Pneumoperitoneum/ Free Air
+● Ischemic Bowel (Pneumatosis)
+● Active Hemorrhage
+● Cardiac Tamponade
+● Volvulus/closed loop obstruction
+● High Grade Traumatic Visceral Injury
+● Retroperitoneal hemorrhage
+● Bowel Obstruction
+● Appendicitis
+● Portal Venous Gas
+● Ectopic Pregnancy
+● Placental abruption/Previa/Uterine Rupture
+● Acute Aortic dissection
+● Ruptured aneurysm or impending rupture
+● Pulmonary Embolism
+● Testicular/Ovarian torsion
+● Significant line/tube misplacement
+● Mediastinal Emphysema
+● Fetal Demise
+● Intraabdominal abscess
+● Active Tuberculosis
+● Acute Cholecystitis
+● New DVT
+● Hemothorax
+● Nonaccidental Trauma (Suspected child/elder Abuse)
+● Diverticulitis
+● Acute osteomyelitis
+● Pseudoaneurysm
+● SVC Syndrome
+● Critical Carotid stenosis
+● Carotid artery dissection
+● Retained surgical instrument/sponge/Foreign body

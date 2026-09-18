@@ -1,0 +1,16 @@
+{
+  "name": "qa-final-verification",
+  "description": "Verify current-stage candidates for scope, grounding, uncertainty, ownership and useful wording.",
+  "version": "0.3.0",
+  "role": "verification",
+  "stages": [
+    "language_review",
+    "consistency_review",
+    "critical_finding_review"
+  ],
+  "owns": [],
+  "instruction": "skills/qa-final-verification/SKILL.md",
+  "references": [],
+  "evaluation": "evaluation/suites/qa-final-verification.json",
+  "changelog": "skills/qa-final-verification/CHANGELOG.md"
+}

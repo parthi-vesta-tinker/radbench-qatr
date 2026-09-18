@@ -1,0 +1,171 @@
+{
+  "suite_version": "1.0.0",
+  "skill": "qa-terminology-errors",
+  "skill_version": "0.2.0",
+  "status": "proposed_not_adjudicated",
+  "cases": [
+    {
+      "id": "TM01",
+      "title": "Clear spelling correction",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nCardiomediastinal silhoutte is unchanged.\nImpression:\nNo acute disease."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "TERM",
+            "anchor_quotes": [
+              "silhoutte"
+            ],
+            "finding_type": "suggestion"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "meaning_preserving_comment"
+        ]
+      }
+    },
+    {
+      "id": "TM02",
+      "title": "Unresolved placeholder",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nThere is a [LEFT/RIGHT] pleural effusion.\nImpression:\nPleural effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "TERM",
+            "anchor_quotes": [
+              "[LEFT/RIGHT]"
+            ],
+            "finding_type": "discrepancy"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "request_clarification"
+        ]
+      }
+    },
+    {
+      "id": "TM03",
+      "title": "Valid uncommon term",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nThere is situs inversus totalis.\nImpression:\nSitus inversus totalis."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "no_style_rewrite"
+        ]
+      }
+    },
+    {
+      "id": "TM04",
+      "title": "Do not insert negation",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nThere is definite pneumothorax.\nImpression:\nPneumothorax."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "no_invented_negation"
+        ]
+      }
+    },
+    {
+      "id": "TM05",
+      "title": "Cross-section conflict belongs elsewhere",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nLeft pleural effusion.\nImpression:\nRight pleural effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "respect_stage_ownership"
+        ]
+      }
+    },
+    {
+      "id": "TM06",
+      "title": "Ambiguous dictation asks rather than guesses",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nThere is a 4 cm mass in the kidney/liver.\nImpression:\nUpper abdominal mass."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "TERM",
+            "anchor_quotes": [
+              "kidney/liver"
+            ],
+            "finding_type": "discrepancy"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "request_clarification",
+          "no_guessed_replacement"
+        ]
+      }
+    }
+  ]
+}

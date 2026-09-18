@@ -1,0 +1,161 @@
+{
+  "version": "0.3",
+  "synthetic": true,
+  "source": "Manually specified fixture observations passed through deterministic assembly. Not model predictions.",
+  "examples": [
+    {
+      "name": "mixed",
+      "report_text": "Findings:\nAcute right pneumothorax. Cardiomediastinal silhoutte is unchanged.\n\nImpression:\nAcute right pneumothorax.",
+      "result": {
+        "result_version": 1,
+        "outcome": "observations",
+        "critical_finding_detected": true,
+        "missed_flag": null,
+        "critical_flag_status": "unknown",
+        "critical_flag_quote": null,
+        "general_comments": [
+          {
+            "finding_type": "suggestion",
+            "report_section": "findings",
+            "comment": "Findings: \u201csilhoutte\u201d \u2192 \u201csilhouette\u201d. Please correct if appropriate.",
+            "observation_id": "obs-1"
+          }
+        ],
+        "critical_comments": [
+          {
+            "finding_type": "suggestion",
+            "report_section": "impression",
+            "comment": "Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway.",
+            "observation_id": "obs-2"
+          }
+        ],
+        "copy_text": "QA review:\n\nGeneral Comments:\n1. Findings: \u201csilhoutte\u201d \u2192 \u201csilhouette\u201d. Please correct if appropriate.\n\nCritical Findings missed flag: Cannot determine\n\nCritical Findings comments:\n1. Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway."
+      }
+    },
+    {
+      "name": "clean",
+      "report_text": "Findings:\nLungs are clear. No pleural effusion or pneumothorax.\n\nImpression:\nNo acute cardiopulmonary abnormality.",
+      "result": {
+        "result_version": 1,
+        "outcome": "no_observations",
+        "critical_finding_detected": false,
+        "missed_flag": false,
+        "critical_flag_status": "unknown",
+        "critical_flag_quote": null,
+        "general_comments": [],
+        "critical_comments": [],
+        "copy_text": ""
+      }
+    },
+    {
+      "name": "discrepancy",
+      "report_text": "Findings:\nLeft pleural effusion.\n\nImpression:\nRight pleural effusion.",
+      "result": {
+        "result_version": 1,
+        "outcome": "observations",
+        "critical_finding_detected": false,
+        "missed_flag": false,
+        "critical_flag_status": "unknown",
+        "critical_flag_quote": null,
+        "general_comments": [
+          {
+            "finding_type": "discrepancy",
+            "report_section": "both",
+            "comment": "Findings state left pleural effusion; impression states right. Please reconcile laterality.",
+            "observation_id": "obs-1"
+          }
+        ],
+        "critical_comments": [],
+        "copy_text": "QA review:\n\nGeneral Comments:\n1. Findings state left pleural effusion; impression states right. Please reconcile laterality.\n\nCritical Findings missed flag: No\n\nCritical Findings comments:\nNone."
+      }
+    },
+    {
+      "name": "critical",
+      "report_text": "Findings:\nAcute right pneumothorax.\n\nImpression:\nAcute right pneumothorax.",
+      "result": {
+        "result_version": 1,
+        "outcome": "observations",
+        "critical_finding_detected": true,
+        "missed_flag": null,
+        "critical_flag_status": "unknown",
+        "critical_flag_quote": null,
+        "general_comments": [],
+        "critical_comments": [
+          {
+            "finding_type": "suggestion",
+            "report_section": "impression",
+            "comment": "Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway.",
+            "observation_id": "obs-1"
+          }
+        ],
+        "copy_text": "QA review:\n\nGeneral Comments:\nNone.\n\nCritical Findings missed flag: Cannot determine\n\nCritical Findings comments:\n1. Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway."
+      }
+    },
+    {
+      "name": "language",
+      "report_text": "Findings:\nCardiomediastinal silhoutte is unchanged. Lungs are clear.\n\nImpression:\nNo acute cardiopulmonary abnormality.",
+      "result": {
+        "result_version": 1,
+        "outcome": "observations",
+        "critical_finding_detected": false,
+        "missed_flag": false,
+        "critical_flag_status": "unknown",
+        "critical_flag_quote": null,
+        "general_comments": [
+          {
+            "finding_type": "suggestion",
+            "report_section": "findings",
+            "comment": "Findings: \u201csilhoutte\u201d \u2192 \u201csilhouette\u201d. Please correct if appropriate.",
+            "observation_id": "obs-1"
+          }
+        ],
+        "critical_comments": [],
+        "copy_text": "QA review:\n\nGeneral Comments:\n1. Findings: \u201csilhoutte\u201d \u2192 \u201csilhouette\u201d. Please correct if appropriate.\n\nCritical Findings missed flag: No\n\nCritical Findings comments:\nNone."
+      }
+    },
+    {
+      "name": "critical_documented",
+      "report_text": "Critical finding flag: Yes\n\nFindings:\nAcute right pneumothorax.\n\nImpression:\nAcute right pneumothorax.",
+      "result": {
+        "result_version": 1,
+        "outcome": "observations",
+        "critical_finding_detected": true,
+        "missed_flag": false,
+        "critical_flag_status": "documented_flagged",
+        "critical_flag_quote": "Critical finding flag: Yes",
+        "general_comments": [],
+        "critical_comments": [
+          {
+            "finding_type": "suggestion",
+            "report_section": "impression",
+            "comment": "Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway.",
+            "observation_id": "obs-1"
+          }
+        ],
+        "copy_text": "QA review:\n\nGeneral Comments:\nNone.\n\nCritical Findings missed flag: No\n\nCritical Findings comments:\n1. Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway."
+      }
+    },
+    {
+      "name": "critical_unflagged",
+      "report_text": "Critical finding flag: No\n\nFindings:\nAcute right pneumothorax.\n\nImpression:\nAcute right pneumothorax.",
+      "result": {
+        "result_version": 1,
+        "outcome": "observations",
+        "critical_finding_detected": true,
+        "missed_flag": true,
+        "critical_flag_status": "documented_not_flagged",
+        "critical_flag_quote": "Critical finding flag: No",
+        "general_comments": [],
+        "critical_comments": [
+          {
+            "finding_type": "suggestion",
+            "report_section": "impression",
+            "comment": "Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway.",
+            "observation_id": "obs-1"
+          }
+        ],
+        "copy_text": "QA review:\n\nGeneral Comments:\nNone.\n\nCritical Findings missed flag: Yes\n\nCritical Findings comments:\n1. Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway."
+      }
+    }
+  ]
+}

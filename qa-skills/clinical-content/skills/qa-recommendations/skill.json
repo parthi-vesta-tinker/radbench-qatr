@@ -1,0 +1,17 @@
+{
+  "name": "qa-recommendations",
+  "description": "Review recommendations for internal coherence and apply supplied approved content requirements when applicable.",
+  "version": "0.2.0",
+  "role": "check",
+  "stages": [
+    "consistency_review"
+  ],
+  "owns": [
+    "REC",
+    "REQUIREMENT"
+  ],
+  "instruction": "skills/qa-recommendations/SKILL.md",
+  "references": [],
+  "evaluation": "evaluation/suites/qa-recommendations.json",
+  "changelog": "skills/qa-recommendations/CHANGELOG.md"
+}

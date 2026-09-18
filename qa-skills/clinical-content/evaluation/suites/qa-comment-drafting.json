@@ -1,0 +1,198 @@
+{
+  "suite_version": "1.0.0",
+  "skill": "qa-comment-drafting",
+  "skill_version": "0.2.0",
+  "status": "proposed_not_adjudicated",
+  "cases": [
+    {
+      "id": "CM01",
+      "title": "Spelling comment is standalone",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nCardiomediastinal silhoutte is unchanged.\nImpression:\nNo acute disease."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "TERM",
+            "anchor_quotes": [
+              "silhoutte"
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "comment_standalone",
+          "comment_concise",
+          "requested_action"
+        ]
+      }
+    },
+    {
+      "id": "CM02",
+      "title": "Conflict comment does not choose side",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nSmall right pleural effusion.\nImpression:\nSmall left pleural effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "LAT",
+            "anchor_quotes": [
+              "Small right pleural effusion.",
+              "Small left pleural effusion."
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "request_reconciliation",
+          "no_chosen_side"
+        ]
+      }
+    },
+    {
+      "id": "CM03",
+      "title": "Critical comment avoids treatment",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "critical_finding_review",
+      "input": {
+        "report_text": "Findings:\nAcute right pneumothorax.\nImpression:\nAcute right pneumothorax."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "CRIT",
+            "anchor_quotes": [
+              "Acute right pneumothorax."
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "no_treatment_instruction",
+          "requested_action"
+        ],
+        "designation": {
+          "status": "unknown",
+          "anchor_quote": null
+        }
+      }
+    },
+    {
+      "id": "CM04",
+      "title": "No headings inside comment",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nCardiomediastinal silhoutte is unchanged.\nImpression:\nNo acute disease."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "TERM",
+            "anchor_quotes": [
+              "silhoutte"
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "no_comment_heading"
+        ]
+      }
+    },
+    {
+      "id": "CM05",
+      "title": "Separate independent actions",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nSolitary 10 mm right upper lobe nodule.\nImpression:\nSolitary 14 mm left upper lobe nodule."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "LAT",
+            "anchor_quotes": [
+              "right upper lobe",
+              "left upper lobe"
+            ]
+          },
+          {
+            "issue_code": "MEAS",
+            "anchor_quotes": [
+              "10 mm",
+              "14 mm"
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 2,
+          "max": 2
+        },
+        "behavior_checks": [
+          "one_action_per_comment"
+        ]
+      }
+    },
+    {
+      "id": "CM06",
+      "title": "Clean report creates no boilerplate",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nLungs are clear.\nImpression:\nNo acute disease."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "no_boilerplate"
+        ]
+      }
+    }
+  ]
+}

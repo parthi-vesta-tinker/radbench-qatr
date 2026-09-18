@@ -1,0 +1,53 @@
+{
+  "name": "qa-critical-match",
+  "description": "Identify report-supported potential critical findings and separately assess explicit current designation.",
+  "version": "0.3.0",
+  "role": "check",
+  "stages": [
+    "critical_finding_review"
+  ],
+  "owns": [
+    "CRIT"
+  ],
+  "instruction": "skills/qa-critical-match/SKILL.md",
+  "references": [
+    {
+      "path": "references/critical-boundaries.md",
+      "role": "guidance",
+      "authority": "review_guidance_not_policy",
+      "load_stages": [
+        "critical_finding_review"
+      ],
+      "sha256": "97976eda6a94196b7e1b69a1523c70971f8fa3e1ad09dde209762d896246fde9"
+    },
+    {
+      "path": "references/critical-result-notification-source.txt",
+      "role": "reference",
+      "authority": "source_wording",
+      "load_stages": [
+        "critical_finding_review"
+      ],
+      "sha256": "18a2b4d5f27292d8ba2fd21f0897cc11e1367cbe04245ba711b1cbfebd97bec6"
+    },
+    {
+      "path": "references/critical-rules.json",
+      "role": "reference",
+      "authority": "draft_catalog",
+      "load_stages": [
+        "critical_finding_review"
+      ],
+      "sha256": "98b90710bc21e7d20b9444ada9986ad177923098af066be82df6dd20fba08d81"
+    },
+    {
+      "path": "references/matching-guardrails.md",
+      "role": "reference",
+      "authority": "proposed_matching_guidance",
+      "load_stages": [
+        "critical_finding_review"
+      ],
+      "sha256": "9ec32cd57eaa8c5bb9eab04e53b8e2606f37bef51b7796473c91a55a771f3ed3"
+    }
+  ],
+  "evaluation": "evaluation/suites/qa-critical-match.json",
+  "changelog": "skills/qa-critical-match/CHANGELOG.md"
+}

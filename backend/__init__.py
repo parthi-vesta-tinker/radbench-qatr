@@ -1,0 +1,1 @@
+"""Vesta report QA prototype."""

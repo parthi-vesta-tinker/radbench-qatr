@@ -1,0 +1,67 @@
+{
+  "package_id": "vesta-web-report-qa",
+  "content_version": "0.3.0",
+  "framework_version": "0.3.0",
+  "status": "prototype_evaluation",
+  "clinically_approved": false,
+  "supported_stages": [
+    "input_validation",
+    "language_review",
+    "consistency_review",
+    "critical_finding_review",
+    "comment_assembly"
+  ],
+  "stages": {
+    "language_review": [
+      "clinical-report-qa",
+      "qa-terminology-errors",
+      "qa-comment-drafting",
+      "qa-final-verification"
+    ],
+    "consistency_review": [
+      "clinical-report-qa",
+      "qa-internal-consistency",
+      "qa-clinical-question",
+      "qa-recommendations",
+      "qa-comment-drafting",
+      "qa-final-verification"
+    ],
+    "critical_finding_review": [
+      "clinical-report-qa",
+      "qa-critical-match",
+      "qa-comment-drafting",
+      "qa-final-verification"
+    ]
+  },
+  "skills": [
+    "skills/clinical-report-qa/skill.json",
+    "skills/qa-input-adequacy/skill.json",
+    "skills/qa-terminology-errors/skill.json",
+    "skills/qa-internal-consistency/skill.json",
+    "skills/qa-clinical-question/skill.json",
+    "skills/qa-recommendations/skill.json",
+    "skills/qa-critical-match/skill.json",
+    "skills/qa-comment-drafting/skill.json",
+    "skills/qa-final-verification/skill.json"
+  ],
+  "skill_versions": {
+    "clinical-report-qa": "0.3.0",
+    "qa-input-adequacy": "0.2.0",
+    "qa-terminology-errors": "0.2.0",
+    "qa-internal-consistency": "0.2.0",
+    "qa-clinical-question": "0.2.0",
+    "qa-recommendations": "0.2.0",
+    "qa-critical-match": "0.3.0",
+    "qa-comment-drafting": "0.2.0",
+    "qa-final-verification": "0.3.0"
+  },
+  "qatr_source": {
+    "repository": "parthi-vesta-tinker/qatr",
+    "commit": "b906151a2bdef8c206325de64d46b61cdf5b7ad7",
+    "git_blobs": {
+      "critical-result-notification-source.txt": "aff165e82689304fb8827cbc32920a284eb8e22f",
+      "critical-rules.json": "501e0ff84530babbfe7a81ad3308a06b15d3e416",
+      "matching-guardrails.md": "0459d999c0e0cef7e50cc4a8a2cebdfdba115c08"
+    }
+  }
+}

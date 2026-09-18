@@ -1,0 +1,158 @@
+{
+  "suite_version": "1.0.0",
+  "skill": "qa-recommendations",
+  "skill_version": "0.2.0",
+  "status": "proposed_not_adjudicated",
+  "cases": [
+    {
+      "id": "RC01",
+      "title": "Recommendation contradicts report target",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nNo pulmonary nodule.\nImpression:\nNo pulmonary nodule. Recommend CT follow-up of the pulmonary nodule in 3 months."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "REC",
+            "anchor_quotes": [
+              "No pulmonary nodule.",
+              "Recommend CT follow-up"
+            ],
+            "finding_type": "discrepancy"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "RC02",
+      "title": "Cautious recommendation is not an error",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nIndeterminate 7 mm pulmonary nodule.\nImpression:\nIndeterminate pulmonary nodule. Consider follow-up based on clinical risk."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "RC03",
+      "title": "No remembered guideline requirement",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\n6 mm pulmonary nodule.\nImpression:\n6 mm pulmonary nodule."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [
+          "REQUIREMENT"
+        ],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "no_unsupplied_policy"
+        ]
+      }
+    },
+    {
+      "id": "RC04",
+      "title": "Different personal interval preference",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nStable renal cyst.\nImpression:\nStable renal cyst. Ultrasound follow-up may be considered in 12 months."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "no_preference_enforcement"
+        ]
+      }
+    },
+    {
+      "id": "RC05",
+      "title": "Recommendation anatomy conflict",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nIndeterminate left renal lesion.\nImpression:\nRecommend ultrasound follow-up of the right kidney."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "REC",
+            "anchor_quotes": [
+              "left renal lesion",
+              "right kidney"
+            ],
+            "finding_type": "discrepancy"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "RC06",
+      "title": "No recommendation and no rule",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nMild dependent atelectasis.\nImpression:\nMild dependent atelectasis."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": []
+      }
+    }
+  ]
+}

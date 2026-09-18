@@ -1,0 +1,175 @@
+{
+  "suite_version": "1.0.0",
+  "skill": "qa-final-verification",
+  "skill_version": "0.3.0",
+  "status": "proposed_not_adjudicated",
+  "cases": [
+    {
+      "id": "FV01",
+      "title": "Benign unit equivalence removed",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nRight renal cyst measures 10 mm.\nImpression:\nRight renal cyst measures 1 cm."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "remove_benign_candidate"
+        ]
+      }
+    },
+    {
+      "id": "FV02",
+      "title": "Duplicate ownership removed",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nSmall right pleural effusion.\nImpression:\nSmall left pleural effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "LAT",
+            "anchor_quotes": [
+              "Small right pleural effusion.",
+              "Small left pleural effusion."
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [
+          "FIMP"
+        ],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "deduplicate_action"
+        ]
+      }
+    },
+    {
+      "id": "FV03",
+      "title": "Critical uncertainty preserved",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "critical_finding_review",
+      "input": {
+        "report_text": "Findings:\nPossible small subarachnoid hemorrhage; artifact cannot be excluded.\nImpression:\nPossible small subarachnoid hemorrhage."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "CRIT",
+            "anchor_quotes": [
+              "Possible small subarachnoid hemorrhage."
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "preserve_uncertainty"
+        ],
+        "designation": {
+          "status": "unknown",
+          "anchor_quote": null
+        }
+      }
+    },
+    {
+      "id": "FV04",
+      "title": "Addendum correction prevents false issue",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nSmall left effusion.\nImpression:\nSmall right effusion.\nAddendum:\nImpression corrected to small left effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "respect_addendum"
+        ]
+      }
+    },
+    {
+      "id": "FV05",
+      "title": "Exact source quote required",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "language_review",
+      "input": {
+        "report_text": "Findings:\nCardiomediastinal silhoutte is unchanged.\nImpression:\nNo acute disease."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "TERM",
+            "anchor_quotes": [
+              "silhoutte"
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": [
+          "exact_unique_anchors"
+        ]
+      }
+    },
+    {
+      "id": "FV06",
+      "title": "No empty success when report content is unavailable",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nReport content is unavailable.\nImpression:\nReport content is unavailable."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "input_problem": true,
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "no_empty_success"
+        ]
+      }
+    }
+  ]
+}

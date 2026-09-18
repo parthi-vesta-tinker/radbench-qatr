@@ -1,0 +1,220 @@
+import { test, expect, type Page } from "@playwright/test";
+async function example(page: Page, name: string) {
+  await page.getByLabel("Load synthetic example").selectOption(name);
+  await page
+    .getByRole("button", { name: "Review report", exact: true })
+    .click();
+  await expect(page.getByRole("status", {name:"QA review: Completed"})).toBeVisible();
+}
+
+test("report-only review, exact copy, feedback, stale replacement and reload", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await expect(page).toHaveTitle(/Vesta/);
+  await expect(page.getByRole("radio")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Review report", exact: true })
+    .click();
+  await expect(page.getByRole("alert")).toContainText("Paste a report");
+  const request = page.waitForRequest(
+    (r) => r.url().endsWith("/api/v1/reviews") && r.method() === "POST",
+  );
+  await example(page, "mixed");
+  expect(Object.keys((await request).postDataJSON())).toEqual(["report_text"]);
+  await expect(page.locator(".missed")).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "The report does not establish whether this finding was flagged.",
+    ),
+  ).toHaveCount(0);
+  await page.screenshot({
+    path: "../prototype/assets/implementation-desktop.png",
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Copy all comments", exact: true })
+    .click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    "QA review:\n\nGeneral Comments:\n1. Findings: “silhoutte” → “silhouette”. Please correct if appropriate.\n\nCritical Findings comments:\n1. Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway.",
+  );
+  await page.getByRole("button", { name: "Copy general", exact: true }).click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("QA review:\n\nGeneral Comments:\n1. Findings: “silhoutte” → “silhouette”. Please correct if appropriate.");
+  await page.getByRole("button", { name: "Copy critical", exact: true }).click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("QA review:\n\nCritical Findings comments:\n1. Impression describes acute right pneumothorax. Please review critical designation and the applicable communication pathway.");
+  await page.getByRole("button", { name: "Thumbs down" }).click();
+  await page.getByLabel("What was wrong?").selectOption("other");
+  await page.screenshot({
+    path: "../prototype/assets/implementation-feedback.png",
+    fullPage: true,
+  });
+  const saved = page.waitForResponse(
+    (r) => r.url().endsWith("/feedback") && r.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "Save feedback" }).click();
+  const response = await saved;
+  expect(response.status()).toBe(201);
+  expect((await response.json()).explanation).toBeNull();
+  await expect(page.getByText("Feedback saved.")).toBeVisible();
+  const original = await page
+    .getByLabel("Report input", { exact: true })
+    .inputValue();
+  await page
+    .getByLabel("Report input", { exact: true })
+    .fill("Findings: A replacement report. Impression: A replacement report.");
+  await expect(
+    page.getByRole("button", { name: "Copy all comments", exact: true }),
+  ).toBeDisabled();
+  await expect(page.getByRole("button", {name:"Copy general", exact:true})).toBeDisabled();
+  await expect(page.getByRole("button", {name:"Copy critical", exact:true})).toBeDisabled();
+  await page.getByRole("button", { name: "Restore reviewed input" }).click();
+  await expect(page.getByLabel("Report input", { exact: true })).toHaveValue(
+    original,
+  );
+  await page.reload();
+  await expect(
+    page.getByRole("status", {name:"QA review: Completed"}),
+  ).toBeVisible();
+  await expect(page.getByRole("radio")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("replacing report needs no metadata; no-observation output retains feedback", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await example(page, "mixed");
+  await page
+    .getByLabel("Report input", { exact: true })
+    .fill(
+      "Findings:\nLungs are clear. No pleural effusion or pneumothorax.\n\nImpression:\nNo acute cardiopulmonary abnormality.",
+    );
+  await expect(
+    page.getByRole("button", { name: "Copy all comments", exact: true }),
+  ).toBeDisabled();
+  await page
+    .getByRole("button", { name: "Review report", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "No actionable observations" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Copy all comments", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByText("Critical Findings missed flag:")).toHaveCount(0);
+  await page.getByRole("button", { name: "Thumbs down" }).click();
+  await page.getByLabel("What was wrong?").selectOption("missed_observation");
+  await page.getByRole("button", { name: "Save feedback" }).click();
+  await expect(page.getByText("Feedback saved.")).toBeVisible();
+});
+
+test("missing sections and unsupported demo reports never clear", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page
+    .getByLabel("Report input", { exact: true })
+    .fill("Findings: Lungs are clear.");
+  await page
+    .getByRole("button", { name: "Review report", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "More information needed" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Copy all comments", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByLabel("Report input", { exact: true })
+    .fill("Findings: A new unknown example. Impression: An unknown example.");
+  await page
+    .getByRole("button", { name: "Review report", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Review could not finish" }),
+  ).toBeVisible();
+  await expect(page.getByText(/Demo mode supports/)).toBeVisible();
+});
+
+test("report-documented flag retains critical comments on mobile", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await example(page, "critical_documented");
+  await expect(page.locator(".missed")).toHaveCount(0);
+  await expect(
+    page.getByText(/Impression describes acute right pneumothorax/),
+  ).toBeVisible();
+  await expect(page.getByRole("radio")).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "../prototype/assets/implementation-mobile.png",
+    fullPage: true,
+  });
+  await example(page, "critical_unflagged");
+  await expect(page.locator(".missed")).toHaveCount(0);
+});
+
+test("connection recovery, clipboard fallback and feedback retry preserve work", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: async () => {
+          throw new Error("Clipboard denied");
+        },
+      },
+    }),
+  );
+  let reads = 0;
+  await page.route(/\/api\/v1\/reviews\/[^/]+$/, async (route) => {
+    if (route.request().method() === "GET" && reads++ === 0)
+      await route.abort();
+    else await route.continue();
+  });
+  await page.goto("/");
+  await page.getByLabel("Load synthetic example").selectOption("language");
+  await page
+    .getByRole("button", { name: "Review report", exact: true })
+    .click();
+  await expect(page.locator(".notice").filter({hasText:/Connection lost/})).toBeVisible();
+  await expect(page.getByText(/Connection lost/)).toHaveCount(0, {
+    timeout: 10000,
+  });
+  await expect(page.getByRole("status", {name:"QA review: Completed"})).toBeVisible();
+  await page
+    .getByRole("button", { name: "Copy all comments", exact: true })
+    .click();
+  await expect(page.getByLabel("Exact copy text")).toHaveValue(
+    /QA review:\n\nGeneral Comments:/,
+  );
+  await expect(page.getByText("Copied.", { exact: true })).toHaveCount(0);
+  let attempts = 0;
+  const keys: string[] = [];
+  await page.route(/\/feedback$/, async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    keys.push(route.request().headers()["idempotency-key"]);
+    if (attempts++ === 0) await route.abort();
+    else await route.continue();
+  });
+  await page.getByRole("button", { name: "Thumbs down" }).click();
+  await page.getByLabel("What was wrong?").selectOption("unclear_wording");
+  await page.getByLabel("Tell us more").fill("Use a shorter comment.");
+  await page.getByRole("button", { name: "Save feedback" }).click();
+  await expect(page.locator(".feedback").getByRole("alert")).toBeVisible();
+  await expect(page.getByLabel("Tell us more")).toHaveValue(
+    "Use a shorter comment.",
+  );
+  await page.getByRole("button", { name: "Save feedback" }).click();
+  await expect(page.getByText("Feedback saved.")).toBeVisible();
+  expect(keys).toHaveLength(2);
+  expect(keys[0]).toBe(keys[1]);
+});

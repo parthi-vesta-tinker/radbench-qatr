@@ -1,0 +1,162 @@
+{
+  "suite_version": "1.0.0",
+  "skill": "qa-clinical-question",
+  "skill_version": "0.2.0",
+  "status": "proposed_not_adjudicated",
+  "cases": [
+    {
+      "id": "CQ01",
+      "title": "Negative answer addresses question",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Indication:\nEvaluate for pulmonary embolism.\nFindings:\nNo pulmonary embolism.\nImpression:\nNo pulmonary embolism."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "CQ02",
+      "title": "Direct limitation addresses question",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Indication:\nEvaluate for pulmonary embolism.\nFindings:\nPulmonary arteries are nondiagnostic because of motion artifact.\nImpression:\nNondiagnostic for pulmonary embolism due to motion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "accept_direct_limitation"
+        ]
+      }
+    },
+    {
+      "id": "CQ03",
+      "title": "Supplied question remains unanswered",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Indication:\nEvaluate for pulmonary embolism.\nFindings:\nMild bibasilar atelectasis.\nImpression:\nMild bibasilar atelectasis."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "CQ",
+            "anchor_quotes": [
+              "Evaluate for pulmonary embolism."
+            ],
+            "finding_type": "discrepancy"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "CQ04",
+      "title": "Broad symptom is not a mandatory question",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "History:\nChest pain.\nFindings:\nNo acute cardiopulmonary abnormality.\nImpression:\nNo acute cardiopulmonary abnormality."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "CQ05",
+      "title": "Cause question needs causal response",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Indication:\nCause of hemoptysis?\nFindings:\nSmall pleural effusion.\nImpression:\nSmall pleural effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "CQ",
+            "anchor_quotes": [
+              "Cause of hemoptysis?"
+            ],
+            "finding_type": "discrepancy"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "CQ06",
+      "title": "Conflicting answers owned by consistency",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Indication:\nEvaluate for pulmonary embolism.\nFindings:\nNo pulmonary embolism.\nImpression:\nAcute pulmonary embolism."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "FIMP",
+            "anchor_quotes": [
+              "No pulmonary embolism.",
+              "Acute pulmonary embolism."
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [
+          "CQ"
+        ],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": []
+      }
+    }
+  ]
+}

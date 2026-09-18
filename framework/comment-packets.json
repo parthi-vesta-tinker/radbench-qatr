@@ -1,0 +1,228 @@
+{
+  "framework_version": "1.2",
+  "synthetic": true,
+  "schema_status": "Illustrative UX contract, not a production API",
+  "note": "R-207 profiles are alternative demonstrations. R-209 concise packet supersedes the archived v1.1 structured draft. Mode changes never rewrite packet text. All outputs are synthetic and undelivered.",
+  "profiles": [
+    {
+      "id": "PROFILE-CONCISE-DEMO",
+      "version": 1,
+      "name": "Concise",
+      "provenance": "Synthetic alternative for comparison; not a real approved preference",
+      "example_only": true,
+      "nature": "brief clarification",
+      "scope": "actionable concerns and optional suggestions",
+      "template": "compact numbered text",
+      "guided_action": "clarify unresolved point; approved amendment if needed",
+      "attention": "avoid repeating prior request",
+      "permissions_granted": []
+    },
+    {
+      "id": "PROFILE-STRUCTURED-DEMO",
+      "version": 1,
+      "name": "Structured",
+      "provenance": "Synthetic organizational default for illustration",
+      "example_only": true,
+      "nature": "issue and action",
+      "scope": "actionable concerns and optional suggestions",
+      "template": "numbered issue/action",
+      "guided_action": "clarify or use separately approved amendment pathway",
+      "attention": "group routine items; critical independently available",
+      "permissions_granted": []
+    }
+  ],
+  "packets": [
+    {
+      "id": "P-207-concise",
+      "revision": 1,
+      "case_id": "R-207",
+      "case_locator": "R-207",
+      "source_id": "R-207-report-v1",
+      "source_version": 1,
+      "signature_status": "signed",
+      "review_run_id": "REVIEW-R-207-1",
+      "recipient": {
+        "id": "RAD-DEMO-A",
+        "role": "radiologist"
+      },
+      "profile_id": "PROFILE-CONCISE-DEMO",
+      "profile_version": 1,
+      "example_only": true,
+      "content_status": "draft",
+      "transfer_status": "not_copied",
+      "delivery_status": "unknown",
+      "decision_status": "needs_clarification",
+      "correction_status": "not_performed",
+      "prior_exchange_ids": [
+        "M-207-1",
+        "M-207-2"
+      ],
+      "sections": [
+        {
+          "id": "critical",
+          "assessment": "complete",
+          "items": []
+        },
+        {
+          "id": "non_critical",
+          "assessment": "complete",
+          "items": [
+            {
+              "finding_id": "F-207",
+              "type": "discrepancy",
+              "evidence_ids": [
+                "E-1",
+                "E-2"
+              ],
+              "text": "Findings states \"Left pleural effusion.\" Impression states \"Right pleural effusion.\" Following your reply, please confirm the correct side and identify the amended report version if corrected."
+            }
+          ]
+        }
+      ],
+      "exports": {
+        "non_critical": {
+          "path": "comment-examples/R-207-concise-non_critical.txt",
+          "text": "QA review | R-207 | Report v1 (signed)\nNON-CRITICAL QA COMMENTS\n1. Findings states \"Left pleural effusion.\" Impression states \"Right pleural effusion.\" Following your reply, please confirm the correct side and identify the amended report version if corrected.\n"
+        },
+        "all": {
+          "path": "comment-examples/R-207-concise-all.txt",
+          "text": "QA review | R-207 | Report v1 (signed)\nNON-CRITICAL QA COMMENTS\n1. Findings states \"Left pleural effusion.\" Impression states \"Right pleural effusion.\" Following your reply, please confirm the correct side and identify the amended report version if corrected.\n"
+        }
+      },
+      "unclassified_items": []
+    },
+    {
+      "id": "P-207-structured",
+      "revision": 1,
+      "case_id": "R-207",
+      "case_locator": "R-207",
+      "source_id": "R-207-report-v1",
+      "source_version": 1,
+      "signature_status": "signed",
+      "review_run_id": "REVIEW-R-207-1",
+      "recipient": {
+        "id": "RAD-DEMO-A",
+        "role": "radiologist"
+      },
+      "profile_id": "PROFILE-STRUCTURED-DEMO",
+      "profile_version": 1,
+      "example_only": true,
+      "content_status": "draft",
+      "transfer_status": "not_copied",
+      "delivery_status": "unknown",
+      "decision_status": "needs_clarification",
+      "correction_status": "not_performed",
+      "prior_exchange_ids": [
+        "M-207-1",
+        "M-207-2"
+      ],
+      "sections": [
+        {
+          "id": "critical",
+          "assessment": "complete",
+          "items": []
+        },
+        {
+          "id": "non_critical",
+          "assessment": "complete",
+          "items": [
+            {
+              "finding_id": "F-207",
+              "type": "discrepancy",
+              "evidence_ids": [
+                "E-1",
+                "E-2"
+              ],
+              "text": "Issue: Findings states \"Left pleural effusion.\" Impression states \"Right pleural effusion.\"\n   Action: Following your reply, please confirm the correct side and identify the amended report version if corrected."
+            }
+          ]
+        }
+      ],
+      "exports": {
+        "non_critical": {
+          "path": "comment-examples/R-207-structured-non_critical.txt",
+          "text": "QA review | R-207 | Report v1 (signed)\nNON-CRITICAL QA COMMENTS\n1. Issue: Findings states \"Left pleural effusion.\" Impression states \"Right pleural effusion.\"\n   Action: Following your reply, please confirm the correct side and identify the amended report version if corrected.\n"
+        },
+        "all": {
+          "path": "comment-examples/R-207-structured-all.txt",
+          "text": "QA review | R-207 | Report v1 (signed)\nNON-CRITICAL QA COMMENTS\n1. Issue: Findings states \"Left pleural effusion.\" Impression states \"Right pleural effusion.\"\n   Action: Following your reply, please confirm the correct side and identify the amended report version if corrected.\n"
+        }
+      },
+      "unclassified_items": []
+    },
+    {
+      "id": "P-209-concise",
+      "revision": 1,
+      "case_id": "R-209",
+      "case_locator": "R-209",
+      "source_id": "R-209-report-v1",
+      "source_version": 1,
+      "signature_status": "signed",
+      "review_run_id": "REVIEW-R-209-1",
+      "recipient": {
+        "id": "RAD-DEMO-B",
+        "role": "radiologist"
+      },
+      "profile_id": "PROFILE-CONCISE-DEMO",
+      "profile_version": 1,
+      "example_only": true,
+      "content_status": "draft",
+      "transfer_status": "not_copied",
+      "delivery_status": "unknown",
+      "decision_status": "pending",
+      "correction_status": "not_performed",
+      "prior_exchange_ids": [],
+      "sections": [
+        {
+          "id": "critical",
+          "assessment": "complete",
+          "items": [
+            {
+              "finding_id": "F-209-critical",
+              "type": "unmet_requirement",
+              "evidence_ids": [
+                "E-209-1",
+                "E-209-2"
+              ],
+              "text": "Impression: \"Acute right pneumothorax.\" Supplied critical flag: unset. Please confirm critical designation; if confirmed, follow the applicable critical-result communication pathway."
+            }
+          ]
+        },
+        {
+          "id": "non_critical",
+          "assessment": "complete",
+          "items": [
+            {
+              "finding_id": "F-209-language",
+              "type": "suggestion",
+              "evidence_ids": [
+                "E-209-3"
+              ],
+              "text": "Findings: \"silhoutte\" \u2192 \"silhouette\". If adopted, use the approved amendment pathway."
+            }
+          ]
+        }
+      ],
+      "exports": {
+        "critical": {
+          "path": "comment-examples/R-209-concise-critical.txt",
+          "text": "QA review | R-209 | Report v1 (signed)\nCRITICAL-REVIEW COMMENTS \u2014 CONFIRMATION NEEDED\n1. Impression: \"Acute right pneumothorax.\" Supplied critical flag: unset. Please confirm critical designation; if confirmed, follow the applicable critical-result communication pathway.\n"
+        },
+        "non_critical": {
+          "path": "comment-examples/R-209-concise-non_critical.txt",
+          "text": "QA review | R-209 | Report v1 (signed)\nNON-CRITICAL QA COMMENTS \u2014 OPTIONAL SUGGESTION\n1. Findings: \"silhoutte\" \u2192 \"silhouette\". If adopted, use the approved amendment pathway.\n"
+        },
+        "all": {
+          "path": "comment-examples/R-209-concise-all.txt",
+          "text": "QA review | R-209 | Report v1 (signed)\nCRITICAL-REVIEW COMMENTS \u2014 CONFIRMATION NEEDED\n1. Impression: \"Acute right pneumothorax.\" Supplied critical flag: unset. Please confirm critical designation; if confirmed, follow the applicable critical-result communication pathway.\n\nQA review | R-209 | Report v1 (signed)\nNON-CRITICAL QA COMMENTS \u2014 OPTIONAL SUGGESTION\n1. Findings: \"silhoutte\" \u2192 \"silhouette\". If adopted, use the approved amendment pathway.\n"
+        }
+      },
+      "unclassified_items": [],
+      "supersedes": {
+        "packet_id": "P-209-structured",
+        "revision": 1,
+        "archive": "history/v1.1/comment-packets.json"
+      }
+    }
+  ]
+}

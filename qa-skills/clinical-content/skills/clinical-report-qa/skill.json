@@ -1,0 +1,39 @@
+{
+  "name": "clinical-report-qa",
+  "description": "Set report-only scope and clinical reasoning boundaries for all web QA review stages.",
+  "version": "0.3.0",
+  "role": "shared",
+  "stages": [
+    "language_review",
+    "consistency_review",
+    "critical_finding_review"
+  ],
+  "owns": [],
+  "instruction": "skills/clinical-report-qa/SKILL.md",
+  "references": [
+    {
+      "path": "references/clinical-reasoning.md",
+      "role": "guidance",
+      "authority": "review_guidance_not_policy",
+      "load_stages": [
+        "language_review",
+        "consistency_review",
+        "critical_finding_review"
+      ],
+      "sha256": "0300043184c60168d57721702ca8714a689fd1e9f4cc5aeac5ba751b6b38591a"
+    },
+    {
+      "path": "references/rich-report-context.md",
+      "role": "guidance",
+      "authority": "review_guidance_not_policy",
+      "load_stages": [
+        "language_review",
+        "consistency_review",
+        "critical_finding_review"
+      ],
+      "sha256": "150f739668d525c687369d40f3abe8d4f796a17cb3f4d445ba35476fc1fa4857"
+    }
+  ],
+  "evaluation": "evaluation/suites/clinical-report-qa.json",
+  "changelog": "skills/clinical-report-qa/CHANGELOG.md"
+}

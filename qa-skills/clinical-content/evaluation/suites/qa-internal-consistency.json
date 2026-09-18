@@ -1,0 +1,175 @@
+{
+  "suite_version": "1.0.0",
+  "skill": "qa-internal-consistency",
+  "skill_version": "0.2.0",
+  "status": "proposed_not_adjudicated",
+  "cases": [
+    {
+      "id": "IC01",
+      "title": "Laterality conflict",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nSmall right pleural effusion.\nImpression:\nSmall left pleural effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "LAT",
+            "anchor_quotes": [
+              "Small right pleural effusion.",
+              "Small left pleural effusion."
+            ],
+            "finding_type": "discrepancy"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "IC02",
+      "title": "Independent side and size conflicts",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nSolitary 10 mm right upper lobe nodule.\nImpression:\nSolitary 14 mm left upper lobe nodule."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "LAT",
+            "anchor_quotes": [
+              "right upper lobe",
+              "left upper lobe"
+            ]
+          },
+          {
+            "issue_code": "MEAS",
+            "anchor_quotes": [
+              "10 mm",
+              "14 mm"
+            ]
+          }
+        ],
+        "forbidden_issue_codes": [
+          "FIMP"
+        ],
+        "observation_count": {
+          "min": 2,
+          "max": 2
+        },
+        "behavior_checks": []
+      }
+    },
+    {
+      "id": "IC03",
+      "title": "Equivalent units",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nRight renal cyst measures 10 mm.\nImpression:\nRight renal cyst measures 1 cm."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "normalize_units"
+        ]
+      }
+    },
+    {
+      "id": "IC04",
+      "title": "Distinct bilateral entities",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nA 10 mm right renal cyst and a separate 6 mm left renal cyst.\nImpression:\nBilateral renal cysts, 1 cm right and 6 mm left."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "preserve_distinct_entities"
+        ]
+      }
+    },
+    {
+      "id": "IC05",
+      "title": "Addendum resolves conflict",
+      "partition": "held_out",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Findings:\nSmall left effusion.\nImpression:\nSmall right effusion.\nAddendum:\nImpression corrected to small left effusion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 0,
+          "max": 0
+        },
+        "behavior_checks": [
+          "respect_addendum"
+        ]
+      }
+    },
+    {
+      "id": "IC06",
+      "title": "Technique conflict",
+      "partition": "development",
+      "evaluation_mode": "stage_model",
+      "stage": "consistency_review",
+      "input": {
+        "report_text": "Technique:\nNoncontrast CT chest.\nFindings:\nThe enhancing aortic lesion on this contrast-enhanced examination is unchanged.\nImpression:\nAortic lesion."
+      },
+      "policy_binding": "none",
+      "expectation_status": "proposed_not_adjudicated",
+      "expected": {
+        "required": [
+          {
+            "issue_code": "TECH",
+            "anchor_quotes": [
+              "Noncontrast CT chest.",
+              "contrast-enhanced examination"
+            ],
+            "finding_type": "discrepancy"
+          }
+        ],
+        "forbidden_issue_codes": [],
+        "observation_count": {
+          "min": 1,
+          "max": 1
+        },
+        "behavior_checks": []
+      }
+    }
+  ]
+}

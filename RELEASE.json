@@ -1,0 +1,9 @@
+{
+  "bundle_version": "1.16",
+  "prototype_contract_version": "0.12",
+  "implementation_version": "0.12.0",
+  "created": "2026-09-17",
+  "foundation_phase": "F2",
+  "api_version": "2026-09-17",
+  "database_schema": 3
+}

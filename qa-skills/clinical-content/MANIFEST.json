@@ -1,0 +1,198 @@
+{
+  "package_id": "vesta-web-report-qa",
+  "artifact_sha256": "f1cae7bcd26791a40ebc23314f417524ae90695dd878e414f2be1e2705367895",
+  "files": [
+    {
+      "path": "SOURCE.md",
+      "sha256": "38ad4f892ccb45e93f635b891c3448cf26842e41a2e2527bec239f397f41249d"
+    },
+    {
+      "path": "evaluation/METHOD.md",
+      "sha256": "86f0e092fcd69adf837fd86f9ea65a1407d9cad777af375bb623c33dbb4bb919"
+    },
+    {
+      "path": "evaluation/cases.json",
+      "sha256": "24cc75e3772ea04d2adf03eef2962152fa1f5a82c992ea7e3c625d383c771f36"
+    },
+    {
+      "path": "evaluation/catalog-cases.json",
+      "sha256": "15a73cf9aa319bf448395cd34d5c9b12744ad3ba8d09aabc231da2d1028545da"
+    },
+    {
+      "path": "evaluation/suite.schema.json",
+      "sha256": "9d499ddf607e051af79e3c84a5e5995e7b75417f81a90674c2530bc99acb074c"
+    },
+    {
+      "path": "evaluation/suites/clinical-report-qa.json",
+      "sha256": "d1e1be0322ea8c3712b2a5851142b82c18ba8296e3e6d09f572cceef6a0b5ecf"
+    },
+    {
+      "path": "evaluation/suites/qa-clinical-question.json",
+      "sha256": "cefeac84263f50d633dd930efa57b85f9cdff72ed27dbe2bfd07c0a2eb849051"
+    },
+    {
+      "path": "evaluation/suites/qa-comment-drafting.json",
+      "sha256": "f0302bb3290646b7213fed33ba7f4a36d87e6f0b49a92ac708ffcb4d29c79d6a"
+    },
+    {
+      "path": "evaluation/suites/qa-critical-match.json",
+      "sha256": "61d52f0d2c02f0568c50dfb81b0744fbd77637c69ade9b3fe4d5d300e71a5c27"
+    },
+    {
+      "path": "evaluation/suites/qa-final-verification.json",
+      "sha256": "cc4ef0280b87822c7dd3266677bc449c891c6a582b26dca6da27962efd13ccc8"
+    },
+    {
+      "path": "evaluation/suites/qa-input-adequacy.json",
+      "sha256": "c4e4954caac5e428807f47cd5cb9938b5626e7fa771d2c4e7410543434066b7a"
+    },
+    {
+      "path": "evaluation/suites/qa-internal-consistency.json",
+      "sha256": "00ea7b33710c7cf4bc393255a06e09abb4eef04df4212af36e102163ef0d190f"
+    },
+    {
+      "path": "evaluation/suites/qa-recommendations.json",
+      "sha256": "2ae04a026b6d100a096fa35fc72800999655ffbb5b8edd08278d0d9c0e31fd40"
+    },
+    {
+      "path": "evaluation/suites/qa-terminology-errors.json",
+      "sha256": "36f53916f44b44b2b0845dc8869f3e1232a4a9847920051d1069b700911b2b05"
+    },
+    {
+      "path": "references/clinical-reasoning.md",
+      "sha256": "0300043184c60168d57721702ca8714a689fd1e9f4cc5aeac5ba751b6b38591a"
+    },
+    {
+      "path": "references/critical-boundaries.md",
+      "sha256": "97976eda6a94196b7e1b69a1523c70971f8fa3e1ad09dde209762d896246fde9"
+    },
+    {
+      "path": "references/critical-result-notification-source.txt",
+      "sha256": "18a2b4d5f27292d8ba2fd21f0897cc11e1367cbe04245ba711b1cbfebd97bec6"
+    },
+    {
+      "path": "references/critical-rules.json",
+      "sha256": "98b90710bc21e7d20b9444ada9986ad177923098af066be82df6dd20fba08d81"
+    },
+    {
+      "path": "references/matching-guardrails.md",
+      "sha256": "9ec32cd57eaa8c5bb9eab04e53b8e2606f37bef51b7796473c91a55a771f3ed3"
+    },
+    {
+      "path": "references/rich-report-context.md",
+      "sha256": "150f739668d525c687369d40f3abe8d4f796a17cb3f4d445ba35476fc1fa4857"
+    },
+    {
+      "path": "registry.json",
+      "sha256": "c028c5b8daaa44ede854d08ed6df752f35eaa1bfa930d859b0b245db079eeb86"
+    },
+    {
+      "path": "skills/clinical-report-qa/CHANGELOG.md",
+      "sha256": "916e45c5193c61f8dc7a0f80bc6afe266b5bb54099ca60c412353bd5a8c62c78"
+    },
+    {
+      "path": "skills/clinical-report-qa/SKILL.md",
+      "sha256": "d3005c51b9413080b21f0df05bb5b9d920118422f3cdee5c84847368cb503a48"
+    },
+    {
+      "path": "skills/clinical-report-qa/skill.json",
+      "sha256": "8f04de5957abb782e28f08235e2df349038a7d69b041b7bacfbbafe0c5163138"
+    },
+    {
+      "path": "skills/qa-clinical-question/CHANGELOG.md",
+      "sha256": "eaf4e0bc9aa22a49f88293532651144e0e227945c019fbe9f133cd7d6d7dd475"
+    },
+    {
+      "path": "skills/qa-clinical-question/SKILL.md",
+      "sha256": "f7d6ff7596e80c2bbf560aa0a497c7154719682d7c6053be9c20eed633fb8922"
+    },
+    {
+      "path": "skills/qa-clinical-question/skill.json",
+      "sha256": "ed6ef08833573456ed106ff1bb1f88c9864827aed8048a4de42452c925d553cf"
+    },
+    {
+      "path": "skills/qa-comment-drafting/CHANGELOG.md",
+      "sha256": "168aeaf28a1d74ba847de8a04efd57d5291f264bb6b3ceb3ffd5376be64e69bc"
+    },
+    {
+      "path": "skills/qa-comment-drafting/SKILL.md",
+      "sha256": "d12fe98a7c962e3270ad9215d1aa92e179708ac61cd1e9e4ea3a45cf2f01b47e"
+    },
+    {
+      "path": "skills/qa-comment-drafting/skill.json",
+      "sha256": "a6befc2f6aad515cc047ac9a8fb4839a05ec2c8ecb904bd4cdaf50d783dd2c40"
+    },
+    {
+      "path": "skills/qa-critical-match/CHANGELOG.md",
+      "sha256": "5d07e3ef4c9d68e77877d47478dfead4e150669b671595ba54ee38e68b4f7acb"
+    },
+    {
+      "path": "skills/qa-critical-match/SKILL.md",
+      "sha256": "eaea8821e196c2237b687010d9418cff969a417ca0585d420d83ea996dffe846"
+    },
+    {
+      "path": "skills/qa-critical-match/skill.json",
+      "sha256": "392b3db4d903c410bc8ca46a979eec3324794e864fe628bc6ed61db64d6affb0"
+    },
+    {
+      "path": "skills/qa-final-verification/CHANGELOG.md",
+      "sha256": "93cfedd4d55fb5e0e83cc29f8998a89d182a33e9de7432a5c966a55396e5d4af"
+    },
+    {
+      "path": "skills/qa-final-verification/SKILL.md",
+      "sha256": "6ef711074fbbb9e70040abefa140eabc6337f68277c1930d497988dcbf2929f7"
+    },
+    {
+      "path": "skills/qa-final-verification/skill.json",
+      "sha256": "bc9edf3ae0deada3a8ebb0d857c0fa015a8bde4c30a163afb0194dc65c7ec8f8"
+    },
+    {
+      "path": "skills/qa-input-adequacy/CHANGELOG.md",
+      "sha256": "5cae3b97208a34733a5ebb7388678afb44687c4a6391845fe5c651888dc7acf0"
+    },
+    {
+      "path": "skills/qa-input-adequacy/SKILL.md",
+      "sha256": "096468928d5b5e391b02e2a305ac4b1968e3bb6d9c19578df9ee1eac2b7662d9"
+    },
+    {
+      "path": "skills/qa-input-adequacy/skill.json",
+      "sha256": "57d39965ee05d492a919c551c667a7ed71b0dac02a0f4d07857af6337203649a"
+    },
+    {
+      "path": "skills/qa-internal-consistency/CHANGELOG.md",
+      "sha256": "db21fe0f87e83855a4c5902f38657f364a80c038b4cd48ce131d5a2d46460a80"
+    },
+    {
+      "path": "skills/qa-internal-consistency/SKILL.md",
+      "sha256": "7907e40807e0045d5ba4ffb999dd582a7987c6a5091ce1d38d9a1ce1e84416d1"
+    },
+    {
+      "path": "skills/qa-internal-consistency/skill.json",
+      "sha256": "f7b139d1bb4d9bb8cac9a39a73851797e34e5b9d40a2b42c32f81d702f38114f"
+    },
+    {
+      "path": "skills/qa-recommendations/CHANGELOG.md",
+      "sha256": "ae92e694853eb625c7bceb269d2d8ecc496a2281b2ef9dc26d17eedfb8fb819d"
+    },
+    {
+      "path": "skills/qa-recommendations/SKILL.md",
+      "sha256": "4c207cb525a538fdae304d0b793438197a2a90f9b6a8e6a6e37d202d5450bd20"
+    },
+    {
+      "path": "skills/qa-recommendations/skill.json",
+      "sha256": "30120597aa836bcd76e3e6319da9cd72d1528548f1cc89c7c80a5940f3a4ca3c"
+    },
+    {
+      "path": "skills/qa-terminology-errors/CHANGELOG.md",
+      "sha256": "e9b5f488d1e1f8552cc75dedff092882406fad4c7f05ef28e1dfcd2ef81fda6d"
+    },
+    {
+      "path": "skills/qa-terminology-errors/SKILL.md",
+      "sha256": "10536dc2115519af0ab9e5e055e8d85c3be6076c8601e65adc3ea7481a191bf9"
+    },
+    {
+      "path": "skills/qa-terminology-errors/skill.json",
+      "sha256": "0461c1304b98bd9113aaddffc48e64b8289e59bab62328e0bd7ed173e48b6136"
+    }
+  ]
+}

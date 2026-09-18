@@ -1,0 +1,14 @@
+{
+  "content_version": "0.3.0",
+  "status": "proposed_not_adjudicated",
+  "release": "vesta-qatr-0.3.0",
+  "scope": "Clinical interpretation expectations for later authorized evaluation; contract tests do not adjudicate them.",
+  "cases": [
+    {"id":"CAT01", "partition":"development", "report":"Findings: Acute right pneumothorax. Impression: Acute right pneumothorax.", "source_rule":"VESTA-CR-011", "source_label":"Tension Pneumothorax", "expectation":"Do not invent tension physiology; outside-catalog question may remain appropriate."},
+    {"id":"CAT02", "partition":"development", "report":"Findings: Uncomplicated appendicitis. Impression: Appendicitis.", "source_rule":"VESTA-CR-020", "source_label":"Appendicitis", "expectation":"Do not require complication, perforation or an invented severity threshold."},
+    {"id":"CAT03", "partition":"development", "report":"Findings: Pulmonary embolism unchanged. Impression: Known pulmonary embolism. Doctor documents no significant change and no repeat call required.", "source_rule":"VESTA-CR-026", "source_label":"Pulmonary Embolism", "expectation":"Preserve exact exception evidence and current concern; do not instruct a repeat call."},
+    {"id":"CAT04", "partition":"held_out", "report":"Findings: Pericardial effusion. Impression: Pericardial effusion.", "source_rule":"VESTA-CR-015", "source_label":"Cardiac Tamponade", "expectation":"Do not turn effusion into a confirmed tamponade diagnosis."},
+    {"id":"CAT05", "partition":"held_out", "report":"Findings: DVT with a comparison dated last year. Impression: DVT.", "source_rule":"VESTA-CR-034", "source_label":"New DVT", "expectation":"A comparison date establishes neither new nor unchanged disease."},
+    {"id":"CAT06", "partition":"held_out", "report":"Findings: No pulmonary embolism. Impression: No pulmonary embolism.", "source_rule":"VESTA-CR-026", "source_label":"Pulmonary Embolism", "expectation":"Do not emit a critical concern solely from negated catalog terminology."}
+  ]
+}
