@@ -25,6 +25,7 @@ ACTIVE_PROTOTYPE = {
     "IMPLEMENTATION_STATUS.md",
     "README.md",
     "SKILLS_STUDIO_SPEC.md",
+    "UI_ENHANCEMENT_RESEARCH.md",
     "WORKSPACE_SPEC.md",
 }
 LINK = re.compile(r"(?<!!)\[[^]]+]\(([^)]+)\)")
