@@ -18,11 +18,15 @@ export function useReview() {
   const [listError, setListError] = useState("");
   const [revision, setRevision] = useState(0);
   const [deleted, setDeleted] = useState<Draft | null>(null);
+  // Local edits to an already submitted report. Never mutates the accepted review.
+  const [editedText, setEditedText] = useState<string | null>(null);
   const submittingIds = useRef(new Set<string>());
   const draft = selected ? drafts.find(d => d.id === selected) : drafts[0];
   const active = draft ? null : selected;
   const visibleReview = !draft && review?.id === active ? review : null;
-  const report = draft?.text ?? visibleReview?.input.report_text ?? "";
+  const submittedText = visibleReview?.input.report_text ?? "";
+  const report = draft?.text ?? editedText ?? submittedText;
+  const edited = !draft && editedText !== null && editedText !== submittedText;
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => { if (drafts.some(d => d.text.trim())) { event.preventDefault(); event.returnValue = ""; } };
     window.addEventListener("beforeunload", warn);
@@ -52,7 +56,7 @@ export function useReview() {
     void poll(); return () => { stopped = true; clearTimeout(timer); };
   }, [revision]);
   useEffect(() => {
-    setReview(null); setDisconnected(false); setError("");
+    setReview(null); setDisconnected(false); setError(""); setEditedText(null);
     if (!active) return;
     let stopped = false; let timer: ReturnType<typeof setTimeout>;
     async function poll() {
@@ -81,8 +85,13 @@ export function useReview() {
     select(next.id);
   }
   function editReport(text: string) {
-    if (!draft || draft.submitting || draft.key) return;
-    setDrafts(old => old.map(d => d.id === draft.id ? {...d, text, error: ""} : d));
+    if (draft) {
+      if (draft.submitting || draft.key) return;
+      setDrafts(old => old.map(d => d.id === draft.id ? {...d, text, error: ""} : d));
+      return;
+    }
+    // A submitted report stays readable and editable; reviewing again creates a new review.
+    if (visibleReview) setEditedText(text);
   }
 
   function deleteDraft(id: string) {
@@ -98,14 +107,15 @@ export function useReview() {
     if (!deleted) return;
     setDrafts(old => [...old, deleted]); select(deleted.id); setDeleted(null);
   }
-  async function submit() {
-    if (!draft || draft.submitting || submittingIds.current.has(draft.id) || !draft.text.trim() || !config?.ready) return;
-    submittingIds.current.add(draft.id);
-    const id = draft.id, key = draft.key || crypto.randomUUID();
+  async function submit(target?: Draft) {
+    const item = target ?? draft;
+    if (!item || item.submitting || submittingIds.current.has(item.id) || !item.text.trim() || !config?.ready) return;
+    submittingIds.current.add(item.id);
+    const id = item.id, key = item.key || crypto.randomUUID();
     const wasSelected = () => selectedRef.current === id || (!selectedRef.current && drafts[0]?.id === id);
     setDrafts(old => old.map(d => d.id === id ? {...d, key, submitting: true, error: ""} : d));
     try {
-      const data = await api.create({report_text: draft.text}, key);
+      const data = await api.create({report_text: item.text}, key);
       setDrafts(old => old.filter(d => d.id !== id));
       if (wasSelected()) { select(data.id); setReview(data); }
       setRevision(n => n + 1);
@@ -115,10 +125,19 @@ export function useReview() {
       setDrafts(old => old.map(d => d.id === id ? {...d, submitting: false, key: definitive ? undefined : key, error: describeError(e)} : d));
     } finally { submittingIds.current.delete(id); }
   }
+  function reviewAgain() {
+    if (!edited || !config?.ready) return;
+    const next = makeDraft(editedText!);
+    setDrafts(old => [...old, next]);
+    select(next.id);
+    setEditedText(null);
+    void submit(next);
+  }
   return {config, configurationError, retryConfiguration,
     report, review: visibleReview, draft, drafts, rows, listError,
     selected: draft?.id || selected, openReview: select, newReview, editReport, submit,
+    edited, reviewAgain,
     deleteDraft, deleted, undoDelete, dismissDelete: () => setDeleted(null),
-    busy: Boolean(draft?.submitting), locked: !draft || Boolean(draft.key), stale: false,
+    busy: Boolean(draft?.submitting), locked: Boolean(draft?.key), stale: false,
     disconnected, error: draft?.error || error, inputError: "", restore: () => {}};
 }

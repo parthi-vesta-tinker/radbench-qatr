@@ -320,7 +320,7 @@
 <li><strong>110 Python tests passed</strong>, including 10 new controlled tests for pack-reference parsing and stamping, derived pack identity, live refusal of a draft pack, workspace draft composition, editorial drafts that never compose, frozen content that cannot be drafted, fork staleness and rebase, tenant scoping, and playground-run isolation from every live table.</li>
 <li>The same single OpenAPI drift check still fails, and was confirmed to fail identically on unmodified <code>origin/main</code> in this container. It is the checked-in 422 wording, not this change: no HTTP route, schema or response was added or altered.</li>
 <li>Skill package validation, generated TypeScript contract drift, and the documentation boundary check passed.</li>
-<li><strong>19 React DOM tests passed</strong> and the TypeScript/Vite production build passed. No frontend file changed.</li>
+<li><strong>20 React DOM tests, the TypeScript/Vite production build, and 9 Playwright scenarios passed</strong> on the merged tree, with the schema-5 store bootstrapped fresh. No frontend file changed by this work.</li>
 <li>No provider request was made. Recorded provider spend was <strong>$0</strong>.</li>
 </ul>
 <p>These are controlled storage and composition checks. They establish no clinical claim, and the playground has no user interface yet.</p>
@@ -387,9 +387,11 @@ npm --prefix frontend run build</code></pre>
 <h3 id="workspace-layout-and-interaction">Layout and interaction</h3>
 <ul>
 <li><strong>Scope:</strong> a slim reports column with independent in-tab drafts, active work, recent results, and history access. Selection does not jump when another review finishes.</li>
-<li><strong>Work:</strong> the report input appears above the review output. Accepted report text is immutable and read-only. Review report sits beside the minimum-input hint. Revise as new draft leaves the original resource unchanged.</li>
+<li><strong>Work:</strong> the report text appears above the review output, under a <strong>Report text only</strong> badge beside the heading. The accepted review resource is immutable, but its report text stays editable in place: editing enables <strong>Review again</strong>, which submits a new review and leaves the original resource unchanged. <strong>Review</strong> sits beside the minimum-input hint for a new draft.</li>
 <li><strong>Studio:</strong> compact tools for New report, Review history, Feedbacks, Analytics, and Skills &amp; knowledge. Tool navigation preserves the current report draft and mounted editor state.</li>
-<li><strong>Comments:</strong> general comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.</li>
+<li><strong>Review panel:</strong> review steps show real execution state; <strong>Guidance: Next steps</strong> lists the numbered actions for the current state. Guidance is advice, not tracked progress, and stores no per-step state.</li>
+<li><strong>Feedback:</strong> thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.</li>
+<li><strong>Quality review:</strong> the output panel is headed <strong>Quality review</strong>. General comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.</li>
 <li><strong>Responsive behavior:</strong> the three regions stack on narrow screens without hiding actions or changing data semantics. Appearance supports light and dark themes.</li>
 </ul>
 <p>Draft report text lives only in the current tab. Submitted resources persist in SQLite. A delete action supports one exact Undo. Once submission begins, the draft and deletion controls lock; an ambiguous HTTP response keeps the exact input and idempotency key available for retry. After reload, users inspect history before intentionally resubmitting.</p>

@@ -36,7 +36,7 @@ Run on 19 September 2026 for P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md).
 - **110 Python tests passed**, including 10 new controlled tests for pack-reference parsing and stamping, derived pack identity, live refusal of a draft pack, workspace draft composition, editorial drafts that never compose, frozen content that cannot be drafted, fork staleness and rebase, tenant scoping, and playground-run isolation from every live table.
 - The same single OpenAPI drift check still fails, and was confirmed to fail identically on unmodified `origin/main` in this container. It is the checked-in 422 wording, not this change: no HTTP route, schema or response was added or altered.
 - Skill package validation, generated TypeScript contract drift, and the documentation boundary check passed.
-- **19 React DOM tests passed** and the TypeScript/Vite production build passed. No frontend file changed.
+- **20 React DOM tests, the TypeScript/Vite production build, and 9 Playwright scenarios passed** on the merged tree, with the schema-5 store bootstrapped fresh. No frontend file changed by this work.
 - No provider request was made. Recorded provider spend was **$0**.
 
 These are controlled storage and composition checks. They establish no clinical claim, and the playground has no user interface yet.
