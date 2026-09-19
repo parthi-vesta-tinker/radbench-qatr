@@ -1,10 +1,4 @@
-import {
-  Check,
-  FileText,
-  MessageSquare,
-  Minus,
-  AlertCircle,
-} from "lucide-react";
+import { Check, Minus, AlertCircle } from "lucide-react";
 import type { Review } from "./types";
 const stages = [
   ["input_validation", "Input validation"],
@@ -12,39 +6,53 @@ const stages = [
   ["output_validation", "Output validation"],
   ["comment_assembly", "Comment assembly"],
 ];
+
+// Guidance is advice for the reader, not tracked progress: no state is stored per step.
+function guidance(review: Review | null, stale: boolean): string[] {
+  if (stale)
+    return [
+      "Reconnect to confirm the current status.",
+      "Do not copy these comments until the status is confirmed.",
+    ];
+  const state = review?.execution_status;
+  if (!review)
+    return ["Paste the findings and impression.", "Select Review."];
+  if (state === "queued" || state === "running")
+    return ["Wait for all checks to finish.", "Results appear here automatically."];
+  if (state === "needs_input")
+    return [
+      "Add the missing findings or impression.",
+      "Select Review again.",
+    ];
+  if (state === "failed")
+    return [
+      "Read the error above.",
+      "Edit the report, then select Review again.",
+    ];
+  if (review.result?.critical_finding_detected)
+    return [
+      "Read the critical findings first.",
+      "Confirm the critical designation.",
+      "Follow the applicable communication pathway.",
+      "Copy the comments into the report.",
+      "Rate the review.",
+    ];
+  if (review.result?.outcome === "observations")
+    return [
+      "Read the comments.",
+      "Copy them into the report.",
+      "Rate the review.",
+    ];
+  return ["No comments to copy.", "Rate the review if something was missed."];
+}
+
 export function Studio({
   review,
   stale,
-  openFeedback,
 }: {
   review: Review | null;
   stale: boolean;
-  openFeedback: () => void;
 }) {
-  const state = review?.execution_status;
-  const complete = state === "completed";
-  let next = "Paste a report containing findings and impression.";
-  if (stale)
-    next =
-      "Review the changed input, or restore the input that produced these results.";
-  else if (state === "running" || state === "queued")
-    next =
-      "The submitted report is being reviewed. Results will appear when all checks finish.";
-  else if (state === "needs_input")
-    next =
-      "Provide the missing minimum information, then request review again.";
-  else if (state === "failed")
-    next = review?.error?.code === "MODEL_OUTCOME_UNKNOWN"
-      ? "The provider outcome is unknown. This review will not be sent again automatically."
-      : "Check the error before starting a new review.";
-  else if (complete && review?.result?.critical_finding_detected)
-    next =
-      "Copy the QA review for the radiologist. Ask them to confirm the critical designation and follow the applicable communication pathway.";
-  else if (complete)
-    next =
-      review?.result?.outcome === "observations"
-        ? "Copy the QA review into your reporting system for radiologist review."
-        : "No comments to copy. Use feedback if an observation was missed.";
   return (
     <aside className="studio" aria-label="Review Studio">
       <section className="studio-section">
@@ -84,35 +92,18 @@ export function Studio({
           })}
         </ol>
       </section>
-      <div className="tool-list">
-        <button
-          className="tool selected"
-          onClick={() =>
-            document
-              .getElementById("output-title")
-              ?.scrollIntoView({ block: "nearest" })
-          }
-        >
-          <FileText />
-          QA comments
-        </button>
-        <button
-          className="tool"
-          disabled={!complete || stale}
-          onClick={openFeedback}
-        >
-          <MessageSquare />
-          Feedback
-        </button>
-      </div>
       <section className="studio-section">
-        <h3>Next step</h3>
-        <p>{next}</p>
-        <p className="scope-note">
-          Report text only.
-          <br />
-          No image or communication verification.
-        </p>
+        <h3>Guidance: Next steps</h3>
+        <ol className="guidance">
+          {guidance(review, stale).map((step, index) => (
+            <li key={step}>
+              <span className="guidance-number" aria-hidden="true">
+                {index + 1}
+              </span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
       </section>
     </aside>
   );

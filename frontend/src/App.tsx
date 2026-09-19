@@ -16,7 +16,6 @@ export default function App() {
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem("vesta.theme", theme); } catch { /* Theme still works when persistence is blocked. */ } }, [theme]);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   useEffect(() => setFeedbackOpen(false), [qa.selected]);
-  function openFeedback() { setFeedbackOpen(true); setView("current"); setTimeout(() => document.getElementById("feedback-reason")?.focus(), 0); }
   const open = (id: string) => { qa.openReview(id); setView("current"); };
   const create = () => { qa.newReview(); setView("current"); };
   const active = qa.rows.filter(r => ["queued", "running"].includes(r.execution_status));
@@ -51,15 +50,11 @@ export default function App() {
       {skillsVisited && <SkillsKnowledge active={view === "skills"}/>}
       <main className="review-workspace" hidden={view !== "current"}>
         <div className="input-pane">
-          <div className="section-heading"><h1>{qa.draft ? "New report" : "Current report"}</h1><span className="mode">Report text only</span></div>
-          <form className="input-section" onSubmit={e => {e.preventDefault(); void qa.submit();}}>
-            <div className="section-heading"><label className="input-title" htmlFor="report-text">Report input</label>
-
-              {qa.locked && <span className="meta">Read-only</span>}
-            </div>
-            <textarea id="report-text" value={qa.report} readOnly={qa.locked || qa.busy} onChange={e => qa.editReport(e.target.value)} maxLength={40000} rows={7} spellCheck={false} aria-describedby="input-help" placeholder={"Findings:\nPaste findings here.\n\nImpression:\nPaste impression here."}/>
-            <div className="input-actions"><p className="meta" id="input-help">{qa.draft ? "Include findings and impression in the pasted report." : "Submitted report · Original text"}</p>
-              {qa.draft ? <button className="primary" disabled={qa.busy || !qa.config?.ready || !qa.report.trim()}>{qa.busy ? "Submitting…" : qa.draft.key ? "Retry submission" : "Review report"}</button> : <button type="button" disabled={!qa.review} onClick={() => qa.newReview(qa.report)}>Revise as new draft</button>}
+          <div className="section-heading"><h1>{qa.draft ? "New report" : "Current report"}</h1><span className="badge">Report text only</span></div>
+          <form className="input-section" onSubmit={e => {e.preventDefault(); if (qa.draft) void qa.submit(); else qa.reviewAgain();}}>
+            <textarea id="report-text" aria-label="Report text" value={qa.report} readOnly={qa.locked || qa.busy} onChange={e => qa.editReport(e.target.value)} maxLength={40000} rows={7} spellCheck={false} aria-describedby="input-help" placeholder={"Findings:\nPaste findings here.\n\nImpression:\nPaste impression here."}/>
+            <div className="input-actions"><p className="meta" id="input-help">{qa.draft ? "Include findings and impression in the pasted report." : qa.edited ? "Edited. Reviewing again starts a new review; the current one is unchanged." : "Submitted report. Edit it to review again."}</p>
+              {qa.draft ? <button className="primary" disabled={qa.busy || !qa.config?.ready || !qa.report.trim()}>{qa.busy ? "Submitting…" : qa.draft.key ? "Retry submission" : "Review"}</button> : <button className="primary" disabled={!qa.edited || !qa.config?.ready || !qa.report.trim()}>Review again</button>}
             </div>
             {qa.error && <p className="error" role="alert">{qa.error}</p>}
             {qa.configurationError && <div className="notice" role="alert"><p>{qa.configurationError}</p><button type="button" onClick={qa.retryConfiguration}>Retry connection</button></div>}
@@ -75,7 +70,7 @@ export default function App() {
         <button aria-pressed={view === "analytics"} onClick={() => setView("analytics")}><ChartNoAxesColumn/><span>Analytics</span></button>
         <button className="studio-knowledge-tool" aria-pressed={view === "skills"} onClick={() => {setSkillsVisited(true);setView("skills");}}><BookOpen/><span>Skills &amp; knowledge</span></button>
       </nav></aside>
-      {view === "current" && <Studio review={qa.review} stale={qa.disconnected} openFeedback={openFeedback}/>}
+      {view === "current" && <Studio review={qa.review} stale={qa.disconnected}/>}
     </div>
   </>;
 }

@@ -14,8 +14,8 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 6597,
-      "sha256": "73dba541a95bd10271959c94ad2155ecba60c53f43e5e7462b3b1d314ea37a73"
+      "bytes": 6705,
+      "sha256": "3d87ebc68b7f9b69382d3e622e073e5be8815990f99011c86ca4dd06bcd84a45"
     },
     {
       "path": "CLAUDE.md",
@@ -174,13 +174,13 @@
     },
     {
       "path": "frontend/src/App.tsx",
-      "bytes": 7644,
-      "sha256": "a0afd44be08a3002a180de8b9865d7011d1ae75271371e806734d39d1be2f3b4"
+      "bytes": 7418,
+      "sha256": "8b6ea9750c897c77f62162be93b9cd984cf6b9c6065af3b6e414e4effa197173"
     },
     {
       "path": "frontend/src/Feedback.tsx",
-      "bytes": 8678,
-      "sha256": "5406d7e8ff134178b5db05186f117a9611a791a728287817b9ce5b70659e3eb4"
+      "bytes": 7881,
+      "sha256": "d404ad106147bbe283fefb6a86e6a2b84d691cbb885098632154378237b8f07a"
     },
     {
       "path": "frontend/src/FeedbackInbox.tsx",
@@ -204,8 +204,8 @@
     },
     {
       "path": "frontend/src/ReviewOutput.tsx",
-      "bytes": 6216,
-      "sha256": "ec36f85a37225327744180a4ca6d7f78d144a466e0584e501c93cba127116f50"
+      "bytes": 6126,
+      "sha256": "8484702a93bba8d2f43a49ffca3a81e139cf28c5a39c10fb16c97730ebc40638"
     },
     {
       "path": "frontend/src/SkillsKnowledge.tsx",
@@ -214,8 +214,8 @@
     },
     {
       "path": "frontend/src/Studio.tsx",
-      "bytes": 3862,
-      "sha256": "aec6bdba61113fa5154a3349d2689242dccf3b57a69409683fa6ad851bd961af"
+      "bytes": 3531,
+      "sha256": "1be5142609ef873b29023f6980c9d702b607348d18f74c826dedbc02a89c1403"
     },
     {
       "path": "frontend/src/SystemStatus.tsx",
@@ -244,8 +244,8 @@
     },
     {
       "path": "frontend/src/style.css",
-      "bytes": 26003,
-      "sha256": "c78b881ea75720330028b6b130e35005a2e2a850076262064099fd5a1c3ba3e1"
+      "bytes": 26426,
+      "sha256": "ee49202e62c6c8c03df7411e5b92e2e8800de063f2d87e6c0976d281c9222277"
     },
     {
       "path": "frontend/src/types.ts",
@@ -254,8 +254,8 @@
     },
     {
       "path": "frontend/src/useReview.ts",
-      "bytes": 6475,
-      "sha256": "daba716d29fb6ec9e361e8040e58745aad39b0d1557319c1e85b7f43221fd44f"
+      "bytes": 7228,
+      "sha256": "5e53e253c4561f8fd17359159f333d01d68f11c00d9b3c9749e0bf3326db7298"
     },
     {
       "path": "frontend/tests/diagnostics.spec.ts",
@@ -264,13 +264,13 @@
     },
     {
       "path": "frontend/tests/f3.spec.ts",
-      "bytes": 1696,
-      "sha256": "e4956bc10638807b618a9ef2e2f7399f2af8a5f4bc6544406f1548a4948316fc"
+      "bytes": 1688,
+      "sha256": "e6529b81e1f0b681d71363a086312093ed65b5d9e2e9f2944a9c368446f32050"
     },
     {
       "path": "frontend/tests/workspace.spec.ts",
-      "bytes": 5334,
-      "sha256": "6b16bd91f264e880a00e8420e26a877e7633ea0a4f33752f8dfb3f2a4481578e"
+      "bytes": 5693,
+      "sha256": "c52df6344c4405c6869049a33d069aced8d4f4eb3ecaf02ecc808cc9230d5f8a"
     },
     {
       "path": "frontend/tsconfig.json",
@@ -279,8 +279,8 @@
     },
     {
       "path": "frontend/unit/workspace.test.tsx",
-      "bytes": 18982,
-      "sha256": "2e286e3d1f68ed4542fbb7d0b16473fea3318797c49f336bfb196671dd10687d"
+      "bytes": 19807,
+      "sha256": "c1d8d714ab5d68a872352062372e5b401da91909d070291deddd78fe1b7069ba"
     },
     {
       "path": "frontend/vite.config.ts",
@@ -349,8 +349,8 @@
     },
     {
       "path": "prototype/WORKSPACE_SPEC.md",
-      "bytes": 2789,
-      "sha256": "f449191c06d9733b6e80d2a3b5097a3c87881702b7fd3b846f9e6940b61efc7c"
+      "bytes": 3368,
+      "sha256": "02ee063f7c18d243a68c6bf4e247601a80b59b8e9afbda0476ca5f78b254d168"
     },
     {
       "path": "prototype/examples/comment-results.json",

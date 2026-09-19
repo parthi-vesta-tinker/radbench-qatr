@@ -37,7 +37,7 @@ export function ReviewOutput({
   return (
     <section className="output" aria-labelledby="output-title">
       <div className="section-heading">
-        <div><h2 id="output-title">QA comments</h2><p className="meta">For radiologist review</p></div>
+        <h2 id="output-title">Quality review</h2>
         {result?.outcome === "observations" && (
           <button
             type="button"
@@ -66,7 +66,7 @@ export function ReviewOutput({
       {!review && (
         <div className="empty">
           <FileCheck2 size={26} strokeWidth={1.4} />
-          <p>Your QA review will appear here.</p>
+          <p>The quality review will appear here.</p>
           <span className="meta">
             Paste findings and impression, then request review.
           </span>
@@ -93,8 +93,8 @@ export function ReviewOutput({
             <p>{review.error?.message}</p>
             <p className="meta">
               {review.execution_status === "needs_input"
-                ? "Select Revise as new draft, update the report, then select Review report."
-                : "No completed result is available. Select Revise as new draft to start a new review."}
+                ? "Edit the report, then select Review again."
+                : "No completed result is available. Edit the report and select Review again."}
             </p>
           </div>
         )}

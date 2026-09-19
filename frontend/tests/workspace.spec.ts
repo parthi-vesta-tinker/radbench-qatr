@@ -6,18 +6,18 @@ test('drafts, Undo, Studio navigation and themes remain usable on desktop and mo
   await expect(page.getByRole('heading',{name:'QA Studio'})).toBeVisible();
   await expect(page.getByRole('group',{name:'Execution mode for new reviews'})).toHaveCount(0);
   await expect(page.getByLabel('Load synthetic example')).toHaveCount(0);
-  await page.getByLabel('Report input',{exact:true}).fill('First draft');
+  await page.getByLabel('Report text',{exact:true}).fill('First draft');
   await page.getByRole('button',{name:'New report',exact:true}).click();
-  await page.getByLabel('Report input',{exact:true}).fill('Second draft');
+  await page.getByLabel('Report text',{exact:true}).fill('Second draft');
   await page.getByRole('button',{name:'Delete draft 1',exact:true}).click();
-  await expect(page.getByLabel('Report input',{exact:true})).toHaveValue('Second draft');
+  await expect(page.getByLabel('Report text',{exact:true})).toHaveValue('Second draft');
   await page.getByRole('button',{name:'Undo',exact:true}).click();
-  await expect(page.getByLabel('Report input',{exact:true})).toHaveValue('First draft');
+  await expect(page.getByLabel('Report text',{exact:true})).toHaveValue('First draft');
   for(const tool of ['Review history','Feedbacks','Analytics','Skills & knowledge']){
     await page.getByRole('button',{name:tool,exact:true}).click();
     await expect(page.locator('.history-pane:visible h1')).toHaveText(tool);
     await page.getByRole('button',{name:'Current report',exact:true}).click();
-    await expect(page.getByLabel('Report input',{exact:true})).toHaveValue('First draft');
+    await expect(page.getByLabel('Report text',{exact:true})).toHaveValue('First draft');
   }
   await page.getByRole('button',{name:'Switch to dark theme'}).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
@@ -47,16 +47,20 @@ test('Skills Studio compares and saves editorial revisions without activating th
   await expect(page.getByRole('textbox',{name:'Draft content',exact:true})).toHaveValue(installed+'\nEditorial UI test note.\n');
 });
 
-test('real API input validation locks submitted report while another draft remains editable',async({page})=>{
+test('real API input validation keeps the submitted report editable for another review',async({page})=>{
   await page.goto('/');
   // Invalid input exercises the actual API/DBOS parser and stops before any model stage.
-  await page.getByLabel('Report input',{exact:true}).fill('Only a preamble, no required sections.');
-  await page.getByRole('button',{name:'Review report',exact:true}).click();
-  await expect(page.getByLabel('Report input',{exact:true})).toHaveAttribute('readonly','');
+  await page.getByLabel('Report text',{exact:true}).fill('Only a preamble, no required sections.');
+  await page.getByRole('button',{name:'Review',exact:true}).click();
   await expect(page.getByRole('heading',{name:'More information needed'})).toBeVisible();
+  // The accepted report stays editable; Review again only unlocks once the text changes.
+  await expect(page.getByLabel('Report text',{exact:true})).toBeEditable();
+  await expect(page.getByRole('button',{name:'Review again',exact:true})).toBeDisabled();
+  await page.getByLabel('Report text',{exact:true}).fill('Findings:\nLungs are clear.\n\nImpression:\nNo acute abnormality.');
+  await expect(page.getByRole('button',{name:'Review again',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'New report',exact:true}).click();
-  await page.getByLabel('Report input',{exact:true}).fill('Another draft');
-  await expect(page.getByLabel('Report input',{exact:true})).toBeEditable();
+  await page.getByLabel('Report text',{exact:true}).fill('Another draft');
+  await expect(page.getByLabel('Report text',{exact:true})).toBeEditable();
 });
 
 test('Studio analytics and inbox work without provider inference',async({page})=>{

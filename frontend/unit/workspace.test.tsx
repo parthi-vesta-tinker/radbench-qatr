@@ -51,16 +51,30 @@ test('empty New report reuses a draft; deleting the final draft leaves usable in
   await mount();await click('New report');await click('New report');assert.equal(document.querySelectorAll('.draft-row').length,1);
   await click('Delete draft 1');assert.equal(text(),'');assert.equal(document.querySelectorAll('.draft-row').length,1);
 });
-test('submitted input is locked and new work can proceed',async()=>{
-  await mount();await paste('Findings: source A. Impression: source A.');await click('Review report');
-  assert.equal((document.querySelector('#report-text') as HTMLTextAreaElement).readOnly,true);
-  await click('New report');await paste('Findings: source B. Impression: source B.');await click('Review report');
+test('submitted input stays editable and new work can proceed',async()=>{
+  await mount();await paste('Findings: source A. Impression: source A.');await click('Review');
+  // A submitted report is editable; reviewing again is a new review, never a mutation.
+  assert.equal((document.querySelector('#report-text') as HTMLTextAreaElement).readOnly,false);
+  assert.equal(button('Review again').disabled,true);
+  await click('New report');await paste('Findings: source B. Impression: source B.');await click('Review');
   assert.equal(requests.length,2);assert.notEqual(requests[0].key,requests[1].key);
+});
+test('editing a submitted report enables Review again and creates a separate review',async()=>{
+  await mount();await paste('Findings: original. Impression: original.');await click('Review');
+  assert.equal(requests.length,1);
+  await paste('Findings: corrected. Impression: corrected.');
+  assert.equal(button('Review again').disabled,false);
+  await click('Review again');
+  assert.equal(requests.length,2);
+  assert.equal(requests[1].text,'Findings: corrected. Impression: corrected.');
+  assert.notEqual(requests[0].key,requests[1].key);
+  // The first review keeps the text it was accepted with.
+  assert.equal(results.get('qr-1')!.input.report_text,'Findings: original. Impression: original.');
 });
 test('late acceptance never replaces a newly selected draft',async()=>{
   let accept!:(r:Review)=>void;
   api.create=()=>new Promise(resolve=>{accept=resolve;});
-  await mount();await paste('first input');await click('Review report');
+  await mount();await paste('first input');await click('Review');
   assert.equal((document.querySelector('#report-text') as HTMLTextAreaElement).readOnly,true);
   await click('New report');await paste('second input');
   const r=review('qr-late','first input');results.set(r.id,r);
@@ -69,7 +83,7 @@ test('late acceptance never replaces a newly selected draft',async()=>{
 test('ambiguous network failure locks input and retries the identical operation',async()=>{
   let calls=0;
   api.create=async(input,key)=>{requests.push({text:input.report_text,key});if(calls++===0)throw new ApiError(0,'QA_CONNECTION_FAILED','Connection lost');const r=review('qr-retry',input.report_text);results.set(r.id,r);return r;};
-  await mount();await paste('immutable request');await click('Review report');
+  await mount();await paste('immutable request');await click('Review');
   assert.equal((document.querySelector('#report-text') as HTMLTextAreaElement).readOnly,true);
   assert.equal(button('Delete draft 1').disabled,true);
   await click('Retry submission');assert.equal(requests.length,2);assert.deepEqual(requests[0],requests[1]);

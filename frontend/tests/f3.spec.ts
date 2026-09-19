@@ -6,8 +6,8 @@ test('F3 phases and copy survive completion and reload',async({page,request})=>{
   const sample=config.samples.find((s:{id:string})=>s.id==='mixed');
   await page.goto('/');
   await expect(page).toHaveTitle(/Vesta/);
-  await page.getByLabel('Report input',{exact:true}).fill(sample.report_text);
-  await page.getByRole('button',{name:'Review report',exact:true}).click();
+  await page.getByLabel('Report text',{exact:true}).fill(sample.report_text);
+  await page.getByRole('button',{name:'Review',exact:true}).click();
   await expect(page.getByText('Combined report review',{exact:true})).toBeVisible();
   await expect(page.getByText('Output validation',{exact:true})).toBeVisible();
   await expect(page.locator('.steps .completed')).toHaveCount(4);
