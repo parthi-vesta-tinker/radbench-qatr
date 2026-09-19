@@ -5,11 +5,21 @@ from . import store
 from .contracts import ReviewProblem
 
 ADAPTER = TypeAdapter(ModelResponse)
+LIVE = 'model_attempts'
+TABLES = {LIVE, 'playground_attempts'}
 
 
-def response(tenant, rid):
+def table(config):
+    """Playground runs checkpoint in their own table; the rules are identical."""
+    name = config.get('attempt_table', LIVE)
+    if name not in TABLES:
+        raise ValueError('Unknown attempt table')
+    return name
+
+
+def response(tenant, rid, table=LIVE):
     with store.db() as conn:
-        row = conn.execute('SELECT * FROM model_attempts WHERE tenant_id=? AND review_id=?', (tenant, rid)).fetchone()
+        row = conn.execute(f'SELECT * FROM {table} WHERE tenant_id=? AND review_id=?', (tenant, rid)).fetchone()
     if row and row['outcome'] == 'response':
         return ADAPTER.validate_json(row['response'])
     if row:
@@ -17,21 +27,21 @@ def response(tenant, rid):
     return None
 
 
-def claim(tenant, rid, attempt):
+def claim(tenant, rid, attempt, table=LIVE):
     with store.db() as conn:
-        conn.execute('INSERT INTO model_attempts VALUES(?,?,?,?,NULL)', (tenant, rid, attempt, 'claimed'))
+        conn.execute(f'INSERT INTO {table} VALUES(?,?,?,?,NULL)', (tenant, rid, attempt, 'claimed'))
 
 
-def save(tenant, rid, value):
+def save(tenant, rid, value, table=LIVE):
     encoded = ADAPTER.dump_json(value).decode()
     with store.db() as conn:
-        if conn.execute("UPDATE model_attempts SET outcome='response',response=? WHERE tenant_id=? AND review_id=? AND outcome='claimed'", (encoded, tenant, rid)).rowcount != 1:
+        if conn.execute(f"UPDATE {table} SET outcome='response',response=? WHERE tenant_id=? AND review_id=? AND outcome='claimed'", (encoded, tenant, rid)).rowcount != 1:
             raise RuntimeError('Attempt checkpoint conflict')
 
 
-def unknown(tenant, rid):
+def unknown(tenant, rid, table=LIVE):
     with store.db() as conn:
-        conn.execute("UPDATE model_attempts SET outcome='unknown' WHERE tenant_id=? AND review_id=? AND outcome='claimed'", (tenant, rid))
+        conn.execute(f"UPDATE {table} SET outcome='unknown' WHERE tenant_id=? AND review_id=? AND outcome='claimed'", (tenant, rid))
 
 
 def uncertain(tenant, rid, config):
@@ -39,14 +49,14 @@ def uncertain(tenant, rid, config):
     if config.get('mode') != 'openai':
         return False
     with store.db() as conn:
-        row = conn.execute('SELECT outcome FROM model_attempts WHERE tenant_id=? AND review_id=?', (tenant, rid)).fetchone()
+        row = conn.execute(f'SELECT outcome FROM {table(config)} WHERE tenant_id=? AND review_id=?', (tenant, rid)).fetchone()
     return bool(row) and row['outcome'] != 'response'
 
 
 def failure_metrics(tenant, rid, config):
     """Keep observed usage on refusal/schema failures; unknown usage stays null."""
     with store.db() as conn:
-        row = conn.execute('SELECT response FROM model_attempts WHERE tenant_id=? AND review_id=?', (tenant, rid)).fetchone()
+        row = conn.execute(f'SELECT response FROM {table(config)} WHERE tenant_id=? AND review_id=?', (tenant, rid)).fetchone()
     if not row:
         return None
     value = ADAPTER.validate_json(row['response']) if row['response'] else None

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, History, Plus, Trash2, MessageSquare, ChartNoAxesColumn, BookOpen, Moon, Sun, X } from "lucide-react";
+import { FileText, History, Plus, Trash2, MessageSquare, ChartNoAxesColumn, BookOpen, FlaskConical, Moon, Sun, X } from "lucide-react";
 import { useReview } from "./useReview";
 import { ReviewOutput } from "./ReviewOutput";
 import { SystemStatus } from "./SystemStatus";
@@ -8,10 +8,13 @@ import { FeedbackInbox } from "./FeedbackInbox";
 import { AnalyticsView } from "./AnalyticsView";
 import { SkillsKnowledge } from "./SkillsKnowledge";
 import { Studio } from "./Studio";
+import { Playground } from "./Playground";
 export default function App() {
   const qa = useReview();
-  const [view, setView] = useState<"current" | "history" | "feedback" | "analytics" | "skills">("current");
+  const [view, setView] = useState<"current" | "history" | "feedback" | "analytics" | "skills" | "playground">("current");
   const [skillsVisited, setSkillsVisited] = useState(false);
+  const [playgroundVisited, setPlaygroundVisited] = useState(false);
+  const openSkills = () => { setSkillsVisited(true); setView("skills"); };
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem("vesta.theme") === "dark" ? "dark" : "light"; } catch { return "light"; } });
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem("vesta.theme", theme); } catch { /* Theme still works when persistence is blocked. */ } }, [theme]);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -48,6 +51,7 @@ export default function App() {
       {view === "feedback" && <FeedbackInbox openReview={open}/>}
       {view === "analytics" && <AnalyticsView/>}
       {skillsVisited && <SkillsKnowledge active={view === "skills"}/>}
+      {playgroundVisited && <Playground active={view === "playground"} openSkills={openSkills}/>}
       <main className="review-workspace" hidden={view !== "current"}>
         <div className="input-pane">
           <div className="section-heading"><h1>{qa.draft ? "New report" : "Current report"}</h1><span className="badge">Report text only</span></div>
@@ -68,7 +72,8 @@ export default function App() {
         <button aria-pressed={view === "history"} onClick={() => setView("history")}><History/><span>Review history</span></button>
         <button aria-pressed={view === "feedback"} onClick={() => setView("feedback")}><MessageSquare/><span>Feedbacks</span></button>
         <button aria-pressed={view === "analytics"} onClick={() => setView("analytics")}><ChartNoAxesColumn/><span>Analytics</span></button>
-        <button className="studio-knowledge-tool" aria-pressed={view === "skills"} onClick={() => {setSkillsVisited(true);setView("skills");}}><BookOpen/><span>Skills &amp; knowledge</span></button>
+        <button className="studio-knowledge-tool" aria-pressed={view === "skills"} onClick={openSkills}><BookOpen/><span>Skills &amp; knowledge</span></button>
+        <button aria-pressed={view === "playground"} onClick={() => {setPlaygroundVisited(true);setView("playground");}}><FlaskConical/><span>Playground</span></button>
       </nav></aside>
       {view === "current" && <Studio review={qa.review} stale={qa.disconnected}/>}
     </div>

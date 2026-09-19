@@ -7,5 +7,6 @@ export type {
   OutcomeInput, OutcomeResource as OutcomeRecord,
   Document as KnowledgeDocument, Draft as KnowledgeDraft, Catalog as KnowledgeCatalog,
   Detail as KnowledgeDetail, DraftInput as KnowledgeDraftInput,
+  PlaygroundCatalog, PlaygroundRun, PlaygroundRunInput, PlaygroundSample,
 } from './generated-api';
 export type Page<T> = { items: T[]; has_more: boolean; next_cursor: string | null };

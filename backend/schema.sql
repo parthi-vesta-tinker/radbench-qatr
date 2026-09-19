@@ -1,4 +1,4 @@
--- Foundation schema 5. Fresh bootstrap only: never migrate or overwrite old data.
+-- Foundation schema 6. Fresh bootstrap only: never migrate or overwrite old data.
 CREATE TABLE tenants (id TEXT PRIMARY KEY, active_release TEXT);
 CREATE TABLE review_snapshots (
  tenant_id TEXT NOT NULL REFERENCES tenants(id), id TEXT NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE observations (
 );
 CREATE TABLE feedback (
  tenant_id TEXT NOT NULL, id TEXT NOT NULL, review_id TEXT NOT NULL,
- document TEXT NOT NULL CHECK(json_valid(document)), schema_version INTEGER NOT NULL CHECK(schema_version=5),
+ document TEXT NOT NULL CHECK(json_valid(document)), schema_version INTEGER NOT NULL CHECK(schema_version=6),
  result_version INTEGER GENERATED ALWAYS AS (json_extract(document,'$.result_version')) STORED NOT NULL,
  observation_id TEXT GENERATED ALWAYS AS (json_extract(document,'$.observation_id')) STORED,
  PRIMARY KEY(tenant_id,id), UNIQUE(id),
@@ -71,18 +71,34 @@ CREATE TABLE knowledge_drafts (
  PRIMARY KEY(tenant_id,workspace_id,document_id,revision), UNIQUE(tenant_id,id)
 );
 -- Playground runs are written only here. They never enter review_records, review_results or
--- observations, and analytics, feedback and outcomes never read this table.
+-- observations, and analytics, feedback and outcomes never read this table. There is no
+-- history surface: a run is reachable only from the screen that started it.
 CREATE TABLE playground_runs (
- tenant_id TEXT NOT NULL REFERENCES tenants(id), workspace_id TEXT NOT NULL, id TEXT NOT NULL,
- pack_ref TEXT NOT NULL CHECK(pack_ref LIKE 'draft:%@%'),
- source TEXT NOT NULL CHECK(source IN ('pasted','example')),
- example_id TEXT, report_text TEXT NOT NULL, created_at TEXT NOT NULL,
- status TEXT NOT NULL CHECK(status IN ('queued','running','completed','needs_input','failed','stopped')),
+ tenant_id TEXT NOT NULL REFERENCES tenants(id), id TEXT NOT NULL,
+ pack_ref TEXT NOT NULL, release_id TEXT NOT NULL,
+ source TEXT NOT NULL CHECK(source IN ('sample','pasted')),
+ sample_id TEXT, report_text TEXT NOT NULL, model TEXT NOT NULL, mode TEXT NOT NULL,
+ created_at TEXT NOT NULL, completed_at TEXT,
+ status TEXT NOT NULL CHECK(status IN ('queued','running','completed','needs_input','failed')),
+ steps TEXT NOT NULL CHECK(json_valid(steps)),
  result TEXT CHECK(result IS NULL OR json_valid(result)),
- PRIMARY KEY(tenant_id,id),
- FOREIGN KEY(tenant_id,workspace_id) REFERENCES skill_workspaces(tenant_id,id)
+ error TEXT CHECK(error IS NULL OR json_valid(error)),
+ PRIMARY KEY(tenant_id,id)
 );
-CREATE INDEX playground_workspace ON playground_runs(tenant_id,workspace_id,created_at,id);
+CREATE INDEX playground_recent ON playground_runs(tenant_id,created_at,id);
+-- The live checkpoint table references review_records, so a playground run cannot use it.
+-- Same shape and same rules: a claim without a durable response is never retried automatically.
+-- review_id holds the playground run id so one implementation serves both tables.
+CREATE TABLE playground_attempts (
+ tenant_id TEXT NOT NULL, review_id TEXT NOT NULL, attempt_id TEXT NOT NULL UNIQUE,
+ outcome TEXT NOT NULL CHECK(outcome IN ('claimed','response','unknown')),
+ response TEXT CHECK(response IS NULL OR json_valid(response)),
+ PRIMARY KEY(tenant_id,review_id),
+ FOREIGN KEY(tenant_id,review_id) REFERENCES playground_runs(tenant_id,id)
+);
+CREATE TRIGGER playground_attempt_response_immutable BEFORE UPDATE ON playground_attempts
+WHEN OLD.outcome='response'
+BEGIN SELECT RAISE(ABORT,'Provider response checkpoint is immutable'); END;
 CREATE TABLE idempotency (
  tenant_id TEXT NOT NULL REFERENCES tenants(id), operation TEXT NOT NULL,
  key_hash TEXT NOT NULL, request_hash TEXT NOT NULL, api_version TEXT NOT NULL,

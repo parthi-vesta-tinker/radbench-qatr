@@ -23,7 +23,7 @@ export default defineConfig({
       QA_MODE: "demo",
       QA_AUTH_MODE: "local",
       QA_DATA_DIR:
-        process.env.QA_BROWSER_DATA_DIR || ".qa-browser-test-data-v0.4",
+        process.env.QA_BROWSER_DATA_DIR || ".qa-browser-test-data-v0.5",
       QA_POLICY_PATH: "",
     },
   },

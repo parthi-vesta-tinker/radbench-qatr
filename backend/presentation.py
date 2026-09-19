@@ -9,7 +9,7 @@ from .contracts import (
 )
 
 API_VERSION = "2026-09-18"
-RECORD_SCHEMA_VERSION = 5
+RECORD_SCHEMA_VERSION = 6
 PROVENANCE = {
     "skill_content_version",
     "skill_content_sha256",

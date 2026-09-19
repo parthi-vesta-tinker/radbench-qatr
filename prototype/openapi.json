@@ -2460,6 +2460,395 @@
           "skills:read"
         ]
       }
+    },
+    "/api/v1/playground": {
+      "get": {
+        "summary": "Playground Catalog",
+        "description": "Requires skills:read. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes.",
+        "operationId": "playground_catalog_api_v1_playground_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-18",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaygroundCatalog"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "skills:read"
+        ]
+      }
+    },
+    "/api/v1/playground/runs": {
+      "post": {
+        "summary": "Create Playground Run",
+        "description": "Requires skills:read and skills:write. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes.",
+        "operationId": "create_playground_run_api_v1_playground_runs_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^\\S+$",
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-18",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaygroundRunInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaygroundRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "skills:read",
+          "skills:write"
+        ]
+      }
+    },
+    "/api/v1/playground/runs/{run_id}": {
+      "get": {
+        "summary": "Read Playground Run",
+        "description": "Requires skills:read. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes.",
+        "operationId": "read_playground_run_api_v1_playground_runs__run_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-18",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaygroundRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "skills:read"
+        ]
+      }
     }
   },
   "components": {
@@ -3725,6 +4114,352 @@
           "created_at"
         ],
         "title": "OutcomeResource"
+      },
+      "PlaygroundCatalog": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "const": "qa_playground_catalog",
+            "title": "Object",
+            "default": "qa_playground_catalog"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "demo",
+              "openai"
+            ],
+            "title": "Mode"
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Models"
+          },
+          "live_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Live Model"
+          },
+          "pack_version": {
+            "type": "string",
+            "title": "Pack Version"
+          },
+          "pack_release": {
+            "type": "string",
+            "title": "Pack Release"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/PlaygroundCategory"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "samples": {
+            "items": {
+              "$ref": "#/components/schemas/PlaygroundSample"
+            },
+            "type": "array",
+            "title": "Samples"
+          },
+          "boundary": {
+            "type": "string",
+            "title": "Boundary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "ready",
+          "models",
+          "live_model",
+          "pack_version",
+          "pack_release",
+          "skills",
+          "categories",
+          "samples",
+          "boundary"
+        ],
+        "title": "PlaygroundCatalog"
+      },
+      "PlaygroundCategory": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description"
+        ],
+        "title": "PlaygroundCategory"
+      },
+      "PlaygroundRun": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "const": "qa_playground_run",
+            "title": "Object",
+            "default": "qa_playground_run"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "release_id": {
+            "type": "string",
+            "title": "Release Id"
+          },
+          "pack_ref": {
+            "type": "string",
+            "title": "Pack Ref"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "sample",
+              "pasted"
+            ],
+            "title": "Source"
+          },
+          "sample_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample Id"
+          },
+          "report_text": {
+            "type": "string",
+            "title": "Report Text"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "needs_input",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/PlaygroundStep"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "release_id",
+          "pack_ref",
+          "source",
+          "sample_id",
+          "report_text",
+          "model",
+          "mode",
+          "status",
+          "created_at",
+          "completed_at",
+          "steps",
+          "result",
+          "error"
+        ],
+        "title": "PlaygroundRun"
+      },
+      "PlaygroundRunInput": {
+        "properties": {
+          "sample_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample Id"
+          },
+          "report_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Report Text"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Model"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "model"
+        ],
+        "title": "PlaygroundRunInput"
+      },
+      "PlaygroundSample": {
+        "properties": {
+          "sample_id": {
+            "type": "string",
+            "title": "Sample Id"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "report_text": {
+            "type": "string",
+            "title": "Report Text"
+          },
+          "demo_supported": {
+            "type": "boolean",
+            "title": "Demo Supported"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sample_id",
+          "category",
+          "title",
+          "report_text",
+          "demo_supported"
+        ],
+        "title": "PlaygroundSample"
+      },
+      "PlaygroundStep": {
+        "properties": {
+          "step": {
+            "type": "string",
+            "title": "Step"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "failed",
+              "needs_input"
+            ],
+            "title": "Status"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "step",
+          "status"
+        ],
+        "title": "PlaygroundStep"
       },
       "ResultObservation": {
         "properties": {

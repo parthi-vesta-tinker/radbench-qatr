@@ -1,6 +1,6 @@
 # Current repository instructions
 
-Application **0.13.0**, bundle **1.18**, foundation **F3**, API **2026-09-18**, schema **5**.
+Application **0.13.0**, bundle **1.19**, foundation **F3**, API **2026-09-18**, schema **6**.
 
 Read [prototype/FOUNDATION_PLAN.md](prototype/FOUNDATION_PLAN.md) before implementing F4 or F5. Use [prototype/FOUNDATION_CHANGELOG.md](prototype/FOUNDATION_CHANGELOG.md) and [prototype/IMPLEMENTATION_STATUS.md](prototype/IMPLEMENTATION_STATUS.md) for implemented decisions and evidence. The specifications listed in [prototype/README.md](prototype/README.md) govern their feature areas. `design-history/` is archive material and has no implementation authority.
 
@@ -20,11 +20,14 @@ Read [prototype/FOUNDATION_PLAN.md](prototype/FOUNDATION_PLAN.md) before impleme
 - Keep the modular FastAPI application, SQLite resource store, DBOS workflows, Agents SDK through `DBOSRunner`, and React frontend. DBOS owns the asynchronous event loop; never wrap an SDK child workflow in `asyncio.run`.
 - A valid admitted review uses one combined, tool-free provider request. Invalid input uses zero. Refusals, incomplete responses, malformed output, and local validation failures do not trigger repair calls.
 - A dispatch claim without a durable response is `MODEL_OUTCOME_UNKNOWN` and must never retry automatically. A durable response checkpoint may resume local validation and assembly.
-- DBOS system storage remains separate from the application resource store. Use fresh matching schema-5 application and DBOS storage for this cutover. Do not silently migrate, reset, or replay older databases.
+- DBOS system storage remains separate from the application resource store. Use fresh matching schema-6 application and DBOS storage for this cutover. Do not silently migrate, reset, or replay older databases.
 - Current identities are application `foundation-f3-0.13.0`, queue `qa-reviews-f3-v1`, parent `qa.review.f3.v1`, and child `qa.openai.combined.f3.v1`. Change them deliberately when recovery compatibility changes.
 - External provider success can occur before a local checkpoint. Do not claim exactly-once billing.
 - A pack reference names what a run composes. Live report QA composes `published` only; `backend/packs.py` refuses a draft reference on the live path. A `draft:<workspace>` pack is stamped `draft:<workspace>@<pack-hash>` and can never be read as a release.
-- `skill_workspaces` and `playground_runs` are additive and isolated. A playground run is written only to `playground_runs`; it never enters `review_records`, `review_results` or `observations`, and analytics, feedback and outcomes never read it.
+- `skill_workspaces`, `playground_runs` and `playground_attempts` are additive and isolated. A playground run is written only to those tables; it never enters `review_records`, `review_results` or `observations`, and analytics, feedback, outcomes and review history never read them.
+- Live review and the playground share one execution path in `backend/workflow.py:execute`. Only the state sink differs, so a playground run exercises the real four phases rather than a copy that can drift. Keep it that way: a change to review execution must apply to both.
+- The playground composes the published pack only, makes the same single combined request, applies the same output validation, and never auto-retries `MODEL_OUTCOME_UNKNOWN`. Its provider checkpoint is `playground_attempts`, because the live checkpoint references `review_records`.
+- The playground has its own queue so a test run cannot consume live review concurrency. Playground model choices are server controlled and never change the live model.
 
 ## API and tenants
 

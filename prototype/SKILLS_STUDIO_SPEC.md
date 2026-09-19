@@ -6,7 +6,7 @@ Skills & knowledge is a tenant-scoped editorial tool inside QA Studio. It can in
 
 The catalog is built from the verified installed package and includes skill documents, shared references, qatr source/catalog documents, and configured tenant guidance. It shows actual combined-request usage. Host validation references are labeled as such and are not presented as model instructions.
 
-Framework schemas, runtime code, package manifests, evaluation answers, credentials, private server paths, and release controls are outside the editor. Installed content is not automatically clinically approved.
+Running installed instructions against a report is the Playground's job, not this editor's; see [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Framework schemas, runtime code, package manifests, evaluation answers, credentials, private server paths, and release controls are outside the editor. Installed content is not automatically clinically approved.
 
 ## Drafts are never active
 

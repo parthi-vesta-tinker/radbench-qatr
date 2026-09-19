@@ -116,6 +116,6 @@ body = "".join(
     f'<section id="{key}">{render((ROOT / name).read_text(encoding="utf-8"), key)}</section>'
     for name, key, _ in SECTIONS
 )
-page = f"""<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Vesta Report QA — current documentation</title><style>{css}</style></head><body><header><strong>Vesta / Report QA</strong><h1>Current foundation documentation</h1><p>Application 0.13.0 · bundle 1.18 · schema 5 · F1–F3 implemented · F4/F5 pending. This edition contains only active contracts and evidence.</p></header><nav>{nav}</nav><main>{body}</main><footer>Generated from the active prototype documentation. Archived design history is intentionally excluded.</footer></body></html>"""
+page = f"""<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Vesta Report QA — current documentation</title><style>{css}</style></head><body><header><strong>Vesta / Report QA</strong><h1>Current foundation documentation</h1><p>Application 0.13.0 · bundle 1.19 · schema 6 · F1–F3 implemented · F4/F5 pending. This edition contains only active contracts and evidence.</p></header><nav>{nav}</nav><main>{body}</main><footer>Generated from the active prototype documentation. Archived design history is intentionally excluded.</footer></body></html>"""
 (ROOT / "BLUEPRINT.html").write_text(page, encoding="utf-8")
 print("Built prototype/BLUEPRINT.html from current documentation")

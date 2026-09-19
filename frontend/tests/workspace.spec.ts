@@ -98,3 +98,35 @@ test('feedback dialog is dismissable by Escape and Cancel, and reopens cleanly',
   await page.getByRole('button',{name:'Thumbs down',exact:true}).click();
   await expect(heading).toBeVisible();
 });
+
+test('playground runs a demo sample in isolation and never enters history or analytics',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Playground',exact:true}).click();
+  const pane=page.locator('.playground-pane');
+  await expect(pane.getByText('Playground — not a clinical review.')).toBeVisible();
+  await expect(pane.getByRole('heading',{name:'Critical findings'})).toBeVisible();
+  await expect(pane.getByRole('heading',{name:'Findings and impression inconsistency'})).toBeVisible();
+  // Only the model the server offers is selectable.
+  await expect(pane.locator('#playground-model option')).toHaveText(['gpt-6-astra']);
+  const run=pane.getByRole('button',{name:'Run test review'});
+  await expect(run).toBeDisabled();
+  // A demo-supported sample completes with canned output and no provider call.
+  await pane.locator('.playground-sample').filter({hasText:'Runs in demo'}).first().click();
+  await expect(run).toBeEnabled();
+  await run.click();
+  await expect(pane.locator('.playground-log li')).toHaveCount(4);
+  await expect(pane.getByText('Combined report review')).toBeVisible();
+  await expect(pane.locator('.playground-log li[data-status="completed"]')).toHaveCount(4,{timeout:20000});
+  await expect(pane.getByRole('heading',{name:'Results'})).toBeVisible();
+  // No copy control exists anywhere in the playground.
+  await expect(pane.getByRole('button',{name:/copy/i})).toHaveCount(0);
+  // The run reaches no live surface. Scope to the review history pane itself: the playground
+  // stays mounted but hidden, and it legitimately shows its own run id.
+  await page.getByRole('button',{name:'Review history',exact:true}).click();
+  const history=page.locator('main.history-pane:not(.playground-pane)');
+  await expect(history).toBeVisible();
+  await expect(pane).toBeHidden();
+  await expect(history.getByText('pg_')).toHaveCount(0);
+  await page.getByRole('button',{name:'Analytics',exact:true}).click();
+  await expect(page.locator('main.history-pane:not(.playground-pane)').getByText('pg_')).toHaveCount(0);
+});

@@ -1,5 +1,39 @@
 # Foundation implementation decisions and releases
 
+## QA Studio playground — schema 6 / bundle 1.19
+
+Implemented 2026-09-19 as P2 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md). The shipped contract is
+Part one of [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Application version, API version and
+workflow identities for live review are unchanged.
+
+Scope was set by explicit user decision: curated samples in two categories plus paste-your-own,
+run the real review, show results and a phase log. No editing, no output comparison, no history,
+feedback or analytics. Skills are presented as one read-only set.
+
+- A sixth Studio tool. `GET /api/v1/playground`, `POST /api/v1/playground/runs` and
+  `GET /api/v1/playground/runs/{id}` are additive; the generated OpenAPI gained 264 leaves and
+  changed or removed none.
+- Live review and the playground now share one execution path, `workflow.py:execute`. Only the
+  state sink differs, so a playground run exercises the real four phases instead of a copy that
+  could drift from them. `run_review` behaviour is unchanged.
+- A separate `qa-playground-f3-v1` queue and the `qa.playground.f3.v1` workflow. A test run
+  cannot consume live review concurrency.
+- `playground_attempts` mirrors the live provider checkpoint, because `model_attempts`
+  references `review_records` and a playground run has none. `attempts.py` takes the table as a
+  parameter rather than being duplicated, so both paths keep one implementation of the
+  claim/response/unknown rules.
+- Schema 6 reshapes `playground_runs` for this design: the workspace link and the draft-only
+  `pack_ref` constraint from schema 5 are gone, and model, mode, phase log and error are stored.
+  Runs regain a workspace link when editing arrives. Fresh default `.qa-data-foundation-v5`.
+- Sample text is read from the hash-pinned `evaluation/cases.json` rather than copied, and
+  `demo_supported` is computed from the text the canned demo path matches rather than declared,
+  so the catalog cannot advertise support that does not exist.
+- The playground model list is server controlled and offers `gpt-6-astra` only; choosing it never
+  changes the live model, and the screen says so when the two differ.
+
+Not built, by decision: no baseline or output diff, so regression is read by a person; no
+instruction editing, so P1's draft pack composition is still unexercised.
+
 ## Pack references and skill workspaces — schema 5 / bundle 1.18
 
 Implemented 2026-09-19 as P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md), with the interaction

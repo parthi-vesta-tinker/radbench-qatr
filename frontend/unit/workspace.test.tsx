@@ -8,6 +8,7 @@ import { api, ApiError } from '../src/api';
 import type { Review } from '../src/types';
 import { OutcomeLog } from '../src/OutcomeLog';
 import type { Analytics, OutcomeRecord, KnowledgeCatalog, KnowledgeDetail, KnowledgeDraftInput } from '../src/types';
+import type { PlaygroundCatalog, PlaygroundRun } from '../src/types';
 const window = new Window({url:'http://localhost:8000'});
 Object.assign(globalThis, {window, document:window.document, HTMLElement:window.HTMLElement,
   sessionStorage:window.sessionStorage, localStorage:window.localStorage, IS_REACT_ACT_ENVIRONMENT:true});
@@ -23,6 +24,14 @@ async function mount() {await act(async()=>{root.render(<App/>);});}
 const text = () => (document.querySelector('#report-text') as HTMLTextAreaElement).value;
 const analytics = (): Analytics => ({object:'qa_analytics',tenant_id:'vesta',checked_at:new Date().toISOString(),period:'7d',period_start:null,source:'openai',reviews:{total:0,with_comments:0,no_comments:0,critical:0,statuses:{queued:0,running:0,completed:0,needs_input:0,failed:0}},feedback:{total:0,reviews:0,up:0,down:0,reasons:{}},acceptance:[],critical_evaluation:{status:'not_measured',precision:null,recall:null,false_positive_rate:null,false_alert_share:null,reason:'No adjudicated reference cohort.'}});
 const knowledgeDetail = (): KnowledgeDetail => ({document:{document_id:'skill_test',title:'Review instructions',kind:'skill',description:'Controlled editorial content.',source_path:'skills/test/SKILL.md',version:'0.2.0',source_sha256:'a'.repeat(64),stages:['critical_finding_review'],used_by:['test'],runtime_use:'model_instruction',latest_revision:0,has_changes:false,source_changed:false},package_sha256:'b'.repeat(64),installed_content:'Installed instructions.',draft:null,saved_diff:'',recent_revisions:[],history_truncated:false});
+const playgroundCatalog = (mode:'demo'|'openai'='openai'): PlaygroundCatalog => ({object:'qa_playground_catalog',mode,ready:true,models:['gpt-6-astra'],live_model:'configured-model',pack_version:'0.3.0',pack_release:'vesta-qatr-0.3.0',skills:['a','b'],boundary:'Playground output is not a clinical review.',
+  categories:[{id:'critical_finding',title:'Critical findings',description:'Reports containing a critical observation.'},{id:'inconsistency',title:'Findings and impression inconsistency',description:'Impression does not follow from findings.'}],
+  samples:[{sample_id:'critical-flagged',category:'critical_finding',title:'Flagged critical',report_text:'Findings:\nAcute right pneumothorax.\nImpression:\nAcute right pneumothorax.',demo_supported:true},
+           {sample_id:'critical-uncertain',category:'critical_finding',title:'Uncertain critical',report_text:'Findings:\nPossible bleed.\nImpression:\nUncertain.',demo_supported:false},
+           {sample_id:'laterality-swap',category:'inconsistency',title:'Laterality swap',report_text:'Findings:\nLeft effusion.\nImpression:\nRight effusion.',demo_supported:true}]});
+const playgroundRun = (status:PlaygroundRun['status'],extra:Partial<PlaygroundRun>={}): PlaygroundRun => ({object:'qa_playground_run',run_id:'pg_controlled',release_id:'vesta-qatr-0.3.0',pack_ref:'published',source:'sample',sample_id:'critical-flagged',report_text:'Findings: x',model:'gpt-6-astra',mode:'openai',status,created_at:new Date().toISOString(),completed_at:null,
+  steps:[{step:'input_validation',status:'completed',elapsed_ms:12},{step:'combined_review',status:status==='completed'?'completed':'running',elapsed_ms:status==='completed'?2400:null},{step:'output_validation',status:status==='completed'?'completed':'queued',elapsed_ms:null},{step:'comment_assembly',status:status==='completed'?'completed':'queued',elapsed_ms:null}],
+  result:status==='completed'?{outcome:'observations',general_comments:[{observation_id:'o1',comment:'Controlled general comment.'}],critical_comments:[{observation_id:'o2',comment:'Controlled critical comment.'}]}:null,error:null,...extra});
 const knowledgeCatalog = (): KnowledgeCatalog => ({package_version:'0.2.0',package_sha256:'b'.repeat(64),can_edit:true,items:[knowledgeDetail().document]});
 async function field(id:string,value:string) {await act(async()=>{const input=document.getElementById(id)!;const prototype=input.tagName==='TEXTAREA'?window.HTMLTextAreaElement.prototype:window.HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(prototype,'value')!.set!.call(input,value);input.dispatchEvent(new window.Event('input',{bubbles:true}));});}
 async function choose(label:string,value:string) { await act(async()=>{const select=[...document.querySelectorAll('label')].find(n=>n.textContent?.startsWith(label))?.querySelector('select');assert.ok(select);select.value=value;select.dispatchEvent(new window.Event('change',{bubbles:true}));}); }
@@ -37,6 +46,9 @@ beforeEach(()=>{
   api.outcomes=async()=>({items:[],has_more:false,next_cursor:null});
   api.knowledgeCatalog=async()=>knowledgeCatalog();
   api.knowledgeDetail=async()=>knowledgeDetail();
+  api.playground=async()=>playgroundCatalog();
+  api.startPlaygroundRun=async()=>playgroundRun('running');
+  api.playgroundRun=async()=>playgroundRun('completed');
   window.confirm=()=>false;
   api.get=async(id)=>{const r=results.get(id);assert.ok(r);return r;};
   api.create=async(input,key)=>{requests.push({text:input.report_text,key});const r=review('qr-'+requests.length,input.report_text);results.set(r.id,r);return r;};
@@ -209,4 +221,36 @@ test('revision conflict retains text for reconciliation',async()=>{
   assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).value,'Keep this proposal.');
   assert.match(document.querySelector('.knowledge-pane [role="alert"]')!.textContent!,/A newer draft exists/);
   assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).readOnly,false);
+});
+
+test('playground runs a sample and shows results and phase logs without copy actions',async()=>{
+  await mount();await click('Playground');
+  const pane=()=>document.querySelector('.playground-pane')!;
+  assert.match(pane().textContent!,/not a clinical review/i);
+  assert.match(pane().textContent!,/Critical findings/);
+  assert.match(pane().textContent!,/Findings and impression inconsistency/);
+  assert.equal(button('Run test review').disabled,true);
+  await click('Flagged criticalRuns in demo');
+  assert.equal(button('Run test review').disabled,false);
+  await click('Run test review');
+  await act(async()=>{await new Promise(r=>setTimeout(r,1100));});
+  const log=[...pane().querySelectorAll('.playground-log li')].map(n=>n.textContent);
+  assert.equal(log.length,4);
+  assert.match(log[0]!,/Input validation/);
+  assert.match(log[1]!,/Combined report review/);
+  assert.match(pane().textContent!,/Controlled general comment/);
+  assert.match(pane().textContent!,/Controlled critical comment/);
+  // A playground comment must not be copyable into a real report.
+  assert.equal([...pane().querySelectorAll('button')].filter(b=>/copy/i.test(b.textContent??'')).length,0);
+});
+
+test('demo mode blocks samples it cannot serve and the playground never enters history',async()=>{
+  api.playground=async()=>playgroundCatalog('demo');
+  await mount();await click('Playground');
+  await click('Uncertain criticalNeeds a model');
+  assert.equal(button('Run test review').disabled,true);
+  assert.match(document.querySelector('.playground-pane')!.textContent!,/needs a configured model/i);
+  await click('Review history');
+  assert.equal(document.querySelector('.playground-pane')!.hasAttribute('hidden'),true);
+  assert.equal(requests.length,0);
 });

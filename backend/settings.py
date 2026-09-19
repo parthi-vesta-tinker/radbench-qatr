@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 ROOT = Path(__file__).resolve().parents[1]
-DATA = Path(os.environ.get("QA_DATA_DIR", str(ROOT / ".qa-data-foundation-v4"))).resolve()
+DATA = Path(os.environ.get("QA_DATA_DIR", str(ROOT / ".qa-data-foundation-v5"))).resolve()
 APP_VERSION = "foundation-f3-0.13.0"
 
 

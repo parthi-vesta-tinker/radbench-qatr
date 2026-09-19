@@ -137,24 +137,13 @@ def test_out_of_date_workspace_refuses_until_rebased(pack_db):
     with pytest.raises(AccessError) as exc:
         workspaces.compose("vesta", workspace)
     assert exc.value.code == "WORKSPACE_OUT_OF_DATE"
-    # A run made before the rebase is kept; its stamp names the pack it was composed against.
-    stale_stamp = f"draft:{workspace}@" + "b" * 64
-    with store.db() as conn:
-        conn.execute(
-            "INSERT INTO playground_runs(tenant_id,workspace_id,id,pack_ref,source,report_text,created_at,status)"
-            " VALUES('vesta',?,?,?,'pasted','Findings: Clear lungs.',?,'completed')",
-            (workspace, store.new_id("pr"), stale_stamp, store.now()),
-        )
     rebased = workspaces.rebase("vesta", workspace)
     assert rebased.out_of_date is False and rebased.status == "open"
-    # Rebase preserves saved revisions and past runs, and composes again.
+    # Rebase preserves every saved revision and composes again.
     assert knowledge.detail("vesta", SKILL, workspace).draft.revision == 1
-    with store.db() as conn:
-        kept = conn.execute("SELECT pack_ref FROM playground_runs WHERE tenant_id='vesta'").fetchall()
-    assert [row[0] for row in kept] == [stale_stamp]
     composed = workspaces.compose("vesta", workspace)
     assert composed["pack_ref"] == f"draft:{workspace}"
-    assert composed["release_id"] != stale_stamp
+    assert composed["release_id"].startswith(f"draft:{workspace}@")
 
 
 def test_workspaces_and_their_drafts_are_tenant_scoped(pack_db, monkeypatch, tmp_path):
@@ -171,32 +160,16 @@ def test_workspaces_and_their_drafts_are_tenant_scoped(pack_db, monkeypatch, tmp
     assert exc.value.code == "WORKSPACE_NOT_FOUND"
 
 
-def test_playground_runs_stay_out_of_live_tables(pack_db):
+def test_draft_snapshots_are_never_reachable_from_a_live_review(pack_db):
+    """A composed draft pack carries a stamp no live configuration can produce."""
     workspace = make_workspace()
     draft_into("vesta", workspace)
     stamp = workspaces.compose("vesta", workspace)["release_id"]
+    assert stamp.startswith("draft:") and "@" in stamp
+    live = runtime_config("vesta")
+    assert live["skill_release"] != stamp
+    assert not live["skill_release"].startswith("draft:")
+    assert live["skill_snapshot"]["pack_ref"] == "published"
     with store.db() as conn:
-        conn.execute(
-            "INSERT INTO playground_runs(tenant_id,workspace_id,id,pack_ref,source,report_text,created_at,status)"
-            " VALUES('vesta',?,?,?,'pasted','Findings: Clear lungs.\nImpression: None.',?,'completed')",
-            (workspace, store.new_id("pr"), stamp, store.now()),
-        )
-    with store.db() as conn:
-        assert conn.execute("SELECT count(*) FROM playground_runs").fetchone()[0] == 1
-        for table in ("review_records", "review_results", "observations", "feedback", "outcomes"):
+        for table in ("review_records", "review_results", "observations", "playground_runs"):
             assert conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0] == 0
-        assert conn.execute("SELECT count(*) FROM reviews").fetchone()[0] == 0
-        # A run must name a draft pack and an existing workspace of this tenant.
-        with pytest.raises(sqlite3.IntegrityError):
-            conn.execute(
-                "INSERT INTO playground_runs(tenant_id,workspace_id,id,pack_ref,source,report_text,created_at,status)"
-                " VALUES('vesta',?,?,'published','pasted','x',?,'completed')",
-                (workspace, store.new_id("pr"), store.now()),
-            )
-    with store.db() as conn:
-        with pytest.raises(sqlite3.IntegrityError):
-            conn.execute(
-                "INSERT INTO playground_runs(tenant_id,workspace_id,id,pack_ref,source,report_text,created_at,status)"
-                " VALUES('vesta','no-such-workspace',?,?,'pasted','x',?,'completed')",
-                (store.new_id("pr"), stamp, store.now()),
-            )

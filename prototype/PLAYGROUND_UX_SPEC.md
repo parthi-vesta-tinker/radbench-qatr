@@ -1,22 +1,93 @@
-> Design proposal, no interface implemented. This document describes the interaction model for
-> the playground proposed in [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md). Its P1 foundation — pack
-> references, draft composition, workspace fork pinning and the schema-5 tables — landed on
-> 19 September 2026; see [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md). Every screen, route
-> and control described here is still unbuilt. Application **0.13.0**, bundle **1.18**,
-> foundation **F3**, schema **5**.
+> Playground v1 is implemented. This document has two parts: the **shipped contract** for the
+> QA Studio playground, and, below it, the **later-phase design** for editing instructions and
+> comparing output, which is not built. Application **0.13.0**, bundle **1.19**, foundation
+> **F3**, schema **6**. See [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md).
 
-# Playground UX interaction model
+# Playground
 
-Status: **proposal for review** · 19 September 2026 · companion to [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) §6
-Interaction decisions taken 19 September 2026 are recorded in §10.
+Shipped 19 September 2026 · companion to [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md)
 
-[SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) decides *what* the playground is: a workspace draft of a
-whole pack that runs, never serves live QA, and is published only by an engineer. It does not
-decide how a radiologist moves through it. This document does, at the level needed to implement
-P2 and accept it.
+## Part one — the shipped contract
 
-Everything here inherits [WORKSPACE_SPEC.md](WORKSPACE_SPEC.md) and
-[SKILLS_STUDIO_SPEC.md](SKILLS_STUDIO_SPEC.md). Where this document is silent, those contracts hold.
+### Purpose
+
+Two aims, in this order: let someone learn what report QA does without touching live work, and
+give them a fixed corpus to re-run when instructions or models change. It does not edit
+instructions and does not compare runs; a person reads the output.
+
+### Placement
+
+A sixth QA Studio tool, **Playground**, opening in the Work region like Review history and
+Analytics. Scope keeps showing reports. A playground run is never a row in the reports column.
+
+### The screen
+
+1. A **non-dismissible banner**: playground output is not a clinical review.
+2. **Instructions**, read only: pack version and skill count, with a link to Skills & knowledge
+   for the text. Skills are presented as one set; nothing here edits them.
+3. **Model**, chosen from a server-controlled list. When the choice differs from the live model,
+   the screen says so rather than implying the result predicts live behaviour.
+4. **Two categories** — critical findings, and findings/impression inconsistency — each listing
+   curated synthetic samples. Selecting one shows its full text before running.
+5. **Paste your own**, as an alternative to a sample. Same deterministic input gate as live.
+6. **Run test review**, then **Log** and **Results** side by side.
+
+### Samples
+
+Each category leads with a sample the canned demo path can serve, so the playground is usable
+with no provider configured, followed by richer cases read from the verified installed package.
+Sample text is never duplicated into application code: it is read from the hash-pinned corpus.
+
+`demo_supported` is **computed** from the text the demo path actually matches, never declared in
+a mapping. A flag that can drift would tell a learner a sample runs when it cannot.
+
+### Logs
+
+The four real phases — input validation, combined report review, output validation, comment
+assembly — each with status and elapsed time. Nothing else: no composed prompt, no raw model
+response, no token counts. A failure shows its code and message in place of results.
+
+### Isolation
+
+- Runs are written only to `playground_runs` and `playground_attempts`.
+- No history, feedback, analytics or stakeholder outcome surface reads them, and there is no
+  playground history: a run is reachable only from the screen that started it.
+- **No copy control exists anywhere in the playground**, so a test comment cannot be pasted into
+  a real report.
+- A run persists so a refresh mid-run recovers and the workflow can resume.
+
+### Execution
+
+Live review and the playground share one execution path (`backend/workflow.py:execute`); only the
+state sink differs, so a playground run exercises the real phases rather than a copy that can
+drift. The playground composes the **published** pack, issues the same single combined request,
+and applies the same output validation. It runs on its own DBOS queue so a test run cannot
+consume live review concurrency, and `MODEL_OUTCOME_UNKNOWN` is never retried automatically.
+
+### API
+
+| Endpoint | Scope | Purpose |
+|---|---|---|
+| `GET /api/v1/playground` | `skills:read` | Categories, samples, models, pack summary |
+| `POST /api/v1/playground/runs` | `skills:write` | Start one run; idempotency key required |
+| `GET /api/v1/playground/runs/{id}` | `skills:read` | Status, phase log, result |
+
+A run names either a sample or pasted text, never both and never neither. Only a model the server
+offers is accepted.
+
+### Known limits of v1
+
+- **Regression is read by a person.** There is no baseline and no diff, so nothing detects drift
+  automatically. A saved-baseline comparison is the natural next step.
+- **Instructions cannot be edited here**, so the draft pack composition built in P1 is not
+  exercised by this version.
+- Playground runs are not workspace-scoped. When editing arrives, runs gain that link.
+
+## Part two — later-phase design, not built
+
+Everything below describes editing instructions in a workspace and comparing output against the
+published pack. It is retained as the design record for that phase. Where it conflicts with Part
+one, Part one is what exists.
 
 ## 1. The one sentence
 

@@ -1,4 +1,4 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Vesta Report QA — current documentation</title><style>*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#20242b;font:16px/1.65 system-ui,-apple-system,sans-serif}header{padding:44px max(5vw,24px);background:#20242b;color:#fff}header p{max-width:850px;color:#d5d7dc}nav{position:sticky;top:0;display:flex;gap:18px;flex-wrap:wrap;padding:14px max(5vw,24px);background:#fff;border-bottom:1px solid #dde2e8}a{color:#245bb2}main{max-width:1120px;margin:auto;background:#fff;padding:20px 46px 50px}h2{font-size:29px;border-top:2px solid #dde2e8;padding-top:22px;margin-top:42px}h3{font-size:21px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid #dde2e8}th{background:#f0f2f5}.table-wrap{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f8;padding:16px;border-left:3px solid #737d8c}code{font-family:ui-monospace,monospace}footer{text-align:center;color:#59616d;padding:28px}@media(max-width:700px){main{padding:12px 18px}nav{position:static}}@media print{nav{position:static}body{background:#fff}main{padding:0}}</style></head><body><header><strong>Vesta / Report QA</strong><h1>Current foundation documentation</h1><p>Application 0.13.0 · bundle 1.18 · schema 5 · F1–F3 implemented · F4/F5 pending. This edition contains only active contracts and evidence.</p></header><nav><a href="#plan">Foundation plan</a><a href="#changes">Implemented decisions</a><a href="#status">Implementation status</a><a href="#api">API contract</a><a href="#dbos">DBOS and recovery</a><a href="#workspace">Workspace</a><a href="#analytics">Analytics</a><a href="#skills">Skills Studio</a><a href="#acceptance">Acceptance gates</a><a href="#backlog">Backlog</a></nav><main><section id="plan"><h2 id="plan-clean-start-foundation-implementation-plan">Clean-start foundation implementation plan</h2>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Vesta Report QA — current documentation</title><style>*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#20242b;font:16px/1.65 system-ui,-apple-system,sans-serif}header{padding:44px max(5vw,24px);background:#20242b;color:#fff}header p{max-width:850px;color:#d5d7dc}nav{position:sticky;top:0;display:flex;gap:18px;flex-wrap:wrap;padding:14px max(5vw,24px);background:#fff;border-bottom:1px solid #dde2e8}a{color:#245bb2}main{max-width:1120px;margin:auto;background:#fff;padding:20px 46px 50px}h2{font-size:29px;border-top:2px solid #dde2e8;padding-top:22px;margin-top:42px}h3{font-size:21px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid #dde2e8}th{background:#f0f2f5}.table-wrap{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f8;padding:16px;border-left:3px solid #737d8c}code{font-family:ui-monospace,monospace}footer{text-align:center;color:#59616d;padding:28px}@media(max-width:700px){main{padding:12px 18px}nav{position:static}}@media print{nav{position:static}body{background:#fff}main{padding:0}}</style></head><body><header><strong>Vesta / Report QA</strong><h1>Current foundation documentation</h1><p>Application 0.13.0 · bundle 1.19 · schema 6 · F1–F3 implemented · F4/F5 pending. This edition contains only active contracts and evidence.</p></header><nav><a href="#plan">Foundation plan</a><a href="#changes">Implemented decisions</a><a href="#status">Implementation status</a><a href="#api">API contract</a><a href="#dbos">DBOS and recovery</a><a href="#workspace">Workspace</a><a href="#analytics">Analytics</a><a href="#skills">Skills Studio</a><a href="#acceptance">Acceptance gates</a><a href="#backlog">Backlog</a></nav><main><section id="plan"><h2 id="plan-clean-start-foundation-implementation-plan">Clean-start foundation implementation plan</h2>
 <p>Decision revision: 2026-09-17. Status: F1–F3 implemented in 0.13.0; F4/F5 remain pending. See [foundation changelog](FOUNDATION_CHANGELOG.md) for decisions and executed tests. Baseline inspected: bundle 1.14 / application 0.10.0. This document is the authority for the next build; [implementation status](IMPLEMENTATION_STATUS.md) remains the authority for what has actually been built and tested.</p>
 <h3 id="plan-1-scope-and-decisions">1. Scope and decisions</h3>
 <p>Keep the working product; simplify its foundations. Reuse FastAPI, SQLite, DBOS, the OpenAI Agents SDK/DBOSRunner integration, and the existing React workspace. Do not introduce a microservice, agent platform, ORM rewrite, vector database or generic workflow engine.</p>
@@ -116,6 +116,38 @@
 </tbody></table></div>
 <p>Reference entrypoints: [API design](API_DESIGN.md), [DBOS validation](DBOS_VALIDATION.md), [acceptance](ACCEPTANCE.md), [Workspace](WORKSPACE_SPEC.md), [Analytics](ANALYTICS_SPEC.md), [Skills Studio](SKILLS_STUDIO_SPEC.md), [backlog](BACKLOG.md).</p>
 <p>Sources: <a href="https://github.com/parthi-vesta-tinker/qatr/tree/b906151a2bdef8c206325de64d46b61cdf5b7ad7/src/qatr/_vendor/qa_skills/skills/qa-critical-match/references">pinned qatr references</a> and <a href="https://developers.openai.com/api/docs/guides/structured-outputs">OpenAI structured outputs</a>. Structured schemas constrain shape, not clinical correctness; refusal and incomplete output need explicit handling. Runtime/DBOS claims must be checked against installed code and F3 tests.</p></section><section id="changes"><h2 id="changes-foundation-implementation-decisions-and-releases">Foundation implementation decisions and releases</h2>
+<h3 id="changes-qa-studio-playground-schema-6-bundle-1-19">QA Studio playground — schema 6 / bundle 1.19</h3>
+<p>Implemented 2026-09-19 as P2 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md). The shipped contract is Part one of [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Application version, API version and workflow identities for live review are unchanged.</p>
+<p>Scope was set by explicit user decision: curated samples in two categories plus paste-your-own, run the real review, show results and a phase log. No editing, no output comparison, no history, feedback or analytics. Skills are presented as one read-only set.</p>
+<ul>
+<li>A sixth Studio tool. <code>GET /api/v1/playground</code>, <code>POST /api/v1/playground/runs</code> and</li>
+</ul>
+<p>  <code>GET /api/v1/playground/runs/{id}</code> are additive; the generated OpenAPI gained 264 leaves and   changed or removed none.</p>
+<ul>
+<li>Live review and the playground now share one execution path, <code>workflow.py:execute</code>. Only the</li>
+</ul>
+<p>  state sink differs, so a playground run exercises the real four phases instead of a copy that   could drift from them. <code>run_review</code> behaviour is unchanged.</p>
+<ul>
+<li>A separate <code>qa-playground-f3-v1</code> queue and the <code>qa.playground.f3.v1</code> workflow. A test run</li>
+</ul>
+<p>  cannot consume live review concurrency.</p>
+<ul>
+<li><code>playground_attempts</code> mirrors the live provider checkpoint, because <code>model_attempts</code></li>
+</ul>
+<p>  references <code>review_records</code> and a playground run has none. <code>attempts.py</code> takes the table as a   parameter rather than being duplicated, so both paths keep one implementation of the   claim/response/unknown rules.</p>
+<ul>
+<li>Schema 6 reshapes <code>playground_runs</code> for this design: the workspace link and the draft-only</li>
+</ul>
+<p>  <code>pack_ref</code> constraint from schema 5 are gone, and model, mode, phase log and error are stored.   Runs regain a workspace link when editing arrives. Fresh default <code>.qa-data-foundation-v5</code>.</p>
+<ul>
+<li>Sample text is read from the hash-pinned <code>evaluation/cases.json</code> rather than copied, and</li>
+</ul>
+<p>  <code>demo_supported</code> is computed from the text the canned demo path matches rather than declared,   so the catalog cannot advertise support that does not exist.</p>
+<ul>
+<li>The playground model list is server controlled and offers <code>gpt-6-astra</code> only; choosing it never</li>
+</ul>
+<p>  changes the live model, and the screen says so when the two differ.</p>
+<p>Not built, by decision: no baseline or output diff, so regression is read by a person; no instruction editing, so P1&#x27;s draft pack composition is still unexercised.</p>
 <h3 id="changes-pack-references-and-skill-workspaces-schema-5-bundle-1-18">Pack references and skill workspaces — schema 5 / bundle 1.18</h3>
 <p>Implemented 2026-09-19 as P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md), with the interaction model in [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Application version, API version and workflow identities are unchanged: no workflow shape, recovery semantic or public contract moved.</p>
 <ul>
@@ -287,10 +319,10 @@
 <p>The GitHub workflow is supplied, not claimed executed remotely. Phase publication is recorded by its Git commit; the next phase must not start before successful publication. No force push.</p>
 <h3 id="changes-next-gates">Next gates</h3>
 <p>F2 is implemented; see the current release above. F3: one combined DBOS request, at-most-once dispatch and independent session-spend ledger. F4: integrated product/browser regression and operational handoff. F5: separate explicit authorization for bounded live evaluation and qualified review.</p></section><section id="status"><h2 id="status-implementation-status">Implementation status</h2>
-<p>Current release: application <strong>0.13.0</strong>, bundle <strong>1.18</strong>, foundation <strong>F3</strong>, API <strong>2026-09-18</strong>, SQLite schema <strong>5</strong>.</p>
+<p>Current release: application <strong>0.13.0</strong>, bundle <strong>1.19</strong>, foundation <strong>F3</strong>, API <strong>2026-09-18</strong>, SQLite schema <strong>6</strong>.</p>
 <h3 id="status-implemented">Implemented</h3>
 <ul>
-<li>Fresh schema-5 application storage and separate DBOS system storage. Older nonempty schemas fail with an actionable error and are never silently migrated or reset.</li>
+<li>Fresh schema-6 application storage and separate DBOS system storage. Older nonempty schemas fail with an actionable error and are never silently migrated or reset.</li>
 <li>Tenant-scoped review history, feedback, outcomes, analytics, and Skills Studio draft revisions.</li>
 <li>Server-controlled tenant release binding with immutable complete content snapshots. Vesta can use <code>vesta-qatr-0.3.0</code>; other tenants use the generic profile unless explicitly configured.</li>
 <li>Byte-pinned qatr source references, the 43-entry catalog, independently versioned skills, package manifests, reference hashes, and lock validation.</li>
@@ -301,7 +333,8 @@
 <li>Atomic dispatch claims and durable response checkpoints. Admission is bounded by the context window only; spend authorization was removed on 2026-09-18 by explicit user decision.</li>
 <li>Generated OpenAPI and TypeScript contracts, React workspace, history, direct comment copy, feedback inbox, analytics, stakeholder outcomes, Skills Studio, health details, and responsive/light/dark behavior.</li>
 <li>Pack references (<code>published</code> and <code>draft:&lt;workspace&gt;</code>), draft pack composition from workspace-scoped drafts, and pack identity derived from the installed package rather than constants in code. This is P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md); it adds no HTTP endpoint and no interface change.</li>
-<li>Schema-5 <code>skill_workspaces</code> and <code>playground_runs</code> tables, workspace fork pinning with explicit rebase, and workspace-scoped <code>knowledge_drafts</code>. Editorial drafts saved outside a workspace still never compose.</li>
+<li>Schema-6 <code>skill_workspaces</code>, <code>playground_runs</code> and <code>playground_attempts</code> tables, workspace fork pinning with explicit rebase, and workspace-scoped <code>knowledge_drafts</code>. Editorial drafts saved outside a workspace still never compose.</li>
+<li><strong>QA Studio Playground</strong>: a sixth Studio tool that runs the real review against curated samples in two categories, or a pasted report, in isolation. It composes the published pack, issues the same combined request, applies the same output validation, and shows results with a phase-and-timing log. Runs are written only to <code>playground_runs</code>; there is no history, feedback, analytics or copy action, and the draft banner cannot be dismissed. Instructions are read-only, summarised with a link to Skills &amp; knowledge. The model list is server controlled. See [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md).</li>
 </ul>
 <h3 id="status-verification-completed-for-f3">Verification completed for F3</h3>
 <ul>
@@ -324,6 +357,18 @@
 <li>No provider request was made. Recorded provider spend was <strong>$0</strong>.</li>
 </ul>
 <p>These are controlled storage and composition checks. They establish no clinical claim, and the playground has no user interface yet.</p>
+<h3 id="status-verification-completed-for-the-qa-studio-playground">Verification completed for the QA Studio playground</h3>
+<p>Run on 19 September 2026 for P2 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md).</p>
+<ul>
+<li><strong>120 Python tests passed</strong>, including 10 new playground tests: catalog shape, sample text read from the hash-pinned corpus, a full run through the real path with a mock HTTP transport, logs restricted to phases and timings, paste-your-own and its input rules, model allowlisting, idempotent replay and conflict, demo support computed rather than declared, a provider failure reported without retry, and tenant scoping.</li>
+<li>Isolation is asserted against the store: after a completed playground run, <code>review_records</code>, <code>review_results</code>, <code>observations</code>, <code>feedback</code>, <code>outcomes</code> and <code>model_attempts</code> are all empty, and review history, analytics and the feedback inbox return nothing.</li>
+<li>Live review is unaffected by the shared execution path: the full recovery and provider suites pass unchanged, including process termination before claim, after claim, after provider response, and after the application checkpoint.</li>
+<li><strong>22 React DOM tests and 10 Playwright scenarios passed</strong>, including a browser run of a demo sample end to end, the absence of any copy control, and the run reaching no live surface.</li>
+<li>Generated OpenAPI gained 264 leaves for the three new routes and changed or removed none. The single pre-existing drift check still fails on the checked-in 422 wording, as it does on unmodified <code>main</code> in this container.</li>
+<li>Skill package validation, generated TypeScript drift, the documentation boundary check and bundle verification passed.</li>
+<li>No provider request was made. Recorded provider spend was <strong>$0</strong>.</li>
+</ul>
+<p>These are controlled tests with canned or mocked provider responses. They establish no clinical claim, and the playground performs no automatic regression comparison.</p>
 <h3 id="status-remaining-phases">Remaining phases</h3>
 <ul>
 <li><strong>F4 — product regression and handoff:</strong> repeat integrated acceptance on a fresh store, review operator-facing failure handling and recovery guidance, verify the distributable bundle, and record any release-blocking issue.</li>
@@ -388,7 +433,7 @@ npm --prefix frontend run build</code></pre>
 <ul>
 <li><strong>Scope:</strong> a slim reports column with independent in-tab drafts, active work, recent results, and history access. Selection does not jump when another review finishes.</li>
 <li><strong>Work:</strong> the report text appears above the review output, under a <strong>Report text only</strong> badge beside the heading. The accepted review resource is immutable, but its report text stays editable in place: editing enables <strong>Review again</strong>, which submits a new review and leaves the original resource unchanged. <strong>Review</strong> sits beside the minimum-input hint for a new draft.</li>
-<li><strong>Studio:</strong> compact tools for New report, Review history, Feedbacks, Analytics, and Skills &amp; knowledge. Tool navigation preserves the current report draft and mounted editor state.</li>
+<li><strong>Studio:</strong> compact tools for New report, Review history, Feedbacks, Analytics, Skills &amp; knowledge, and Playground. Tool navigation preserves the current report draft and mounted editor state.</li>
 <li><strong>Review panel:</strong> review steps show real execution state; <strong>Guidance: Next steps</strong> lists the numbered actions for the current state. Guidance is advice, not tracked progress, and stores no per-step state.</li>
 <li><strong>Feedback:</strong> thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.</li>
 <li><strong>Quality review:</strong> the output panel is headed <strong>Quality review</strong>. General comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.</li>
@@ -405,6 +450,7 @@ npm --prefix frontend run build</code></pre>
 <li>Analytics uses the full matching tenant dataset and keeps operational, feedback, acceptance, and unmeasured clinical metrics distinct.</li>
 <li>Stakeholder outcomes are collapsed, append-only, result-bound operator records.</li>
 <li>Skills &amp; knowledge shows verified installed content and tenant draft revisions; editing never activates a model change.</li>
+<li>Playground runs the real review against curated samples or a pasted report, in isolation. It never becomes a review: no history, feedback, analytics, outcome or copy action, and its banner cannot be dismissed.</li>
 <li>Health is an on-demand timestamped snapshot. Provider metadata is checked only when explicitly requested and does not perform inference.</li>
 </ul>
 <p>No control sends a report, edits a source report, triggers clinical escalation, or releases a content draft.</p></section><section id="analytics"><h2 id="analytics-analytics-and-outcomes-contract">Analytics and outcomes contract</h2>
@@ -426,7 +472,7 @@ npm --prefix frontend run build</code></pre>
 <p>Skills &amp; knowledge is a tenant-scoped editorial tool inside QA Studio. It can inspect verified installed instructions and references, compare proposed text, save immutable draft revisions, restore an older revision as a new proposal, and export a saved proposal. It makes no provider call.</p>
 <h3 id="skills-content-boundary">Content boundary</h3>
 <p>The catalog is built from the verified installed package and includes skill documents, shared references, qatr source/catalog documents, and configured tenant guidance. It shows actual combined-request usage. Host validation references are labeled as such and are not presented as model instructions.</p>
-<p>Framework schemas, runtime code, package manifests, evaluation answers, credentials, private server paths, and release controls are outside the editor. Installed content is not automatically clinically approved.</p>
+<p>Running installed instructions against a report is the Playground&#x27;s job, not this editor&#x27;s; see [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Framework schemas, runtime code, package manifests, evaluation answers, credentials, private server paths, and release controls are outside the editor. Installed content is not automatically clinically approved.</p>
 <h3 id="skills-drafts-are-never-active">Drafts are never active</h3>
 <p>Saving appends a <code>draft_not_active</code> record in the application database. It does not write installed files, change package hashes or locks, alter a review, enter prompt composition, or modify old snapshots.</p>
 <p>Activation requires an intentional package release with qualified review, affected document versions and changelogs, evaluation updates, manifest/reference/lock regeneration, package validation, and appropriate model/clinical evaluation. The browser has no publish button.</p>

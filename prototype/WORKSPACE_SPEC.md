@@ -6,7 +6,7 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 
 - **Scope:** a slim reports column with independent in-tab drafts, active work, recent results, and history access. Selection does not jump when another review finishes.
 - **Work:** the report text appears above the review output, under a **Report text only** badge beside the heading. The accepted review resource is immutable, but its report text stays editable in place: editing enables **Review again**, which submits a new review and leaves the original resource unchanged. **Review** sits beside the minimum-input hint for a new draft.
-- **Studio:** compact tools for New report, Review history, Feedbacks, Analytics, and Skills & knowledge. Tool navigation preserves the current report draft and mounted editor state.
+- **Studio:** compact tools for New report, Review history, Feedbacks, Analytics, Skills & knowledge, and Playground. Tool navigation preserves the current report draft and mounted editor state.
 - **Review panel:** review steps show real execution state; **Guidance: Next steps** lists the numbered actions for the current state. Guidance is advice, not tracked progress, and stores no per-step state.
 - **Feedback:** thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.
 - **Quality review:** the output panel is headed **Quality review**. General comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.
@@ -27,6 +27,7 @@ Copy text is always server derived from the same immutable result displayed on s
 - Analytics uses the full matching tenant dataset and keeps operational, feedback, acceptance, and unmeasured clinical metrics distinct.
 - Stakeholder outcomes are collapsed, append-only, result-bound operator records.
 - Skills & knowledge shows verified installed content and tenant draft revisions; editing never activates a model change.
+- Playground runs the real review against curated samples or a pasted report, in isolation. It never becomes a review: no history, feedback, analytics, outcome or copy action, and its banner cannot be dismissed.
 - Health is an on-demand timestamped snapshot. Provider metadata is checked only when explicitly requested and does not perform inference.
 
 No control sends a report, edits a source report, triggers clinical escalation, or releases a content draft.

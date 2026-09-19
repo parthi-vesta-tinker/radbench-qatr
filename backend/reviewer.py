@@ -141,23 +141,24 @@ class GuardedModel(Model):
 
     async def get_response(self, *args, **kwargs):
         from .workflow import boundary_hook
-        cached = attempts.response(self.tenant, self.rid)
+        table = attempts.table(self.config)
+        cached = attempts.response(self.tenant, self.rid, table)
         if cached is not None:
             return cached
         boundary_hook(self.rid, 'before_provider_claim')
-        attempts.claim(self.tenant, self.rid, store.new_id('qa'))
+        attempts.claim(self.tenant, self.rid, store.new_id('qa'), table)
         boundary_hook(self.rid, 'after_provider_claim')
         try:
             result = await self.model.get_response(*args, **kwargs)
             boundary_hook(self.rid, 'after_provider_response')
-            attempts.save(self.tenant, self.rid, result)
+            attempts.save(self.tenant, self.rid, result, table)
             boundary_hook(self.rid, 'after_response_checkpoint')
             return result
         except ReviewProblem:
-            attempts.unknown(self.tenant, self.rid)
+            attempts.unknown(self.tenant, self.rid, table)
             raise
         except Exception:
-            attempts.unknown(self.tenant, self.rid)
+            attempts.unknown(self.tenant, self.rid, table)
             raise ReviewProblem('MODEL_OUTCOME_UNKNOWN', 'The provider attempt did not finish durably. It will not be sent again automatically.') from None
 
     async def stream_response(self, *args, **kwargs):

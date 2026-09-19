@@ -1,6 +1,6 @@
 # Local setup and verification
 
-These instructions apply to application **0.13.0**, foundation **F3**, API **2026-09-18**, and schema **5**.
+These instructions apply to application **0.13.0**, foundation **F3**, API **2026-09-18**, and schema **6**.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ Run canned demo behavior without a provider call:
 QA_MODE=demo uv run uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-Use fresh schema-5 storage. The default is `.qa-data-foundation-v4`. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are not migrated or deleted.
+Use fresh schema-6 storage. The default is `.qa-data-foundation-v5`. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are not migrated or deleted.
 
 ## Live provider session
 

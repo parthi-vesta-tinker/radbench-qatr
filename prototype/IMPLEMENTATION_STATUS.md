@@ -1,10 +1,10 @@
 # Implementation status
 
-Current release: application **0.13.0**, bundle **1.18**, foundation **F3**, API **2026-09-18**, SQLite schema **5**.
+Current release: application **0.13.0**, bundle **1.19**, foundation **F3**, API **2026-09-18**, SQLite schema **6**.
 
 ## Implemented
 
-- Fresh schema-5 application storage and separate DBOS system storage. Older nonempty schemas fail with an actionable error and are never silently migrated or reset.
+- Fresh schema-6 application storage and separate DBOS system storage. Older nonempty schemas fail with an actionable error and are never silently migrated or reset.
 - Tenant-scoped review history, feedback, outcomes, analytics, and Skills Studio draft revisions.
 - Server-controlled tenant release binding with immutable complete content snapshots. Vesta can use `vesta-qatr-0.3.0`; other tenants use the generic profile unless explicitly configured.
 - Byte-pinned qatr source references, the 43-entry catalog, independently versioned skills, package manifests, reference hashes, and lock validation.
@@ -15,7 +15,8 @@ Current release: application **0.13.0**, bundle **1.18**, foundation **F3**, API
 - Atomic dispatch claims and durable response checkpoints. Admission is bounded by the context window only; spend authorization was removed on 2026-09-18 by explicit user decision.
 - Generated OpenAPI and TypeScript contracts, React workspace, history, direct comment copy, feedback inbox, analytics, stakeholder outcomes, Skills Studio, health details, and responsive/light/dark behavior.
 - Pack references (`published` and `draft:<workspace>`), draft pack composition from workspace-scoped drafts, and pack identity derived from the installed package rather than constants in code. This is P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md); it adds no HTTP endpoint and no interface change.
-- Schema-5 `skill_workspaces` and `playground_runs` tables, workspace fork pinning with explicit rebase, and workspace-scoped `knowledge_drafts`. Editorial drafts saved outside a workspace still never compose.
+- Schema-6 `skill_workspaces`, `playground_runs` and `playground_attempts` tables, workspace fork pinning with explicit rebase, and workspace-scoped `knowledge_drafts`. Editorial drafts saved outside a workspace still never compose.
+- **QA Studio Playground**: a sixth Studio tool that runs the real review against curated samples in two categories, or a pasted report, in isolation. It composes the published pack, issues the same combined request, applies the same output validation, and shows results with a phase-and-timing log. Runs are written only to `playground_runs`; there is no history, feedback, analytics or copy action, and the draft banner cannot be dismissed. Instructions are read-only, summarised with a link to Skills & knowledge. The model list is server controlled. See [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md).
 
 ## Verification completed for F3
 
@@ -40,6 +41,20 @@ Run on 19 September 2026 for P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md).
 - No provider request was made. Recorded provider spend was **$0**.
 
 These are controlled storage and composition checks. They establish no clinical claim, and the playground has no user interface yet.
+
+## Verification completed for the QA Studio playground
+
+Run on 19 September 2026 for P2 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md).
+
+- **120 Python tests passed**, including 10 new playground tests: catalog shape, sample text read from the hash-pinned corpus, a full run through the real path with a mock HTTP transport, logs restricted to phases and timings, paste-your-own and its input rules, model allowlisting, idempotent replay and conflict, demo support computed rather than declared, a provider failure reported without retry, and tenant scoping.
+- Isolation is asserted against the store: after a completed playground run, `review_records`, `review_results`, `observations`, `feedback`, `outcomes` and `model_attempts` are all empty, and review history, analytics and the feedback inbox return nothing.
+- Live review is unaffected by the shared execution path: the full recovery and provider suites pass unchanged, including process termination before claim, after claim, after provider response, and after the application checkpoint.
+- **22 React DOM tests and 10 Playwright scenarios passed**, including a browser run of a demo sample end to end, the absence of any copy control, and the run reaching no live surface.
+- Generated OpenAPI gained 264 leaves for the three new routes and changed or removed none. The single pre-existing drift check still fails on the checked-in 422 wording, as it does on unmodified `main` in this container.
+- Skill package validation, generated TypeScript drift, the documentation boundary check and bundle verification passed.
+- No provider request was made. Recorded provider spend was **$0**.
+
+These are controlled tests with canned or mocked provider responses. They establish no clinical claim, and the playground performs no automatic regression comparison.
 
 ## Remaining phases
 

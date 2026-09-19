@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 from dbos import DBOS
 from agents import set_tracing_disabled
-from . import store, presentation, reporting, outcomes, knowledge
+from . import store, presentation, reporting, outcomes, knowledge, playground
 from .access import AccessError, Principal, require, validate_access_config
 from .contracts import (
     ReviewProblem,
@@ -603,6 +603,23 @@ def export_knowledge_draft(document_id: str, revision: Annotated[int, PathParam(
     return knowledge.export_draft(p.tenant_id, document_id, revision)
 
 
+@app.get("/api/v1/playground", response_model=playground.PlaygroundCatalog)
+def playground_catalog(p: SkillsRead):
+    return playground.catalog(p.tenant_id)
+
+
+@app.post("/api/v1/playground/runs", response_model=playground.PlaygroundRun, status_code=202)
+def create_playground_run(payload: playground.PlaygroundRunInput, p: SkillsWrite, read_access: SkillsRead,
+                          idempotency_key: Key, version: Version):
+    saved, created = playground.create_run(p.tenant_id, payload, idempotency_key, version)
+    return respond(saved, not created)
+
+
+@app.get("/api/v1/playground/runs/{run_id}", response_model=playground.PlaygroundRun)
+def read_playground_run(run_id: str, p: SkillsRead):
+    return playground.read_run(p.tenant_id, run_id)
+
+
 DIST = ROOT / "frontend/dist"
 if DIST.exists():
     app.mount("/", StaticFiles(directory=DIST, html=True), name="ui")
@@ -632,3 +649,9 @@ for route in app.routes:
         rights = ["skills:read", "skills:write"] if "POST" in methods else ["skills:read"]
         route.openapi_extra = {"x-required-scopes": rights}
         route.description = "Requires " + " and ".join(rights) + ". Draft editing only; installed model instructions remain unchanged."
+    if path.startswith("/api/v1/playground"):
+        rights = ["skills:read", "skills:write"] if "POST" in methods else ["skills:read"]
+        route.openapi_extra = {"x-required-scopes": rights}
+        route.description = ("Requires " + " and ".join(rights) + ". Isolated test runs against the "
+                             "published pack. Playground output is never a review and never enters "
+                             "review history, feedback, analytics or outcomes.")

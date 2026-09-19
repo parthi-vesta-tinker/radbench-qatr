@@ -50,18 +50,21 @@ def boundary_hook(rid, point):
         raise RuntimeError("Injected isolated test failure")
 
 
-@DBOS.workflow(name="qa.review.f3.v1", max_recovery_attempts=5)
-def run_review(tenant, rid, payload, config):
+def execute(tenant, rid, payload, config, sink, checkpoint):
+    """The four real phases, shared by live review and the playground.
+
+    Both callers run the same validation, the same combined request and the same output
+    validation. Only where state is written differs, so a playground run exercises the
+    live path rather than a copy of it that can drift.
+    """
     active = "input_validation"
     try:
-        state(
-            tenant, rid, step=active, step_status="running", execution_status="running"
-        )
+        sink(tenant, rid, step=active, step_status="running", execution_status="running")
         validate(payload)
-        state(tenant, rid, step=active, step_status="completed")
-        test_checkpoint(rid, "after_input_validation")
+        sink(tenant, rid, step=active, step_status="completed")
+        checkpoint(rid, "after_input_validation")
         active = 'combined_review'
-        state(tenant, rid, step=active, step_status='running')
+        sink(tenant, rid, step=active, step_status='running')
         if config['mode'] == 'demo':
             outputs = {stage: demo_stage(stage, payload) for stage in
                        ('language_review', 'consistency_review', 'critical_finding_review')}
@@ -70,19 +73,19 @@ def run_review(tenant, rid, payload, config):
         else:
             response = DBOS.start_workflow(openai_combined, tenant, rid, payload, config).get_result()
             raw, metrics = response['raw'], response['metrics']
-        state(tenant, rid, step=active, step_status='completed', metrics=metrics)
-        test_checkpoint(rid, 'after_combined_review')
+        sink(tenant, rid, step=active, step_status='completed', metrics=metrics)
+        checkpoint(rid, 'after_combined_review')
         active = 'output_validation'
-        state(tenant, rid, step=active, step_status='running')
+        sink(tenant, rid, step=active, step_status='running')
         if raw is not None:
             from .combined import validate_combined
             outputs = validate_combined(raw, payload['report_text'], config['skill_snapshot'])
-        state(tenant, rid, step=active, step_status='completed')
-        test_checkpoint(rid, 'after_output_validation')
+        sink(tenant, rid, step=active, step_status='completed')
+        checkpoint(rid, 'after_output_validation')
         active = "comment_assembly"
-        state(tenant, rid, step=active, step_status="running")
+        sink(tenant, rid, step=active, step_status="running")
         result = format_result(outputs, payload["report_text"])
-        state(
+        sink(
             tenant,
             rid,
             step=active,
@@ -90,7 +93,7 @@ def run_review(tenant, rid, payload, config):
             execution_status="completed",
             result=result,
         )
-        test_checkpoint(rid, 'after_final_commit')
+        checkpoint(rid, 'after_final_commit')
         return result
     except Exception as exc:
         from .diagnostics import record_failure
@@ -111,7 +114,7 @@ def run_review(tenant, rid, payload, config):
                 metrics = failure_metrics(tenant, rid, config)
             except Exception as metric_exc:
                 record_failure('attempt.metrics_unavailable', metric_exc, tenant=tenant, review_id=rid)
-        state(
+        sink(
             tenant,
             rid,
             metrics=metrics,
@@ -123,6 +126,11 @@ def run_review(tenant, rid, payload, config):
         return None
 
 
+@DBOS.workflow(name="qa.review.f3.v1", max_recovery_attempts=5)
+def run_review(tenant, rid, payload, config):
+    return execute(tenant, rid, payload, config, state, test_checkpoint)
+
+
 def workflow_id(tenant, rid):
     return f"qa:f3:{tenant}:{rid}"
 
@@ -132,3 +140,35 @@ def dispatch(tenant, rid):
     if args:
         with SetWorkflowID(workflow_id(tenant, rid)):
             return review_queue.enqueue(run_review, tenant, rid, *args)
+
+
+PLAYGROUND_CONCURRENCY = int(os.environ.get("QA_PLAYGROUND_CONCURRENCY", "2"))
+if not 1 <= PLAYGROUND_CONCURRENCY <= 32:
+    raise ValueError("QA_PLAYGROUND_CONCURRENCY must be between 1 and 32")
+# A separate queue so a playground run can never starve live report QA of its concurrency.
+playground_queue = Queue("qa-playground-f3-v1", concurrency=PLAYGROUND_CONCURRENCY)
+
+
+@DBOS.step(name="qa.playground.state.f3.v1")
+def playground_state(tenant, run_id, *, execution_status=None, metrics=None, **values):
+    # Playground logs are phases and timings. Provider metrics are deliberately not stored.
+    store.update_playground(tenant, run_id, status=execution_status, **values)
+
+
+@DBOS.step(name="qa.playground.checkpoint.f3.v1")
+def playground_checkpoint(run_id, point):
+    return None
+
+
+@DBOS.workflow(name="qa.playground.f3.v1", max_recovery_attempts=5)
+def run_playground(tenant, run_id, payload, config):
+    return execute(tenant, run_id, payload, config, playground_state, playground_checkpoint)
+
+
+def playground_workflow_id(tenant, run_id):
+    return f"qa:pg:{tenant}:{run_id}"
+
+
+def dispatch_playground(tenant, run_id, payload, config):
+    with SetWorkflowID(playground_workflow_id(tenant, run_id)):
+        return playground_queue.enqueue(run_playground, tenant, run_id, payload, config)

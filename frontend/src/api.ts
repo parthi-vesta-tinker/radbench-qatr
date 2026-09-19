@@ -1,5 +1,6 @@
 import type { Review, ReviewInput, Config, FeedbackPayload, FeedbackRecord, ReviewSummary, Page, FeedbackInboxItem, Analytics, OutcomeInput, OutcomeRecord } from "./types";
 import type { KnowledgeCatalog, KnowledgeDetail, KnowledgeDraft, KnowledgeDraftInput } from './types';
+import type { PlaygroundCatalog, PlaygroundRun, PlaygroundRunInput } from './types';
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -42,6 +43,10 @@ export function describeError(error: unknown): string {
   return error instanceof Error ? error.message : "The QA service request failed.";
 }
 export const api = {
+  playground: () => request<PlaygroundCatalog>('/api/v1/playground'),
+  startPlaygroundRun: (payload: PlaygroundRunInput, key: string) =>
+    request<PlaygroundRun>('/api/v1/playground/runs', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': key }, body: JSON.stringify(payload) }),
+  playgroundRun: (id: string) => request<PlaygroundRun>('/api/v1/playground/runs/' + encodeURIComponent(id)),
   knowledgeCatalog: () => request<KnowledgeCatalog>('/api/v1/knowledge'),
   knowledgeDetail: (id: string) => request<KnowledgeDetail>('/api/v1/knowledge/' + encodeURIComponent(id)),
   saveKnowledgeDraft: (id: string, payload: KnowledgeDraftInput, key: string) => request<KnowledgeDraft>('/api/v1/knowledge/' + encodeURIComponent(id) + '/drafts', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': key }, body: JSON.stringify(payload) }),

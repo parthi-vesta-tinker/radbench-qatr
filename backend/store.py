@@ -55,7 +55,7 @@ def db():
         conn.close()
 
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 
 def init():
@@ -404,3 +404,83 @@ def list_reviews(
                 )
             )
         return items, len(rows) > limit
+
+
+# --- Playground -------------------------------------------------------------------
+# Isolated test runs. These never touch review_records, review_results, observations,
+# feedback or outcomes, and no reporting or analytics query reads playground_runs.
+
+
+def playground_steps():
+    return [dict(step=name, status="queued", elapsed_ms=None) for name in STEPS]
+
+
+def create_playground_run(tenant, run_id, *, source, sample_id, report_text, model, mode,
+                          pack_ref, release_id):
+    with db() as conn:
+        conn.execute(
+            "INSERT INTO playground_runs(tenant_id,id,pack_ref,release_id,source,sample_id,"
+            "report_text,model,mode,created_at,status,steps)"
+            " VALUES(?,?,?,?,?,?,?,?,?,?,'queued',?)",
+            (tenant, run_id, pack_ref, release_id, source, sample_id, report_text, model,
+             mode, now(), canonical(playground_steps())),
+        )
+    return playground_run(tenant, run_id)
+
+
+def playground_run(tenant, run_id):
+    with db() as conn:
+        row = conn.execute(
+            "SELECT * FROM playground_runs WHERE tenant_id=? AND id=?", (tenant, run_id)
+        ).fetchone()
+    if row is None:
+        return None
+    return dict(
+        run_id=row["id"], pack_ref=row["pack_ref"], release_id=row["release_id"],
+        source=row["source"], sample_id=row["sample_id"], report_text=row["report_text"],
+        model=row["model"], mode=row["mode"], status=row["status"],
+        created_at=row["created_at"], completed_at=row["completed_at"],
+        steps=json.loads(row["steps"]),
+        result=json.loads(row["result"]) if row["result"] else None,
+        error=json.loads(row["error"]) if row["error"] else None,
+    )
+
+
+def update_playground(tenant, run_id, *, step=None, step_status=None, status=None,
+                      result=None, error=None):
+    """Advance a playground run. Terminal state is final, so a durable replay is a no-op."""
+    with db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        row = conn.execute(
+            "SELECT status, steps FROM playground_runs WHERE tenant_id=? AND id=?",
+            (tenant, run_id),
+        ).fetchone()
+        if row is None:
+            raise KeyError("Playground run not found in workflow tenant")
+        if row["status"] in ("completed", "failed", "needs_input"):
+            return
+        steps = json.loads(row["steps"])
+        if step:
+            item = next(x for x in steps if x["step"] == step)
+            item["status"] = step_status
+            if step_status == "running":
+                item["started"] = now()
+            elif item.get("started"):
+                item["elapsed_ms"] = max(
+                    0,
+                    round((datetime.fromisoformat(now()) - datetime.fromisoformat(item["started"])).total_seconds() * 1000),
+                )
+        values = {"steps": canonical(steps)}
+        if status:
+            values["status"] = status
+            if status in ("completed", "failed", "needs_input"):
+                values["completed_at"] = now()
+        if result is not None:
+            values["result"] = canonical(result)
+        if error is not None:
+            values["error"] = canonical(error)
+        assignments = ",".join(f"{name}=?" for name in values)
+        conn.execute(
+            f"UPDATE playground_runs SET {assignments} WHERE tenant_id=? AND id=?",
+            (*values.values(), tenant, run_id),
+        )
