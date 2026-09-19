@@ -620,9 +620,28 @@ def read_playground_run(run_id: str, p: SkillsRead):
     return playground.read_run(p.tenant_id, run_id)
 
 
+class BuiltUI(StaticFiles):
+    """Serve the built UI with cache headers that match how Vite names its output.
+
+    index.html names the content-hashed bundles, so a cached copy pins the browser to
+    a build that no longer exists: the server updates and the page does not. It must be
+    revalidated every load. The hashed assets beside it can never change under a given
+    name, so they are cached indefinitely.
+    """
+
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code < 400:
+            immutable = path.startswith("assets/") and not path.endswith(".html")
+            response.headers["Cache-Control"] = (
+                "public, max-age=31536000, immutable" if immutable else "no-cache"
+            )
+        return response
+
+
 DIST = ROOT / "frontend/dist"
 if DIST.exists():
-    app.mount("/", StaticFiles(directory=DIST, html=True), name="ui")
+    app.mount("/", BuiltUI(directory=DIST, html=True), name="ui")
 
 # Publish authorization requirements in the live OpenAPI document as well as prose.
 for route in app.routes:
