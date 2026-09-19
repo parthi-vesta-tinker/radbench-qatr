@@ -552,3 +552,41 @@ inferred from the stale committed screenshots.
 - Not established: no accessibility audit, no contrast-ratio sweep, no screen-reader pass, no
   clinical or usability acceptance. WCAG 2.5.8 is cited in X-3 as a reference threshold only.
 - Not implemented: no proposal here has been built, and no spec has been amended.
+
+---
+
+## 10. Decision log
+
+Proposals are gated individually. Every verdict is recorded — Accepted, Parked and Rejected
+alike — because parked items are a backlog and rejections are design rationale. A Parked item
+stays alive and re-surfaces when this list is next reviewed; a Rejected item is not re-proposed
+unless circumstances change.
+
+Verdicts were given by Parthi on 2026-09-19 against rendered before/after mockups, not prose.
+
+### Stage 1 — gated 2026-09-19
+
+| # | Proposal | Verdict | Rationale recorded |
+|---|---|---|---|
+| P1 | Remove the `onDoubleClick` force-open from the health trigger; update `workspace.spec.ts` to a single click plus an outside-click assertion | **Accepted** | Accepted as proposed at the gate. No additional rationale given. |
+| P2 | Health panel dismissable as a dialog: close button, document-level Escape, outside-click dismiss, `role="dialog"`, focus return | **Accepted** | Full dialog treatment chosen over the smaller disclosure-only variant, which was offered and not taken. |
+| P3 | Restore a disclosure marker on the health trigger, **static ▸/▾** | **Accepted** | Static form chosen over a rotating chevron, consistent with the "static progress icons" rule. This also settles the open question listed as Stage 3 item 15, which is therefore closed. |
+| P4 | Mobile: order navigated content above the Reports rail; collapse the rail to a summary row | **Accepted** | Accepted as proposed, over both a reorder-only variant and a park-pending-usage-data option. Note this commits effort to mobile while open question 4 (does anyone use this on a phone?) is still unanswered. |
+| P5 | Collapse the four "Not measured" tiles into one verdict block and move the section below the populated ones | **Accepted** | Accepted with the move, over a collapse-in-place variant. Nothing is removed: the four formulas and the reason text stay inside the retained `<details>`. |
+
+Stage 1 is gated in full. Stages 2 and 3 are not yet gated.
+
+### Corrections to earlier statements in this document
+
+- §6 Stage 1 previously implied a larger mobile saving than the measurements support. The
+  measured figure is chrome before content **880px → ~283px, a ~597px saving** — the Reports
+  rail moves below the content, it is not removed, and the header and Studio nav remain above.
+- The `order` values sketched for P4 are illustrative. The existing ≤650px block already assigns
+  `order` to five elements with implicit ties, and `.input-pane`/`.output-pane` sit inside
+  `main.review-workspace` rather than directly in the flex container, so the exact cascade must
+  be verified in the browser at implementation time rather than taken from the sketch.
+
+### Not yet gated
+
+Stage 2 (items 6–12) and Stage 3 (items 13, 14, 16 — item 15 closed by P3) remain open. No
+implementation has started on any accepted item.
