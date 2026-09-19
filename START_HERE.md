@@ -1,6 +1,6 @@
 # Start here
 
-The current build is application **0.13.0**, bundle **1.17**, foundation **F3**.
+The current build is application **0.13.0**, bundle **1.18**, foundation **F3**, schema **5**.
 
 Read only the documents needed for the task:
 

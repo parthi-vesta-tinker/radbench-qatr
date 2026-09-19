@@ -12,7 +12,7 @@ from backend.settings import runtime_config
 
 
 def test_exact_upstream_inventory_and_complete_composition():
-    snap = skill_runtime.load_snapshot(release_id=content.VESTA_RELEASE)
+    snap = skill_runtime.load_snapshot(profile=content.VESTA_PROFILE)
     root = skill_runtime.ROOT / "clinical-content/references"
     raw = {name: (root / name).read_bytes() for name in content.SOURCE_FILES}
     catalog = content.validate_catalog(raw)
@@ -35,7 +35,7 @@ def test_exact_upstream_inventory_and_complete_composition():
 
 
 def test_catalog_attribution_and_exception_anchors():
-    snap = skill_runtime.load_snapshot(release_id=content.VESTA_RELEASE)
+    snap = skill_runtime.load_snapshot(profile=content.VESTA_PROFILE)
     report = "Findings: Known unchanged pulmonary embolism.\nImpression: Pulmonary embolism."
     rule = snap["catalog"]["rules"][25]
     assert rule["source_label"] == "Pulmonary Embolism"
@@ -64,8 +64,9 @@ def test_catalog_attribution_and_exception_anchors():
 
 def test_tenant_binding_draft_isolation_and_captured_release(client, monkeypatch, tmp_path):
     tenants = tmp_path / "tenants.json"
-    tenants.write_text(json.dumps({"vesta": {"skill_release":content.VESTA_RELEASE},
-                                  "other": {"skill_release":content.GENERIC_RELEASE}}))
+    vesta_release, generic_release = content.binding("vesta", {}), content.binding("other", {})
+    tenants.write_text(json.dumps({"vesta": {"skill_release":vesta_release},
+                                  "other": {"skill_release":content.GENERIC_PROFILE}}))
     monkeypatch.setenv("QA_TENANTS_FILE", str(tenants))
     monkeypatch.setattr(store, "DATA", tmp_path / "db")
     store.init()
@@ -85,25 +86,28 @@ def test_tenant_binding_draft_isolation_and_captured_release(client, monkeypatch
     receipt, _ = store.reserve("vesta", uuid.uuid4().hex,
         ReviewInput(report_text="Findings: Clear lungs.\nImpression: No acute disease."), cfg)
     rid = receipt["body"]["id"]
-    tenants.write_text(json.dumps({"vesta":{"skill_release":content.GENERIC_RELEASE},"other":{}}))
-    assert runtime_config("vesta")["skill_release"] == content.GENERIC_RELEASE
+    tenants.write_text(json.dumps({"vesta":{"skill_release":content.GENERIC_PROFILE},"other":{}}))
+    assert runtime_config("vesta")["skill_release"] == generic_release
     assert store.job("vesta", rid)[1] == cfg
     with store.db() as conn:
-        assert conn.execute("SELECT active_release FROM tenants WHERE id='vesta'").fetchone()[0] == content.VESTA_RELEASE
+        assert conn.execute("SELECT active_release FROM tenants WHERE id='vesta'").fetchone()[0] == vesta_release
 
 
 def test_complete_request_context_bounds():
-    snap = skill_runtime.load_snapshot(release_id=content.VESTA_RELEASE)
+    snap = skill_runtime.load_snapshot(profile=content.VESTA_PROFILE)
     prompt = content.combined_instructions(snap)
     assert content.check_request_bound(prompt, "Report", output_tokens=6000) > 60000
     with pytest.raises(ReviewProblem) as exc:
         content.check_request_bound(prompt, "Report", output_tokens=6000, context_limit=20000)
     assert exc.value.code == "REVIEW_CONTEXT_TOO_LARGE"
     with pytest.raises(ValueError): content.binding("other", {"skill_release":"unknown"})
+    with pytest.raises(ValueError): content.binding("other", {"skill_release":"generic-9.9.9"})
+    assert content.binding("other", {}) == content.release_id(
+        content.GENERIC_PROFILE, skill_runtime.installed_version())
 
 
 def test_catalog_fixture_relationships_and_qualifier_guidance():
-    snap = skill_runtime.load_snapshot(release_id=content.VESTA_RELEASE)
+    snap = skill_runtime.load_snapshot(profile=content.VESTA_PROFILE)
     cases = json.loads((skill_runtime.ROOT / "clinical-content/evaluation/catalog-cases.json").read_text())
     assert cases["status"] == "proposed_not_adjudicated"
     assert {c["partition"] for c in cases["cases"]} == {"development", "held_out"}

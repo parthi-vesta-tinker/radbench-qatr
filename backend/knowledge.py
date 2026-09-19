@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from . import store, skill_runtime
+from . import packs, store, skill_runtime
 from .access import AccessError, tenants
 
 
@@ -90,8 +90,8 @@ def digest(text):
 
 def installed(tenant):
     root = Path(os.environ.get("QA_SKILL_PACKAGE_DIR", str(skill_runtime.ROOT)))
-    from .content import binding
-    snapshot = skill_runtime.load_snapshot(root, release_id=binding(tenant, tenants()[tenant]))
+    from .content import profile
+    snapshot = skill_runtime.load_snapshot(root, profile=profile(tenant, tenants()[tenant])[0])
     content_root = (root / "clinical-content").resolve()
     inventory = json.loads((content_root / "MANIFEST.json").read_text(encoding="utf-8"))["files"]
     hashes = {row["path"]: row["sha256"] for row in inventory}
@@ -150,8 +150,8 @@ def sources(tenant):
         raise AccessError(503, "KNOWLEDGE_SOURCE_UNAVAILABLE", "Installed skills or guidance could not be verified. Check service health and backend configuration.") from exc
 
 
-def head(conn, tenant, key):
-    row = conn.execute("SELECT document FROM knowledge_drafts WHERE tenant_id=? AND document_id=? ORDER BY revision DESC LIMIT 1", (tenant, key)).fetchone()
+def head(conn, tenant, key, workspace=packs.NO_WORKSPACE):
+    row = conn.execute("SELECT document FROM knowledge_drafts WHERE tenant_id=? AND workspace_id=? AND document_id=? ORDER BY revision DESC LIMIT 1", (tenant, workspace, key)).fetchone()
     return json.loads(row[0]) if row else None
 
 
@@ -162,21 +162,21 @@ def summary(doc, draft, package_hash):
                     source_changed=bool(draft and (draft["source_sha256"] != doc["source_sha256"] or draft["package_sha256"] != package_hash)))
 
 
-def catalog(tenant, can_edit):
+def catalog(tenant, can_edit, workspace=packs.NO_WORKSPACE):
     snapshot, docs = sources(tenant)
     with store.db() as conn:
         conn.execute("BEGIN")
-        items = [summary(doc, head(conn, tenant, key), snapshot["content_sha256"]) for key, doc in docs.items()]
+        items = [summary(doc, head(conn, tenant, key, workspace), snapshot["content_sha256"]) for key, doc in docs.items()]
     return Catalog(package_version=snapshot["content_version"], package_sha256=snapshot["content_sha256"], can_edit=can_edit, items=items)
 
 
-def detail(tenant, key):
+def detail(tenant, key, workspace=packs.NO_WORKSPACE):
     snapshot, docs = sources(tenant)
     if key not in docs:
         raise AccessError(404, "KNOWLEDGE_NOT_FOUND", "Knowledge document not found.")
     doc = docs[key]
     with store.db() as conn:
-        rows = conn.execute("SELECT document FROM knowledge_drafts WHERE tenant_id=? AND document_id=? ORDER BY revision DESC LIMIT 21", (tenant, key)).fetchall()
+        rows = conn.execute("SELECT document FROM knowledge_drafts WHERE tenant_id=? AND workspace_id=? AND document_id=? ORDER BY revision DESC LIMIT 21", (tenant, workspace, key)).fetchall()
     history = [Draft.model_validate_json(row[0]) for row in rows[:20]]
     draft = history[0] if history else None
     diff = "".join(difflib.unified_diff(doc["content"].splitlines(keepends=True), draft.content.splitlines(keepends=True), fromfile="installed", tofile=f"draft-r{draft.revision}")) if draft else ""
@@ -185,8 +185,9 @@ def detail(tenant, key):
                   draft=draft, saved_diff=diff, recent_revisions=history, history_truncated=len(rows)>20)
 
 
-def save(tenant, document_id, payload, key, version):
-    operation = f"POST /api/v1/knowledge/{document_id}/drafts"
+def save(tenant, document_id, payload, key, version, workspace=packs.NO_WORKSPACE):
+    operation = (f"POST /api/v1/workspaces/{workspace}/skills/{document_id}" if workspace
+                 else f"POST /api/v1/knowledge/{document_id}/drafts")
     data = payload.model_dump()
     # Receipt lookup precedes source verification so accepted work can replay after package drift.
     with store.db() as conn:
@@ -204,22 +205,23 @@ def save(tenant, document_id, payload, key, version):
         saved = store.replay_in(conn, tenant, operation, key, data, version)
         if saved:
             return saved, False
-        previous = head(conn, tenant, document_id)
+        previous = head(conn, tenant, document_id, workspace)
         revision = previous["revision"] if previous else 0
         if payload.expected_revision != revision:
             raise AccessError(409, "KNOWLEDGE_REVISION_CONFLICT", "A newer draft exists. Reload the document and reconcile your edits before saving.")
         doc = Draft(draft_id=store.new_id("kd"), document_id=document_id, revision=revision+1,
                     content=payload.content, content_sha256=digest(payload.content), source_sha256=source["source_sha256"],
                     package_sha256=snapshot["content_sha256"], change_note=payload.change_note.strip(), created_at=store.now())
-        conn.execute("INSERT INTO knowledge_drafts VALUES(?,?,?,?,?)", (tenant, document_id, revision+1, doc.draft_id, store.canonical(doc.model_dump())))
+        conn.execute("INSERT INTO knowledge_drafts(tenant_id,workspace_id,document_id,revision,id,document) VALUES(?,?,?,?,?,?)",
+                     (tenant, workspace, document_id, revision+1, doc.draft_id, store.canonical(doc.model_dump())))
         saved = store.receipt(201, doc.model_dump())
         store.remember(conn, tenant, operation, key, data, version, saved)
         return saved, True
 
 
-def export_draft(tenant, key, revision):
+def export_draft(tenant, key, revision, workspace=packs.NO_WORKSPACE):
     with store.db() as conn:
-        row = conn.execute("SELECT document FROM knowledge_drafts WHERE tenant_id=? AND document_id=? AND revision=?", (tenant, key, revision)).fetchone()
+        row = conn.execute("SELECT document FROM knowledge_drafts WHERE tenant_id=? AND workspace_id=? AND document_id=? AND revision=?", (tenant, workspace, key, revision)).fetchone()
     if row is None:
         raise AccessError(404, "DRAFT_NOT_FOUND", "Saved draft not found.")
     return {"object": "qa_knowledge_draft_export", "format_version": 1, "tenant_id": tenant,

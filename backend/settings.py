@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 ROOT = Path(__file__).resolve().parents[1]
-DATA = Path(os.environ.get("QA_DATA_DIR", str(ROOT / ".qa-data-foundation-v3"))).resolve()
+DATA = Path(os.environ.get("QA_DATA_DIR", str(ROOT / ".qa-data-foundation-v4"))).resolve()
 APP_VERSION = "foundation-f3-0.13.0"
 
 
@@ -28,8 +28,16 @@ def runtime_config(tenant_id="vesta") -> dict:
         )
     from .skill_runtime import load_snapshot, instructions, SkillStageOutput
 
-    from .content import binding, combined_instructions
-    snapshot = load_snapshot(release_id=binding(tenant_id, entry))
+    from .content import combined_instructions, profile
+    from .packs import PUBLISHED
+
+    name, pinned = profile(tenant_id, entry)
+    # Live report QA composes the published pack only. A draft pack is never reachable here.
+    snapshot = load_snapshot(profile=name, pack=PUBLISHED)
+    if pinned and pinned != snapshot["content_version"]:
+        raise ValueError(
+            f"Configured skill release pins content {pinned}; the installed pack is {snapshot['content_version']}."
+        )
     tasks = {
         stage: instructions(
             snapshot,
@@ -46,7 +54,7 @@ def runtime_config(tenant_id="vesta") -> dict:
     config = dict(
         mode=mode,
         model=model or None,
-        prompt_version="qa-skills-0.3.0-combined-1",
+        prompt_version=f"qa-skills-{snapshot['content_version']}-combined-1",
         skill_release=snapshot["release_id"],
         combined_instructions=combined_instructions(snapshot, policy),
         skill_snapshot=snapshot,

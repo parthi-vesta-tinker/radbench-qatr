@@ -55,7 +55,7 @@ def db():
         conn.close()
 
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 
 def init():
@@ -84,9 +84,11 @@ def init():
             if statement.strip():
                 raise RuntimeError("Incomplete bootstrap schema")
             conn.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
-        from .content import binding
+        # The configured profile, not a resolved release: bootstrap has not composed a pack yet.
+        # Accepting a review records the resolved release id for the snapshot it captured.
+        from .content import profile
         for tenant, entry in tenants().items():
-            conn.execute("INSERT INTO tenants(id,active_release) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET active_release=excluded.active_release", (tenant, binding(tenant, entry)))
+            conn.execute("INSERT INTO tenants(id,active_release) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET active_release=excluded.active_release", (tenant, profile(tenant, entry)[0]))
         for row in conn.execute("SELECT config FROM reviews WHERE json_extract(document,'$.execution_status') IN ('queued','running')"):
             if json.loads(row["config"]).get("workflow_version") != APP_VERSION:
                 raise RuntimeError("Pending workflow version mismatch. Use the matching application or a fresh QA_DATA_DIR.")

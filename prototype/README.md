@@ -1,6 +1,6 @@
 # Current prototype documentation
 
-This directory contains the current application contract and generated artifacts for application **0.13.0** / foundation **F3**. Older plans, screenshots, and design studies are under `../design-history/` and are not implementation authority.
+This directory contains the current application contract and generated artifacts for application **0.13.0** / foundation **F3** / schema **5**. Older plans, screenshots, and design studies are under `../design-history/` and are not implementation authority.
 
 ## Read by task
 
@@ -15,12 +15,24 @@ This directory contains the current application contract and generated artifacts
 | Change analytics or outcomes | [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) |
 | Change Skills Studio | [SKILLS_STUDIO_SPEC.md](SKILLS_STUDIO_SPEC.md) |
 | Review gates or deferred work | [ACCEPTANCE.md](ACCEPTANCE.md) and [BACKLOG.md](BACKLOG.md) |
+| Review UI problems and proposed enhancements | [UI_ENHANCEMENT_RESEARCH.md](UI_ENHANCEMENT_RESEARCH.md) |
+
+## Proposals under review
+
+These are not implementation authority. They describe target behavior that changes nothing until accepted.
+
+| Proposal | Document |
+|---|---|
+| Skill pack reorganization and playground | [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) |
+| Playground interaction model | [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md) |
 
 `BLUEPRINT.html` is a generated reading edition of this current set. Rebuild it with:
 
 ```sh
 uv run python prototype/render_blueprint.py
 ```
+
+`UI_ENHANCEMENT_RESEARCH.md` records observed UI problems, gated enhancement proposals and their verdicts. It is research and a decision log, not implementation authority; the specifications above govern.
 
 `examples/` contains synthetic scenarios used by evaluation tooling. These examples are technical fixtures, not clinical validation.
 

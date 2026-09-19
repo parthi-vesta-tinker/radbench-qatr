@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 from .contracts import ReviewProblem, section_index
-from .content import GENERIC_RELEASE, VESTA_RELEASE, RELEASES, SOURCE_FILES, labeled, validate_catalog
+from . import packs
+from .content import GENERIC_PROFILE, VESTA_PROFILE, PROFILES, SOURCE_FILES, labeled, release_id, validate_catalog
 
 ROOT = Path(__file__).resolve().parents[1] / "qa-skills"
 
@@ -68,14 +69,52 @@ class SkillStageOutput(Strict):
     designation: Designation | None
 
 
-def load_snapshot(root: Path | None = None, *, release_id: str = GENERIC_RELEASE) -> dict:
-    if release_id not in RELEASES:
-        raise ValueError("Unknown skill release")
-    root = (
-        Path(os.environ.get("QA_SKILL_PACKAGE_DIR", str(ROOT)))
-        if root is None
-        else root
-    )
+def package_root(root: Path | None = None) -> Path:
+    return Path(os.environ.get("QA_SKILL_PACKAGE_DIR", str(ROOT))) if root is None else root
+
+
+def installed_version(root: Path | None = None) -> str:
+    """The installed pack version, read from the package and verified against its manifest.
+
+    Identity comes from the pack, not from a constant in this repository. Full package
+    validation still happens in load_snapshot; this is the cheap read used where only the
+    version is needed.
+    """
+    content = package_root(root) / "clinical-content"
+    inventory = {
+        row["path"]: row["sha256"]
+        for row in json.loads((content / "MANIFEST.json").read_text(encoding="utf-8"))["files"]
+    }
+    raw = (content / "registry.json").read_bytes()
+    if hashlib.sha256(raw).hexdigest() != inventory["registry.json"]:
+        raise ValueError("Installed registry does not match the package manifest")
+    version = json.loads(raw)["content_version"]
+    if not isinstance(version, str) or not version.strip():
+        raise ValueError("Installed pack does not declare a content version")
+    return version
+
+
+def load_snapshot(
+    root: Path | None = None,
+    *,
+    profile: str = GENERIC_PROFILE,
+    pack: "packs.PackRef | str | None" = packs.PUBLISHED,
+    overlay: dict[str, str] | None = None,
+) -> dict:
+    """Compose a pack. `published` reads verified installed bytes; a draft overlays a workspace.
+
+    A draft snapshot is stamped `draft:<workspace>@<hash>` and carries the published pack it
+    forked from, so a run made against it cannot be read as a live release.
+    """
+    if profile not in PROFILES:
+        raise ValueError("Unknown skill profile")
+    # Named in full: `ref` is the reference name used by the reference loops below.
+    pack_reference = packs.parse(pack)
+    if pack_reference.is_draft and not overlay:
+        raise packs.PackError("A draft pack requires at least one workspace edit")
+    if overlay and not pack_reference.is_draft:
+        raise packs.PackError("The published pack cannot be overlaid")
+    root = package_root(root)
     spec = importlib.util.spec_from_file_location(
         "qa_package_validator", root / "framework/tools/validate.py"
     )
@@ -95,10 +134,14 @@ def load_snapshot(root: Path | None = None, *, release_id: str = GENERIC_RELEASE
         return raw.decode("utf-8")
 
     registry = json.loads(read("registry.json"))
-    if registry["content_version"] != "0.3.0":
-        raise ValueError("Release binding requires content 0.3.0")
+    published_release = release_id(profile, registry["content_version"])
     catalog = validate_catalog({name: read("references/" + name).encode("utf-8") for name in SOURCE_FILES})
-    selected_catalog = catalog if release_id == VESTA_RELEASE else None
+    selected_catalog = catalog if profile == VESTA_PROFILE else None
+    drafted = overlay or {}
+
+    def compose(relative):
+        """Verified installed text, replaced by this workspace's draft where one exists."""
+        return drafted[relative] if relative in drafted else read(relative)
 
     def selected(ref):
         return selected_catalog is not None or ref["authority"] == "review_guidance_not_policy"
@@ -110,13 +153,18 @@ def load_snapshot(root: Path | None = None, *, release_id: str = GENERIC_RELEASE
     for filename in registry["skills"]:
         item = json.loads(read(filename))
         skills[item["name"]] = item
+    editable = {item["instruction"] for item in skills.values()}
+    for path in drafted:
+        # Frozen references and the pinned source wording are not draftable, by decision.
+        if path not in editable:
+            raise packs.PackError("Only skill instructions can be drafted: " + path)
     stages, owners = {}, {}
     for stage, names in registry["stages"].items():
         chunks, refs = [], set()
         stage_owners = {}
         for name in names:
             skill = skills[name]
-            chunks.append(read(skill["instruction"]))
+            chunks.append(compose(skill["instruction"]))
             if skill["owns"]:
                 stage_owners[name] = skill["owns"]
             for ref in skill["references"]:
@@ -128,13 +176,21 @@ def load_snapshot(root: Path | None = None, *, release_id: str = GENERIC_RELEASE
     combined, included = [], set()
     for name in dict.fromkeys(name for names in registry["stages"].values() for name in names):
         skill = skills[name]
-        combined.append(read(skill["instruction"]))
+        combined.append(compose(skill["instruction"]))
         for ref in skill["references"]:
             if selected(ref) and ref["path"] not in included:
                 included.add(ref["path"])
                 combined.append(reference(ref))
+    composed_sha256 = hashlib.sha256(
+        json.dumps({"stages": stages, "combined": "\n\n".join(combined)}, sort_keys=True).encode()
+    ).hexdigest()
     value = dict(
-        release_id=release_id,
+        release_id=(pack_reference.stamp(composed_sha256) if pack_reference.is_draft
+                    else published_release),
+        pack_ref=str(pack_reference),
+        pack_sha256=composed_sha256,
+        forked_from=published_release,
+        drafted_paths=sorted(overlay or {}),
         catalog=selected_catalog,
         reference_bytes={p: read(p) for p in sorted(included)},
         reference_hashes={p: inventory[p] for p in sorted(included)},
