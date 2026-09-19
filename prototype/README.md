@@ -16,6 +16,15 @@ This directory contains the current application contract and generated artifacts
 | Change Skills Studio | [SKILLS_STUDIO_SPEC.md](SKILLS_STUDIO_SPEC.md) |
 | Review gates or deferred work | [ACCEPTANCE.md](ACCEPTANCE.md) and [BACKLOG.md](BACKLOG.md) |
 
+## Proposals under review
+
+These are not implementation authority. They describe target behavior that changes nothing until accepted.
+
+| Proposal | Document |
+|---|---|
+| Skill pack reorganization and playground | [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) |
+| Playground interaction model | [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md) |
+
 `BLUEPRINT.html` is a generated reading edition of this current set. Rebuild it with:
 
 ```sh
