@@ -1,4 +1,4 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Vesta Report QA — current documentation</title><style>*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#20242b;font:16px/1.65 system-ui,-apple-system,sans-serif}header{padding:44px max(5vw,24px);background:#20242b;color:#fff}header p{max-width:850px;color:#d5d7dc}nav{position:sticky;top:0;display:flex;gap:18px;flex-wrap:wrap;padding:14px max(5vw,24px);background:#fff;border-bottom:1px solid #dde2e8}a{color:#245bb2}main{max-width:1120px;margin:auto;background:#fff;padding:20px 46px 50px}h2{font-size:29px;border-top:2px solid #dde2e8;padding-top:22px;margin-top:42px}h3{font-size:21px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid #dde2e8}th{background:#f0f2f5}.table-wrap{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f8;padding:16px;border-left:3px solid #737d8c}code{font-family:ui-monospace,monospace}footer{text-align:center;color:#59616d;padding:28px}@media(max-width:700px){main{padding:12px 18px}nav{position:static}}@media print{nav{position:static}body{background:#fff}main{padding:0}}</style></head><body><header><strong>Vesta / Report QA</strong><h1>Current foundation documentation</h1><p>Application 0.13.0 · bundle 1.17 · F1–F3 implemented · F4/F5 pending. This edition contains only active contracts and evidence.</p></header><nav><a href="#plan">Foundation plan</a><a href="#changes">Implemented decisions</a><a href="#status">Implementation status</a><a href="#api">API contract</a><a href="#dbos">DBOS and recovery</a><a href="#workspace">Workspace</a><a href="#analytics">Analytics</a><a href="#skills">Skills Studio</a><a href="#acceptance">Acceptance gates</a><a href="#backlog">Backlog</a></nav><main><section id="plan"><h2 id="plan-clean-start-foundation-implementation-plan">Clean-start foundation implementation plan</h2>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Vesta Report QA — current documentation</title><style>*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#20242b;font:16px/1.65 system-ui,-apple-system,sans-serif}header{padding:44px max(5vw,24px);background:#20242b;color:#fff}header p{max-width:850px;color:#d5d7dc}nav{position:sticky;top:0;display:flex;gap:18px;flex-wrap:wrap;padding:14px max(5vw,24px);background:#fff;border-bottom:1px solid #dde2e8}a{color:#245bb2}main{max-width:1120px;margin:auto;background:#fff;padding:20px 46px 50px}h2{font-size:29px;border-top:2px solid #dde2e8;padding-top:22px;margin-top:42px}h3{font-size:21px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid #dde2e8}th{background:#f0f2f5}.table-wrap{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f8;padding:16px;border-left:3px solid #737d8c}code{font-family:ui-monospace,monospace}footer{text-align:center;color:#59616d;padding:28px}@media(max-width:700px){main{padding:12px 18px}nav{position:static}}@media print{nav{position:static}body{background:#fff}main{padding:0}}</style></head><body><header><strong>Vesta / Report QA</strong><h1>Current foundation documentation</h1><p>Application 0.13.0 · bundle 1.18 · schema 5 · F1–F3 implemented · F4/F5 pending. This edition contains only active contracts and evidence.</p></header><nav><a href="#plan">Foundation plan</a><a href="#changes">Implemented decisions</a><a href="#status">Implementation status</a><a href="#api">API contract</a><a href="#dbos">DBOS and recovery</a><a href="#workspace">Workspace</a><a href="#analytics">Analytics</a><a href="#skills">Skills Studio</a><a href="#acceptance">Acceptance gates</a><a href="#backlog">Backlog</a></nav><main><section id="plan"><h2 id="plan-clean-start-foundation-implementation-plan">Clean-start foundation implementation plan</h2>
 <p>Decision revision: 2026-09-17. Status: F1–F3 implemented in 0.13.0; F4/F5 remain pending. See [foundation changelog](FOUNDATION_CHANGELOG.md) for decisions and executed tests. Baseline inspected: bundle 1.14 / application 0.10.0. This document is the authority for the next build; [implementation status](IMPLEMENTATION_STATUS.md) remains the authority for what has actually been built and tested.</p>
 <h3 id="plan-1-scope-and-decisions">1. Scope and decisions</h3>
 <p>Keep the working product; simplify its foundations. Reuse FastAPI, SQLite, DBOS, the OpenAI Agents SDK/DBOSRunner integration, and the existing React workspace. Do not introduce a microservice, agent platform, ORM rewrite, vector database or generic workflow engine.</p>
@@ -10,7 +10,7 @@
 <tr><td>Critical references</td><td>Import qatr&#x27;s three pinned reference artifacts and complete 43-entry catalog. Preserve the distinction between source text, normalized catalog and proposed matching guidance.</td></tr>
 <tr><td>Tenant isolation</td><td>Authenticated tenant owns data, draft history and explicit active-package binding. Never accept tenant/package overrides from report text.</td></tr>
 <tr><td>Extensibility</td><td>Public API models, private model-output models and database records have separate responsibilities. Version their contracts explicitly without building legacy adapters now.</td></tr>
-<tr><td>Spend</td><td>Explicit authorization before live tests; at most $1 aggregate per authorized session unless the user explicitly raises it. Resetting review data must not reset spending authority.</td></tr>
+<tr><td>Spend</td><td>Not modelled in the application. Removed by explicit user decision; provider cost is managed in the OpenAI account. A request that cannot fit the context window is rejected before dispatch, never clipped.</td></tr>
 </tbody></table></div>
 <p>Old instructions to preserve completed rows, historical API projections or pending old workflows are superseded for this cutover only. Durable recovery, receipt replay and immutability still apply to reviews created within the new build. Disposable old data does not mean disposable history functionality or permission to silently reset data on startup.</p>
 <h3 id="plan-2-architecture-aligned-to-the-current-code">2. Architecture aligned to the current code</h3>
@@ -55,7 +55,7 @@
 <tr><td><code>idempotency</code></td><td>Tenant/operation/key uniqueness, request fingerprint, original response and acceptance metadata. No cross-tenant receipt reads.</td></tr>
 <tr><td><code>model_attempts</code></td><td>Unique tenant/review attempt, dispatch claim, provider request/response ID if available, usage, output/checkpoint reference and terminal outcome. Never a general event-sourcing framework.</td></tr>
 </tbody></table></div>
-<p>Budget authorizations/reservations belong to a small durable spend ledger outside disposable review and DBOS storage; see section 7. Installed packages remain immutable files with a manifest, not a new content registry service or dozens of database rows for the 43 catalog entries.</p>
+<p>No budget or spend table exists; see section 7. Installed packages remain immutable files with a manifest, not a new content registry service or dozens of database rows for the 43 catalog entries.</p>
 <p>Use relational columns for identities, joins, permissions, states, timestamps and frequent filters. Use versioned JSON for variable snapshot/model metadata and source anchors, not a copy of the entire mutable HTTP resource. Derive clipboard strings and public arrays through one presenter from persisted canonical results; pin its result/presentation version for accepted reviews.</p>
 <p>Enable foreign keys on every connection, use tenant-inclusive composite foreign keys, uniqueness constraints and guarded state updates. Index tenant/time/ID history, tenant/state dispatch, feedback targets and outcome subject/time. Use transactions and appropriate SQLite busy timeout/WAL settings; validate concurrent acceptance and draft saves. Do not hold a SQL transaction while waiting on OpenAI or DBOS dispatch. Test query plans on a moderately sized synthetic fixture.</p>
 <h3 id="plan-5-qatr-content-and-tenant-scoped-authoring">5. qatr content and tenant-scoped authoring</h3>
@@ -86,14 +86,13 @@
 <tr><td>Final application commit complete</td><td>Reads/replays return the persisted result; no duplicate observations or receipts.</td></tr>
 </tbody></table></div>
 <p>A deliberate rerun is a new review linked to its predecessor, with explicit operator authorization and budget admission; it never silently changes the old result. Use a new workflow namespace at this incompatible cutover and an empty DBOS store. Prove same-build recovery; arbitrary old-code replay is out of scope. Keep DBOS in control of the event loop.</p>
-<h3 id="plan-7-session-spend-protection-and-diagnostics">7. Session spend protection and diagnostics</h3>
-<p>Do not treat an API key, an old test allowance or a fresh database as permission to spend. Require explicit live-test authorization tied to a durable session ID, expiry and ceiling at or below $1. Sum completed costs plus outstanding conservative reservations across all concurrent reports, diagnostics and evaluation requests in that authorized session.</p>
-<p>Before acceptance, reserve the worst-case bound for full input plus bounded output/reasoning under a verified pricing snapshot for the configured model. Use integer currency units, round up, assume no cache discount and allow safety headroom. Unsupported pricing/token accounting means fail closed. Set the provider output limit consistently with that bound. Record actual usage when available; leave unknown attempts conservatively charged/reserved. Do not claim this is an account-wide billing cap for calls made outside this app.</p>
-<p>Keep the spend ledger outside resettable app/DBOS directories. Reserve idempotently before the application transaction; a crash leaves a conservative orphan reservation, not free budget. Reconcile using the acceptance key/review identity; refund only with evidence no attempt occurred. This small failure-safe reconciliation avoids pretending there is an atomic transaction across the ledger, application database and provider. A missing ledger must not silently recreate an already-authorized session with a fresh allowance. New sessions or increases require permission.</p>
+<h3 id="plan-7-request-admission-and-diagnostics">7. Request admission and diagnostics</h3>
+<p>Spend authorization, pricing snapshots and the session ledger were removed by explicit user decision and must not be reintroduced. A review is admitted on configuration readiness and context size alone: the composed instructions plus the report plus the bounded output must fit the context allowance, or the request is rejected before dispatch with <code>REVIEW_CONTEXT_TOO_LARGE</code>. Instructions and report text are never clipped to make a request fit.</p>
+<p>Record actual provider usage when it is available and leave it null when it is not. Usage is observability, not accounting. The application makes no claim about provider billing.</p>
 <p>Structured operational logs carry request/review/workflow/attempt IDs, tenant-safe identifiers, phase, latency, usage and safe errors. Redact report text, prompts, API keys and policy contents by default. Exposed test keys must be rotated before future live use. No paid probes on startup.</p>
 <h3 id="plan-8-clean-bootstrap-not-migration">8. Clean bootstrap, not migration</h3>
 <p>Prefer a new, explicitly named development data directory over deleting the old one. During implementation, stop old workers, verify the exact configured application and DBOS locations, and point the new build at fresh stores together. Re-seed only synthetic demo records and explicit tenant/content bindings. Do not copy old reviews, receipts, drafts or pending workflow records.</p>
-<p>A later reset helper must preview exact paths, refuse broad/root/repository targets, require explicit confirmation, stop or reject active workers and preserve secrets, installed releases, source files and the independent spend ledger. A reset also invalidates local browser review IDs; clear or reject stale identities without re-submitting their report text. No reset was performed while writing this plan. Backup/restore and migrations become gates before retained real data.</p>
+<p>A later reset helper must preview exact paths, refuse broad/root/repository targets, require explicit confirmation, stop or reject active workers and preserve secrets, installed releases and source files. A reset also invalidates local browser review IDs; clear or reject stale identities without re-submitting their report text. No reset was performed while writing this plan. Backup/restore and migrations become gates before retained real data.</p>
 <h3 id="plan-9-implementation-sequence-and-gates">9. Implementation sequence and gates</h3>
 <div class=table-wrap><table><thead><tr><th>Phase</th><th>Deliverable</th><th>Gate before moving on</th></tr></thead><tbody>
 <tr><td>F1 — Contracts and fresh schema</td><td>Public/private Pydantic models, endpoint examples, bootstrap DDL, typed persistence, schema/version checks, generated OpenAPI/TS and existing feature fixtures.</td><td>Contract/error/pagination/tenant/FK/idempotency tests; no legacy projection/migration branches. All current feature routes represented.</td></tr>
@@ -117,8 +116,37 @@
 </tbody></table></div>
 <p>Reference entrypoints: [API design](API_DESIGN.md), [DBOS validation](DBOS_VALIDATION.md), [acceptance](ACCEPTANCE.md), [Workspace](WORKSPACE_SPEC.md), [Analytics](ANALYTICS_SPEC.md), [Skills Studio](SKILLS_STUDIO_SPEC.md), [backlog](BACKLOG.md).</p>
 <p>Sources: <a href="https://github.com/parthi-vesta-tinker/qatr/tree/b906151a2bdef8c206325de64d46b61cdf5b7ad7/src/qatr/_vendor/qa_skills/skills/qa-critical-match/references">pinned qatr references</a> and <a href="https://developers.openai.com/api/docs/guides/structured-outputs">OpenAI structured outputs</a>. Structured schemas constrain shape, not clinical correctness; refusal and incomplete output need explicit handling. Runtime/DBOS claims must be checked against installed code and F3 tests.</p></section><section id="changes"><h2 id="changes-foundation-implementation-decisions-and-releases">Foundation implementation decisions and releases</h2>
+<h3 id="changes-pack-references-and-skill-workspaces-schema-5-bundle-1-18">Pack references and skill workspaces — schema 5 / bundle 1.18</h3>
+<p>Implemented 2026-09-19 as P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md), with the interaction model in [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Application version, API version and workflow identities are unchanged: no workflow shape, recovery semantic or public contract moved.</p>
+<ul>
+<li><code>load_snapshot</code> takes a pack reference. <code>published</code> is today&#x27;s verified read. <code>draft:&lt;workspace&gt;</code></li>
+</ul>
+<p>  overlays that tenant workspace&#x27;s saved skill drafts and is stamped   <code>draft:&lt;workspace&gt;@&lt;pack-hash&gt;</code>. Live report QA resolves <code>published</code> only, and <code>packs.py</code> refuses   a draft reference on that path.</p>
+<ul>
+<li>Pack identity is derived, not hardcoded. A tenant binds a *profile* (<code>vesta-qatr</code>, <code>generic</code>);</li>
+</ul>
+<p>  the version is read from the installed package. Bindings still resolve to <code>vesta-qatr-0.3.0</code> and   <code>generic-0.3.0</code>, and a configured pin is refused when the installed pack does not carry it.   The three hardcoded <code>0.3.0</code> constants are gone.</p>
+<ul>
+<li>Schema 5 adds <code>skill_workspaces</code> and <code>playground_runs</code> and scopes <code>knowledge_drafts</code> by</li>
+</ul>
+<p>  workspace. A draft saved outside a workspace is an editorial record that still never composes.   The default store moves to <code>.qa-data-foundation-v4</code>; a schema-4 store is refused, never migrated.</p>
+<ul>
+<li>A workspace pins the published pack it forked from. When live moves past that pin, composition is</li>
+</ul>
+<p>  refused until an explicit rebase, which preserves saved revisions, clears stored runs, and returns   a submitted workspace to open.</p>
+<ul>
+<li>Only skill instructions are composable. A workspace draft targeting the frozen catalog or pinned</li>
+</ul>
+<p>  source wording is refused at composition rather than silently dropped.</p>
+<p>There is no playground interface, no run endpoint and no output diff yet; those are P2.</p>
+<h2 id="changes-spend-removal-2026-09-18">Spend removal — 2026-09-18</h2>
+<p>Removed by explicit user decision: &quot;spending is not a problem&quot;, after the running application rejected a review with <code>SPEND_LIMIT_EXCEEDED</code>.</p>
+<p>Deleted <code>backend/spend.py</code>, <code>scripts/authorize_spend.py</code> and <code>tests/test_spend.py</code>. Removed the reservation step from review acceptance, claim/settle from the guarded dispatch path, <code>release_unclaimed</code> from failure handling, the <code>--spend-session</code> requirement from the launcher, and <code>cost_upper_bound_micro_usd</code> from reported metrics. <code>model_attempts.reservation_id</code> is now <code>attempt_id</code>; the column is written positionally, so existing databases are unaffected and <code>SCHEMA_VERSION</code> is unchanged.</p>
+<p>Retained: the context-window guard (<code>REVIEW_CONTEXT_TOO_LARGE</code>), at-most-once dispatch claims, durable response checkpoints, <code>MODEL_OUTCOME_UNKNOWN</code> with no automatic retry, and observed token usage as observability. <code>attempts.uncertain()</code> now decides from the attempt checkpoint alone: the claim is written before dispatch, so no row means the provider was never called.</p>
+<p>Verification: 100 passed, 1 deselected. The deselected case, <code>test_public_schema_and_generated_client_do_not_drift</code>, fails identically on the unmodified tree in this container — FastAPI renders 422 as &quot;Unprocessable Entity&quot; where the checked-in <code>prototype/openapi.json</code> says &quot;Unprocessable Content&quot;. Unrelated to this change and left alone.</p>
 <h3 id="changes-f3-durable-single-call-execution-application-0-13-0-bundle-1-17">F3 — Durable single-call execution — application 0.13.0 / bundle 1.17</h3>
 <p>Implemented 2026-09-18. API <strong>2026-09-18</strong>, SQLite schema <strong>4</strong>, workflow application <code>foundation-f3-0.13.0</code>, queue <code>qa-reviews-f3-v1</code>, parent <code>qa.review.f3.v1</code>, child <code>qa.openai.combined.f3.v1</code>. Fresh default <code>.qa-data-foundation-v3</code>; no existing databases were reset or migrated. Pinned clinical content remains 0.3.0 and its hashes are unchanged.</p>
+<p>The session spend ledger described below was removed on 2026-09-18; see <strong>Spend removal</strong> above. Everything else in this entry still describes the installed behavior.</p>
 <h4 id="changes-behavior-and-recovery">Behavior and recovery</h4>
 <ul>
 <li>One combined, tool-free structured request through the existing Agents SDK/DBOSRunner.</li>
@@ -259,10 +287,10 @@
 <p>The GitHub workflow is supplied, not claimed executed remotely. Phase publication is recorded by its Git commit; the next phase must not start before successful publication. No force push.</p>
 <h3 id="changes-next-gates">Next gates</h3>
 <p>F2 is implemented; see the current release above. F3: one combined DBOS request, at-most-once dispatch and independent session-spend ledger. F4: integrated product/browser regression and operational handoff. F5: separate explicit authorization for bounded live evaluation and qualified review.</p></section><section id="status"><h2 id="status-implementation-status">Implementation status</h2>
-<p>Current release: application <strong>0.13.0</strong>, bundle <strong>1.17</strong>, foundation <strong>F3</strong>, API <strong>2026-09-18</strong>, SQLite schema <strong>4</strong>.</p>
+<p>Current release: application <strong>0.13.0</strong>, bundle <strong>1.18</strong>, foundation <strong>F3</strong>, API <strong>2026-09-18</strong>, SQLite schema <strong>5</strong>.</p>
 <h3 id="status-implemented">Implemented</h3>
 <ul>
-<li>Fresh schema-4 application storage and separate DBOS system storage. Older nonempty schemas fail with an actionable error and are never silently migrated or reset.</li>
+<li>Fresh schema-5 application storage and separate DBOS system storage. Older nonempty schemas fail with an actionable error and are never silently migrated or reset.</li>
 <li>Tenant-scoped review history, feedback, outcomes, analytics, and Skills Studio draft revisions.</li>
 <li>Server-controlled tenant release binding with immutable complete content snapshots. Vesta can use <code>vesta-qatr-0.3.0</code>; other tenants use the generic profile unless explicitly configured.</li>
 <li>Byte-pinned qatr source references, the 43-entry catalog, independently versioned skills, package manifests, reference hashes, and lock validation.</li>
@@ -270,12 +298,14 @@
 <li>Durable DBOS dispatch claim and private response checkpoint. A claimed attempt without a durable response fails as <code>MODEL_OUTCOME_UNKNOWN</code> and never retries automatically.</li>
 <li>Complete output validation for skill coverage, candidate identity, check ownership, exact source anchors, report grounding, grouping, and server-derived copy.</li>
 <li>Four truthful phases: input validation, combined report review, output validation, and comment assembly.</li>
-<li>An independent SQLite spend ledger with explicit expiring session authorization, stable reservations, atomic dispatch claims, and conservative request admission. Each session is capped at $1.</li>
+<li>Atomic dispatch claims and durable response checkpoints. Admission is bounded by the context window only; spend authorization was removed on 2026-09-18 by explicit user decision.</li>
 <li>Generated OpenAPI and TypeScript contracts, React workspace, history, direct comment copy, feedback inbox, analytics, stakeholder outcomes, Skills Studio, health details, and responsive/light/dark behavior.</li>
+<li>Pack references (<code>published</code> and <code>draft:&lt;workspace&gt;</code>), draft pack composition from workspace-scoped drafts, and pack identity derived from the installed package rather than constants in code. This is P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md); it adds no HTTP endpoint and no interface change.</li>
+<li>Schema-5 <code>skill_workspaces</code> and <code>playground_runs</code> tables, workspace fork pinning with explicit rebase, and workspace-scoped <code>knowledge_drafts</code>. Editorial drafts saved outside a workspace still never compose.</li>
 </ul>
 <h3 id="status-verification-completed-for-f3">Verification completed for F3</h3>
 <ul>
-<li><strong>107 Python tests passed</strong>, including contract, store, tenant isolation, controlled SDK/HTTP adapter, spend admission/concurrency, and subprocess recovery tests.</li>
+<li><strong>100 Python tests passed</strong> after the spend removal, including contract, store, tenant isolation, controlled SDK/HTTP adapter, concurrency, and subprocess recovery tests. One OpenAPI drift check is deselected: it fails identically on the unmodified tree in the current container, where FastAPI renders 422 as &quot;Unprocessable Entity&quot; against the checked-in &quot;Unprocessable Content&quot;.</li>
 <li>Recovery covered process termination before claim, after claim, after provider response, after the application response checkpoint, after combined completion, and after final commit.</li>
 <li>Controlled adapter tests covered HTTP 500, incomplete response, refusal, missing usage, unknown tools, malformed/invalid coverage, and replay behavior.</li>
 <li><strong>19 React DOM tests passed</strong> and the TypeScript/Vite production build passed.</li>
@@ -284,10 +314,20 @@
 <li>No paid OpenAI request was made for implementation verification: recorded provider spend was <strong>$0</strong>.</li>
 </ul>
 <p>These checks establish technical behavior with controlled data. They do not establish clinical correctness, patient-data readiness, public deployment readiness, or exactly-once external billing.</p>
+<h3 id="status-verification-completed-for-the-pack-reference-change">Verification completed for the pack reference change</h3>
+<p>Run on 19 September 2026 for P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md).</p>
+<ul>
+<li><strong>110 Python tests passed</strong>, including 10 new controlled tests for pack-reference parsing and stamping, derived pack identity, live refusal of a draft pack, workspace draft composition, editorial drafts that never compose, frozen content that cannot be drafted, fork staleness and rebase, tenant scoping, and playground-run isolation from every live table.</li>
+<li>The same single OpenAPI drift check still fails, and was confirmed to fail identically on unmodified <code>origin/main</code> in this container. It is the checked-in 422 wording, not this change: no HTTP route, schema or response was added or altered.</li>
+<li>Skill package validation, generated TypeScript contract drift, and the documentation boundary check passed.</li>
+<li><strong>20 React DOM tests, the TypeScript/Vite production build, and 9 Playwright scenarios passed</strong> on the merged tree, with the schema-5 store bootstrapped fresh. No frontend file changed by this work.</li>
+<li>No provider request was made. Recorded provider spend was <strong>$0</strong>.</li>
+</ul>
+<p>These are controlled storage and composition checks. They establish no clinical claim, and the playground has no user interface yet.</p>
 <h3 id="status-remaining-phases">Remaining phases</h3>
 <ul>
 <li><strong>F4 — product regression and handoff:</strong> repeat integrated acceptance on a fresh store, review operator-facing failure handling and recovery guidance, verify the distributable bundle, and record any release-blocking issue.</li>
-<li><strong>F5 — bounded evaluation:</strong> obtain separate explicit session authorization, run a predeclared live-provider evaluation within the $1 session ceiling, and keep model behavior review separate from qualified clinical adjudication.</li>
+<li><strong>F5 — bounded evaluation:</strong> run a predeclared live-provider evaluation and keep model behavior review separate from qualified clinical adjudication.</li>
 </ul>
 <p>See [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md) for gate details and [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md) for implementation decisions.</p></section><section id="api"><h2 id="api-api-contract">API contract</h2>
 <p>The active public contract is <code>QA-Version: 2026-09-18</code>; omitting the header selects the same version. Other explicit versions are rejected. Generated [openapi.json](openapi.json) is the schema authority and must be regenerated from the FastAPI application.</p>
@@ -347,9 +387,11 @@ npm --prefix frontend run build</code></pre>
 <h3 id="workspace-layout-and-interaction">Layout and interaction</h3>
 <ul>
 <li><strong>Scope:</strong> a slim reports column with independent in-tab drafts, active work, recent results, and history access. Selection does not jump when another review finishes.</li>
-<li><strong>Work:</strong> the report input appears above the review output. Accepted report text is immutable and read-only. Review report sits beside the minimum-input hint. Revise as new draft leaves the original resource unchanged.</li>
+<li><strong>Work:</strong> the report text appears above the review output, under a <strong>Report text only</strong> badge beside the heading. The accepted review resource is immutable, but its report text stays editable in place: editing enables <strong>Review again</strong>, which submits a new review and leaves the original resource unchanged. <strong>Review</strong> sits beside the minimum-input hint for a new draft.</li>
 <li><strong>Studio:</strong> compact tools for New report, Review history, Feedbacks, Analytics, and Skills &amp; knowledge. Tool navigation preserves the current report draft and mounted editor state.</li>
-<li><strong>Comments:</strong> general comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.</li>
+<li><strong>Review panel:</strong> review steps show real execution state; <strong>Guidance: Next steps</strong> lists the numbered actions for the current state. Guidance is advice, not tracked progress, and stores no per-step state.</li>
+<li><strong>Feedback:</strong> thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.</li>
+<li><strong>Quality review:</strong> the output panel is headed <strong>Quality review</strong>. General comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.</li>
 <li><strong>Responsive behavior:</strong> the three regions stack on narrow screens without hiding actions or changing data semantics. Appearance supports light and dark themes.</li>
 </ul>
 <p>Draft report text lives only in the current tab. Submitted resources persist in SQLite. A delete action supports one exact Undo. Once submission begins, the draft and deletion controls lock; an ambiguous HTTP response keeps the exact input and idempotency key available for retry. After reload, users inspect history before intentionally resubmitting.</p>
@@ -398,7 +440,7 @@ npm --prefix frontend run build</code></pre>
 <ul>
 <li><strong>F1 — contracts and storage:</strong> fresh schema, one public API version, generated contracts, immutable snapshots/results, tenant-safe idempotency, and controlled regression tests.</li>
 <li><strong>F2 — content and snapshots:</strong> pinned qatr sources/catalog, server-controlled tenant releases, complete immutable composition, Studio source/catalog visibility, and package/hash validation.</li>
-<li><strong>F3 — execution and spend:</strong> one combined call, truthful phases, durable claim/response handling, no automatic ambiguous retry, per-session fail-closed spend admission, recovery tests, frontend regression, and source bundle checks.</li>
+<li><strong>F3 — execution:</strong> one combined call, truthful phases, durable claim/response handling, no automatic ambiguous retry, context-bound admission, recovery tests, frontend regression, and source bundle checks.</li>
 </ul>
 <h3 id="acceptance-f4-product-regression-and-handoff">F4 — product regression and handoff</h3>
 <ul>
@@ -409,8 +451,7 @@ npm --prefix frontend run build</code></pre>
 </ul>
 <h3 id="acceptance-f5-bounded-model-and-clinical-evaluation">F5 — bounded model and clinical evaluation</h3>
 <ul>
-<li>Obtain explicit authorization for a named test session and predeclare its cases, model, and stopping rule.</li>
-<li>Keep the aggregate session ceiling at or below $1 and inspect admission before dispatch.</li>
+<li>Predeclare the evaluation cases, model, and stopping rule.</li>
 <li>Separate provider connectivity, model-output evaluation, and qualified clinical adjudication.</li>
 <li>Preserve failures, indeterminate cases, denominators, immutable provenance, and release version. Do not turn feedback acceptance into an accuracy label.</li>
 <li>Do not claim clinical validation, production readiness, or patient-data suitability from technical tests.</li>

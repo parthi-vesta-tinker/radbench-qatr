@@ -1,6 +1,6 @@
 # Local setup and verification
 
-These instructions apply to application **0.13.0**, foundation **F3**, API **2026-09-18**, and schema **4**.
+These instructions apply to application **0.13.0**, foundation **F3**, API **2026-09-18**, and schema **5**.
 
 ## Prerequisites
 
@@ -27,33 +27,21 @@ Run canned demo behavior without a provider call:
 QA_MODE=demo uv run uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-Use fresh schema-4 storage. The default is `.qa-data-foundation-v3`. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are not migrated or deleted.
+Use fresh schema-5 storage. The default is `.qa-data-foundation-v4`. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are not migrated or deleted.
 
 ## Live provider session
 
-Live use requires explicit authorization for each test session. All concurrent calls in that session share one aggregate ceiling. The implementation accepts ceilings up to **$1.00** and has no override above that value.
-
 ```sh
-uv run python scripts/authorize_spend.py \
-  --session my-authorized-test \
-  --ceiling-usd 1.00 \
-  --hours 4 \
-  --authorization "Operator authorized this test session"
-
-uv run python scripts/run_local.py \
-  --model gpt-5.6-sol \
-  --spend-session my-authorized-test
-
-uv run python scripts/authorize_spend.py \
-  --session my-authorized-test \
-  --status
+uv run python scripts/run_local.py --model gpt-5.6-sol
 ```
 
-The launcher prompts for `OPENAI_API_KEY` without storing it. Rotate any key exposed in chat before use. `QA_SPEND_LEDGER` defaults to `.qa-spend/ledger.sqlite`, outside `QA_DATA_DIR`. Never delete or replace the ledger to renew an allowance.
+The launcher prompts for `OPENAI_API_KEY` without storing it. Rotate any key exposed in chat before use.
 
-Admission prices the complete serialized request and response allowance with conservative headroom. Unknown models, expired price data, nonstandard endpoints or tiers, oversized requests, and missing or invalid ledgers are rejected before dispatch. The ledger is a local conservative guard; it is not account-wide provider billing reconciliation.
+There is no spend ledger, session authorization or cost ceiling; they were removed on 2026-09-18 by explicit user decision. Provider cost is managed in the OpenAI account. Live reviews incur ordinary provider charges.
 
-A valid live review makes one provider call. Invalid input makes zero. There is no automatic repair request. After a claimed request with no durable response, the review fails as `MODEL_OUTCOME_UNKNOWN` and is never retried automatically. Submitting a new review is a new explicitly admitted operation.
+A review is admitted on configuration readiness and context size alone. A request whose composed instructions, report and bounded output exceed the context allowance is rejected before dispatch with `REVIEW_CONTEXT_TOO_LARGE`; instructions and report text are never clipped to make one fit.
+
+A valid live review makes one provider call. Invalid input makes zero. There is no automatic repair request. After a claimed request with no durable response, the review fails as `MODEL_OUTCOME_UNKNOWN` and is never retried automatically. Submitting a new review is a new explicit operation.
 
 ## Tenant content
 
@@ -88,7 +76,7 @@ uv run python scripts/package_project.py --manifest-only
 uv run python verify_bundle.py
 ```
 
-`scripts/evaluate_skills.py` is a no-call plan/fixture tool. Use `scripts/evaluate.py` against an already running, authorized F3 API for any live evaluation. Keep provider evaluation results separate from controlled tests and from qualified clinical review.
+`scripts/evaluate_skills.py` is a no-call plan/fixture tool. Use `scripts/evaluate.py` against an already running API for any live evaluation. Keep provider evaluation results separate from controlled tests and from qualified clinical review.
 
 ## Expected local behavior
 

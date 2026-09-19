@@ -5,9 +5,11 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 ## Layout and interaction
 
 - **Scope:** a slim reports column with independent in-tab drafts, active work, recent results, and history access. Selection does not jump when another review finishes.
-- **Work:** the report input appears above the review output. Accepted report text is immutable and read-only. Review report sits beside the minimum-input hint. Revise as new draft leaves the original resource unchanged.
+- **Work:** the report text appears above the review output, under a **Report text only** badge beside the heading. The accepted review resource is immutable, but its report text stays editable in place: editing enables **Review again**, which submits a new review and leaves the original resource unchanged. **Review** sits beside the minimum-input hint for a new draft.
 - **Studio:** compact tools for New report, Review history, Feedbacks, Analytics, and Skills & knowledge. Tool navigation preserves the current report draft and mounted editor state.
-- **Comments:** general comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.
+- **Review panel:** review steps show real execution state; **Guidance: Next steps** lists the numbered actions for the current state. Guidance is advice, not tracked progress, and stores no per-step state.
+- **Feedback:** thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.
+- **Quality review:** the output panel is headed **Quality review**. General comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.
 - **Responsive behavior:** the three regions stack on narrow screens without hiding actions or changing data semantics. Appearance supports light and dark themes.
 
 Draft report text lives only in the current tab. Submitted resources persist in SQLite. A delete action supports one exact Undo. Once submission begins, the draft and deletion controls lock; an ambiguous HTTP response keeps the exact input and idempotency key available for retry. After reload, users inspect history before intentionally resubmitting.

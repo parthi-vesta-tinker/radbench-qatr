@@ -1,11 +1,11 @@
-"""Exercise the actual OpenAI HTTP adapter with a local transport; zero network spend."""
+"""Exercise the actual OpenAI HTTP adapter with a local transport; no network calls."""
 import json
 import re
 import uuid
 import httpx
 import pytest
 from openai import AsyncOpenAI
-from backend import reviewer, spend, attempts
+from backend import reviewer, attempts, store
 from test_api import finish, post
 
 
@@ -47,18 +47,12 @@ def test_actual_http_adapter_is_single_call(client, monkeypatch, outcome):
     result = finish(client,receipt)
     assert len(calls) == 1
     assert result['execution_status'] == ('completed' if outcome in ('valid','missing_usage') else 'failed'), result
-    with spend.db() as conn:
-        r = conn.execute('SELECT * FROM reservations WHERE id=?',(result['id'],)).fetchone()
-    if outcome in ('http_error','incomplete','missing_usage'):
-        assert r['charged'] == r['bound']
-    else:
-        assert r['charged'] == 33
     if outcome in ('valid','refusal','tool_call'):
         metrics = result['steps'][1]['metrics']
-        assert metrics['model_calls'] == 1 and metrics['cost_upper_bound_micro_usd'] == 33
+        assert metrics['model_calls'] == 1
 
 
-def test_invalid_input_uses_zero_calls_and_releases_reservation(client,monkeypatch):
+def test_invalid_input_uses_zero_calls(client,monkeypatch):
     monkeypatch.setenv('QA_MODE','openai')
     monkeypatch.setenv('OPENAI_API_KEY','controlled-only')
     monkeypatch.setenv('OPENAI_MODEL','controlled-sdk-test')
@@ -67,7 +61,6 @@ def test_invalid_input_uses_zero_calls_and_releases_reservation(client,monkeypat
     assert receipt.status_code == 202, receipt.text
     result = finish(client,receipt)
     assert result['execution_status'] == 'needs_input'
-    assert spend.status('controlled-test')['committed_micro_usd'] == 0
 
 
 def test_concurrent_post_replay_uses_one_attempt(client,monkeypatch):
@@ -86,21 +79,7 @@ def test_concurrent_post_replay_uses_one_attempt(client,monkeypatch):
     result=finish(client,responses[0])
     assert result['execution_status']=='completed'
     assert len(calls)==1
-    with spend.db() as conn:
-        assert conn.execute('SELECT count(*) FROM reservations').fetchone()[0]==1
-    monkeypatch.delenv('QA_SPEND_SESSION')
+    with store.db() as conn:
+        assert conn.execute('SELECT count(*) FROM model_attempts WHERE review_id=?',(result['id'],)).fetchone()[0]==1
     monkeypatch.delenv('OPENAI_API_KEY')
     assert post(client,key=key,sample='clean').json()==responses[0].json()
-
-
-def test_missing_session_blocks_acceptance(client,monkeypatch):
-    monkeypatch.setenv('QA_MODE','openai')
-    monkeypatch.setenv('OPENAI_API_KEY','controlled-only')
-    monkeypatch.setenv('OPENAI_MODEL','controlled-sdk-test')
-    monkeypatch.delenv('QA_SPEND_SESSION')
-    monkeypatch.setattr(reviewer,'make_model',lambda *args: pytest.fail('Unauthorized request reached model'))
-    response=post(client,key=uuid.uuid4().hex,sample='clean')
-    assert response.status_code==409
-    assert response.json()['error']['code']=='SPEND_NOT_AUTHORIZED'
-    with spend.db() as conn:
-        assert conn.execute('SELECT count(*) FROM reservations').fetchone()[0]==0

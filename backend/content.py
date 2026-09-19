@@ -3,10 +3,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 
-GENERIC_RELEASE = "generic-0.3.0"
-VESTA_RELEASE = "vesta-qatr-0.3.0"
-RELEASES = {GENERIC_RELEASE, VESTA_RELEASE}
+GENERIC_PROFILE = "generic"
+VESTA_PROFILE = "vesta-qatr"
+PROFILES = {GENERIC_PROFILE, VESTA_PROFILE}
+# A configured binding may name a profile alone or pin it to an installed pack version.
+PINNED = re.compile(r"^(?P<profile>[a-z][a-z0-9-]*?)-(?P<version>\d+\.\d+\.\d+)$")
 PIN = "b906151a2bdef8c206325de64d46b61cdf5b7ad7"
 SOURCE_FILES = {
     "critical-result-notification-source.txt": "aff165e82689304fb8827cbc32920a284eb8e22f",
@@ -21,12 +24,37 @@ AUTHORITIES = {
 }
 
 
-def binding(tenant, entry):
+def profile(tenant, entry):
+    """Server-controlled content profile, and the pack version it is pinned to, if any.
+
+    Configuration may name a bare profile or a pinned release id. This is a pure read of
+    configuration: it never touches the installed package, so tenant validation stays cheap.
+    """
     # Only the bundled local Vesta tenant receives the Vesta evaluation binding by default.
-    release = entry.get("skill_release", VESTA_RELEASE if tenant == "vesta" else GENERIC_RELEASE)
-    if release not in RELEASES:
+    value = entry.get("skill_release", VESTA_PROFILE if tenant == "vesta" else GENERIC_PROFILE)
+    match = PINNED.fullmatch(value) if isinstance(value, str) else None
+    name = match.group("profile") if match else value
+    if name not in PROFILES:
         raise ValueError("Unknown immutable skill release binding")
-    return release
+    return name, (match.group("version") if match else None)
+
+
+def release_id(profile_name, version):
+    """The release identity of a pack: server-controlled profile plus the version in the pack."""
+    return f"{profile_name}-{version}"
+
+
+def binding(tenant, entry):
+    """Resolve this tenant's release id. The profile is configuration; the version is data."""
+    from .skill_runtime import installed_version
+
+    name, pinned = profile(tenant, entry)
+    version = installed_version()
+    if pinned and pinned != version:
+        raise ValueError(
+            f"Configured skill release pins content {pinned}; the installed pack is {version}."
+        )
+    return release_id(name, version)
 
 
 def validate_catalog(raw_files):
@@ -73,17 +101,14 @@ def combined_instructions(snapshot, policy=""):
     )
 
 
-def check_request_bound(instructions, report, *, output_tokens, context_limit=120000,
-                        input_token_allowance=None):
+def check_request_bound(instructions, report, *, output_tokens, context_limit=120000):
     """Conservative UTF-8 byte token bound plus envelope/schema allowance, no clipping.
 
-    F3 supplies a spend-derived input allowance after durable authorization; this helper
-    cannot authorize spend or claim a model-specific price/context window.
+    This is a context-window guard only. It does not clip instructions or the report;
+    a request that cannot fit is rejected before dispatch.
     """
     from .contracts import ReviewProblem
     input_bound = len((instructions + report).encode("utf-8")) + 16000
     if input_bound + output_tokens > context_limit:
         raise ReviewProblem("REVIEW_CONTEXT_TOO_LARGE", "Complete report and instructions exceed the context allowance.")
-    if input_token_allowance is not None and input_bound > input_token_allowance:
-        raise ReviewProblem("REVIEW_BUDGET_TOO_SMALL", "Complete instructions exceed the authorized input allowance.")
     return input_bound

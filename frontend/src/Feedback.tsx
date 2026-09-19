@@ -14,9 +14,7 @@ export function Feedback({
   disabled: boolean;
 }) {
   const [reason, setReason] = useState(""),
-    [explanation, setExplanation] = useState(""),
-    [suggested, setSuggested] = useState(""),
-    [target, setTarget] = useState("result");
+    [explanation, setExplanation] = useState("");
   const [saving, setSaving] = useState(false),
     [message, setMessage] = useState(""),
     [error, setError] = useState("");
@@ -41,6 +39,24 @@ export function Feedback({
     catch (e) { setHistoryError(describeError(e)); }
     finally { setHistoryBusy(false); }
   }
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const node = dialog.current;
+    if (!node) return;
+    // happy-dom and older engines lack showModal; fall back to the plain open state.
+    if (typeof node.showModal !== "function") { node.open = open; return; }
+    if (open && !node.open) node.showModal();
+    if (!open && node.open) node.close();
+  }, [open]);
+  useEffect(() => {
+    const node = dialog.current;
+    if (!node) return;
+    // close does not bubble, so Escape never reaches a React synthetic handler.
+    // Without this the dialog would shut while state still believed it was open.
+    const sync = () => { setOpen(false); setError(""); };
+    node.addEventListener("close", sync);
+    return () => node.removeEventListener("close", sync);
+  }, [setOpen]);
   const pending = useRef<{ payload: string; key: string } | null>(null);
   const result = review.result!;
   async function save(rating: "up" | "down") {
@@ -52,18 +68,11 @@ export function Feedback({
     const payload: FeedbackPayload = {
       result_version: result.result_version,
       rating,
-      target:
-        rating === "up"
-          ? "result"
-          : target.startsWith("obs-")
-            ? "observation"
-            : "result",
+      target: "result",
     };
     if (rating === "down") {
       payload.reason = reason as NonNullable<FeedbackPayload["reason"]>;
       if (explanation.trim()) payload.explanation = explanation.trim();
-      if (suggested.trim()) payload.suggested_comment = suggested.trim();
-      if (target.startsWith("obs-")) payload.observation_id = target;
     }
     const serialized = JSON.stringify(payload);
     if (pending.current?.payload !== serialized)
@@ -121,7 +130,11 @@ export function Feedback({
           {message}
         </span>
       </div>
-      {open && (
+      <dialog
+        className="feedback-dialog"
+        ref={dialog}
+        aria-labelledby="feedback-dialog-title"
+      >
         <form
           className="feedback-form"
           onSubmit={(e) => {
@@ -129,7 +142,7 @@ export function Feedback({
             void save("down");
           }}
         >
-          <h3>What should we improve?</h3>
+          <h3 id="feedback-dialog-title">What should we improve?</h3>
           <label htmlFor="feedback-reason">
             What was wrong? <span className="required">Required</span>
           </label>
@@ -154,61 +167,36 @@ export function Feedback({
               </option>
             ))}
           </select>
-          <label htmlFor="feedback-target">Applies to</label>
-          <select
-            id="feedback-target"
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            disabled={saving || disabled}
-          >
-            <option value="result">Whole review</option>
-            {[...result.general_comments, ...result.critical_comments].map(
-              (o) => (
-                <option key={o.observation_id} value={o.observation_id}>
-                  {o.comment.slice(0, 90)}
-                </option>
-              ),
-            )}
-          </select>
           <label htmlFor="feedback-details">
             Tell us more <span className="meta">Optional</span>
           </label>
           <textarea
             id="feedback-details"
-            rows={2}
+            rows={3}
             maxLength={2000}
             value={explanation}
             onChange={(e) => setExplanation(e.target.value)}
             disabled={saving || disabled}
           />
-          <label htmlFor="suggested">
-            Suggested wording <span className="meta">Optional</span>
-          </label>
-          <textarea
-            id="suggested"
-            rows={2}
-            maxLength={2000}
-            value={suggested}
-            onChange={(e) => setSuggested(e.target.value)}
-            disabled={saving || disabled}
-          />
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
           <div className="form-actions">
             <button className="primary" disabled={saving || disabled}>
-              {saving ? "Saving…" : "Save feedback"}
+              {saving ? "Saving…" : "Save"}
             </button>
             <button
               type="button"
               disabled={saving}
-              onClick={() => {
-                setOpen(false);
-                setError("");
-              }}
+              onClick={() => { setOpen(false); setError(""); }}
             >
               Cancel
             </button>
           </div>
         </form>
-      )}
+      </dialog>
       <details className="disclosure disclosure-aside feedback-history">
         <summary>Saved feedback{entries.length ? ` · ${entries.length}${cursor ? "+" : ""}` : ""}</summary>
         {historyBusy && <p className="meta" role="status">Loading feedback…</p>}
@@ -222,11 +210,6 @@ export function Feedback({
         </li>)}</ol>
         {cursor && <button type="button" disabled={historyBusy} onClick={() => void loadMore()}>Load more feedback</button>}
       </details>
-      {error && (
-        <p className="error" role="alert">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

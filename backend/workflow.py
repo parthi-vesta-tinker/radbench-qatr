@@ -93,13 +93,7 @@ def run_review(tenant, rid, payload, config):
         test_checkpoint(rid, 'after_final_commit')
         return result
     except Exception as exc:
-        from . import spend
         from .diagnostics import record_failure
-        try:
-            spend.release_unclaimed(tenant, config)
-        except Exception as ledger_exc:
-            # A missing/unavailable ledger cannot turn a failed review into stuck work.
-            record_failure('spend.release_deferred', ledger_exc, tenant=tenant, review_id=rid)
         record_failure("review.failed", exc, tenant=tenant, review_id=rid, stage=active)
         is_input = isinstance(exc, ReviewProblem) and exc.needs_input
         if isinstance(exc, ReviewProblem):

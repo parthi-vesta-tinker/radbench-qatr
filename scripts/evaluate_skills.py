@@ -30,7 +30,7 @@ def selected_cases(skill: str, partition: str) -> list[tuple[dict, dict]]:
 
 
 async def execute(args, rows):
-    raise SystemExit('Direct three-stage evaluation is retired. Run scripts/evaluate.py against the F3 API with an authorized QA_SPEND_SESSION; it shares the guarded one-call path and spend ledger.')
+    raise SystemExit('Direct three-stage evaluation is retired. Run scripts/evaluate.py against the running API; it shares the guarded one-call review path.')
 
 
 def write_export(path, config, args, results, used):

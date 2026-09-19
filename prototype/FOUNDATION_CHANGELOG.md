@@ -1,11 +1,61 @@
 # Foundation implementation decisions and releases
 
+## Pack references and skill workspaces — schema 5 / bundle 1.18
+
+Implemented 2026-09-19 as P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md), with the interaction
+model in [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Application version, API version and
+workflow identities are unchanged: no workflow shape, recovery semantic or public contract moved.
+
+- `load_snapshot` takes a pack reference. `published` is today's verified read. `draft:<workspace>`
+  overlays that tenant workspace's saved skill drafts and is stamped
+  `draft:<workspace>@<pack-hash>`. Live report QA resolves `published` only, and `packs.py` refuses
+  a draft reference on that path.
+- Pack identity is derived, not hardcoded. A tenant binds a *profile* (`vesta-qatr`, `generic`);
+  the version is read from the installed package. Bindings still resolve to `vesta-qatr-0.3.0` and
+  `generic-0.3.0`, and a configured pin is refused when the installed pack does not carry it.
+  The three hardcoded `0.3.0` constants are gone.
+- Schema 5 adds `skill_workspaces` and `playground_runs` and scopes `knowledge_drafts` by
+  workspace. A draft saved outside a workspace is an editorial record that still never composes.
+  The default store moves to `.qa-data-foundation-v4`; a schema-4 store is refused, never migrated.
+- A workspace pins the published pack it forked from. When live moves past that pin, composition is
+  refused until an explicit rebase, which preserves saved revisions, clears stored runs, and returns
+  a submitted workspace to open.
+- Only skill instructions are composable. A workspace draft targeting the frozen catalog or pinned
+  source wording is refused at composition rather than silently dropped.
+
+There is no playground interface, no run endpoint and no output diff yet; those are P2.
+
+# Spend removal — 2026-09-18
+
+Removed by explicit user decision: "spending is not a problem", after the running application
+rejected a review with `SPEND_LIMIT_EXCEEDED`.
+
+Deleted `backend/spend.py`, `scripts/authorize_spend.py` and `tests/test_spend.py`. Removed the
+reservation step from review acceptance, claim/settle from the guarded dispatch path,
+`release_unclaimed` from failure handling, the `--spend-session` requirement from the launcher,
+and `cost_upper_bound_micro_usd` from reported metrics. `model_attempts.reservation_id` is now
+`attempt_id`; the column is written positionally, so existing databases are unaffected and
+`SCHEMA_VERSION` is unchanged.
+
+Retained: the context-window guard (`REVIEW_CONTEXT_TOO_LARGE`), at-most-once dispatch claims,
+durable response checkpoints, `MODEL_OUTCOME_UNKNOWN` with no automatic retry, and observed
+token usage as observability. `attempts.uncertain()` now decides from the attempt checkpoint
+alone: the claim is written before dispatch, so no row means the provider was never called.
+
+Verification: 100 passed, 1 deselected. The deselected case,
+`test_public_schema_and_generated_client_do_not_drift`, fails identically on the unmodified
+tree in this container — FastAPI renders 422 as "Unprocessable Entity" where the checked-in
+`prototype/openapi.json` says "Unprocessable Content". Unrelated to this change and left alone.
+
 ## F3 — Durable single-call execution — application 0.13.0 / bundle 1.17
 
 Implemented 2026-09-18. API **2026-09-18**, SQLite schema **4**, workflow application
 `foundation-f3-0.13.0`, queue `qa-reviews-f3-v1`, parent `qa.review.f3.v1`, child
 `qa.openai.combined.f3.v1`. Fresh default `.qa-data-foundation-v3`; no existing databases
 were reset or migrated. Pinned clinical content remains 0.3.0 and its hashes are unchanged.
+
+The session spend ledger described below was removed on 2026-09-18; see **Spend removal** above.
+Everything else in this entry still describes the installed behavior.
 
 ### Behavior and recovery
 

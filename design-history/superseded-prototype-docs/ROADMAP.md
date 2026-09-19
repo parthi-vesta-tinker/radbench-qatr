@@ -1,4 +1,4 @@
-> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch, durable response checkpoints and per-session spend admission. F4/F5 remain separate gates.
+> Current implementation: application **0.13.0**, bundle **1.17**, foundation **F3**. [Decisions and verification](FOUNDATION_CHANGELOG.md) supersede older baseline statements below. Fresh schema 4 and API 2026-09-18 are implemented. F3 adds one combined request, guarded dispatch and durable response checkpoints. F4/F5 remain separate gates.
 
 # Revised roadmap — 2026-09-17
 
@@ -7,8 +7,8 @@ Follow [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md) and [implementation gates](IMPLE
 | Horizon | Scope |
 |---|---|
 | Implemented — F1/F2 | Contract ownership, fresh schema, pinned qatr references, tenant snapshots |
-| Next — F3/F4 | Single-request DBOS/spend safety and existing feature regression |
-| Separate gate — F5 | Explicitly authorized evaluation within $1/session |
+| Next — F3/F4 | Single-request DBOS safety and existing feature regression |
+| Separate gate — F5 | Combined-path clinical evaluation |
 | Later | Migrations, PostgreSQL deployment, activation approval UI, environment switch, advanced analytics/triage, integrations |
 
 Tenant scoping, constraints, idempotency, safe failures and tests are foundation work. Reset is a

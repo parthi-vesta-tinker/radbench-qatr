@@ -37,8 +37,8 @@ def tenants():
             raise ValueError("Invalid tenant configuration.")
         if set(config) - {"model", "policy_path", "skill_release"}:
             raise ValueError("Unknown tenant configuration field.")
-        from .content import binding
-        binding(key, config)
+        from .content import profile
+        profile(key, config)
     return entries
 
 

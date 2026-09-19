@@ -358,18 +358,11 @@ def create_review(
             "Configure OPENAI_API_KEY and OPENAI_MODEL before reviewing.",
         )
     if cfg['mode'] == 'openai':
-        from . import spend
         from .combined import input_bound
         try:
-            cfg = spend.reserve(p.tenant_id, idempotency_key,
-                store.request_hash(payload.model_dump(), version), cfg,
-                input_bound(cfg, payload.report_text))
+            input_bound(cfg, payload.report_text)
         except ReviewProblem as exc:
-            saved = store.replay(p.tenant_id, store.CREATE_REVIEW, idempotency_key, payload.model_dump(), version)
-            if saved:
-                return respond(saved, True)
-            return error(request, 422 if exc.code == 'REVIEW_CONTEXT_TOO_LARGE' else 409,
-                         exc.code, exc.message)
+            return error(request, 422, exc.code, exc.message)
     saved, created = store.reserve(p.tenant_id, idempotency_key, payload, cfg, version)
     if created:
         try:

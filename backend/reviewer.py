@@ -8,7 +8,7 @@ from dbos import DBOS
 from dbos_openai_agents import DBOSRunner
 from .contracts import ReviewProblem
 from agents.models.interface import Model
-from . import attempts, spend
+from . import attempts, store
 from .combined import CombinedOutput, task, model_input
 
 SAMPLES = [
@@ -143,17 +143,14 @@ class GuardedModel(Model):
         from .workflow import boundary_hook
         cached = attempts.response(self.tenant, self.rid)
         if cached is not None:
-            spend.settle(self.tenant, self.config, cached.raw_usage)
             return cached
         boundary_hook(self.rid, 'before_provider_claim')
-        spend.claim(self.tenant, self.config)
-        attempts.claim(self.tenant, self.rid, self.config['spend']['reservation_id'])
+        attempts.claim(self.tenant, self.rid, store.new_id('qa'))
         boundary_hook(self.rid, 'after_provider_claim')
         try:
             result = await self.model.get_response(*args, **kwargs)
             boundary_hook(self.rid, 'after_provider_response')
             attempts.save(self.tenant, self.rid, result)
-            spend.settle(self.tenant, self.config, result.raw_usage)
             boundary_hook(self.rid, 'after_response_checkpoint')
             return result
         except ReviewProblem:
@@ -171,7 +168,7 @@ class GuardedModel(Model):
 @DBOS.workflow(name="qa.openai.combined.f3.v1")
 async def openai_combined(tenant, rid, payload, config):
     from openai.types.shared import Reasoning
-    # Pin the public endpoint and standard tier; custom endpoints have unverified pricing.
+    # Pin the public endpoint and standard tier.
     async with AsyncOpenAI(max_retries=0, timeout=120.0, base_url='https://api.openai.com/v1') as client:
         agent = Agent(name='combined_report_review', instructions=task(config),
             model=GuardedModel(make_model(config, client), tenant, rid, config),
@@ -190,13 +187,10 @@ async def openai_combined(tenant, rid, payload, config):
             # SDK parse/refusal exceptions may contain model text; keep them out of
             # DBOS exception logs and public resources. The private response is saved.
             raise ReviewProblem('MODEL_OUTPUT_INVALID', 'The model response could not be accepted. No repair request will be made.') from None
-        # SDK can replay a checkpoint without entering GuardedModel; settlement is idempotent.
         last = answer.raw_responses[-1]
-        cost = spend.settle(tenant, config, last.raw_usage)
         usage = answer.context_wrapper.usage
         return dict(raw=answer.final_output.model_dump(), metrics=dict(provider='openai',
             model=config['model'], model_calls=1, requests=usage.requests,
             elapsed_ms=round((time.monotonic()-started)*1000), input_tokens=usage.input_tokens if last.raw_usage is not None else None,
             output_tokens=usage.output_tokens if last.raw_usage is not None else None,
-            total_tokens=usage.total_tokens if last.raw_usage is not None else None,
-            cost_upper_bound_micro_usd=cost))
+            total_tokens=usage.total_tokens if last.raw_usage is not None else None))

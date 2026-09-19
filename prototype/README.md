@@ -1,6 +1,6 @@
 # Current prototype documentation
 
-This directory contains the current application contract and generated artifacts for application **0.13.0** / foundation **F3**. Older plans, screenshots, and design studies are under `../design-history/` and are not implementation authority.
+This directory contains the current application contract and generated artifacts for application **0.13.0** / foundation **F3** / schema **5**. Older plans, screenshots, and design studies are under `../design-history/` and are not implementation authority.
 
 ## Read by task
 
@@ -16,6 +16,15 @@ This directory contains the current application contract and generated artifacts
 | Change Skills Studio | [SKILLS_STUDIO_SPEC.md](SKILLS_STUDIO_SPEC.md) |
 | Review gates or deferred work | [ACCEPTANCE.md](ACCEPTANCE.md) and [BACKLOG.md](BACKLOG.md) |
 | Review UI problems and proposed enhancements | [UI_ENHANCEMENT_RESEARCH.md](UI_ENHANCEMENT_RESEARCH.md) |
+
+## Proposals under review
+
+These are not implementation authority. They describe target behavior that changes nothing until accepted.
+
+| Proposal | Document |
+|---|---|
+| Skill pack reorganization and playground | [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) |
+| Playground interaction model | [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md) |
 
 `BLUEPRINT.html` is a generated reading edition of this current set. Rebuild it with:
 

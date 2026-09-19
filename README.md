@@ -1,6 +1,6 @@
 # Vesta Report QA
 
-Application **0.13.0** · bundle **1.17** · foundation **F3** · API **2026-09-18** · schema **4**.
+Application **0.13.0** · bundle **1.18** · foundation **F3** · API **2026-09-18** · schema **5**.
 
 Vesta Report QA is a local FastAPI, DBOS, OpenAI Agents SDK, React, and SQLite prototype. A user pastes report text, runs one durable combined review request, reads two copy-ready comment groups, and records feedback or stakeholder outcomes. It also includes tenant-scoped analytics and a Skills Studio draft editor.
 
@@ -12,10 +12,10 @@ Install Python 3.11+, `uv`, and Node.js 22 LTS, then:
 
 ```sh
 uv sync --locked
-uv run python scripts/run_local.py --model gpt-5.6-sol --spend-session <authorized-session>
+uv run python scripts/run_local.py --model gpt-5.6-sol
 ```
 
-The launcher builds a missing frontend and prompts for an API key without saving it. A live session must be authorized first; see [the spending instructions](LOCAL_TESTING.md#live-provider-session). Controlled tests and the demo path make no paid provider call.
+The launcher builds a missing frontend and prompts for an API key without saving it. See [the live provider session instructions](LOCAL_TESTING.md#live-provider-session). Controlled tests and the demo path make no paid provider call.
 
 ## Current architecture
 
@@ -27,7 +27,7 @@ The launcher builds a missing frontend and prompts for an API key without saving
 - `tests/`: backend, workflow, recovery, contract, and controlled-provider tests.
 - `design-history/`: superseded documents and visual artifacts. Nothing in this directory is implementation authority.
 
-The active runtime uses one tool-free structured provider request per admitted review. Invalid input makes zero calls. An ambiguous claimed provider attempt is never retried automatically. A separate fail-closed spend ledger enforces an authorized ceiling per test session.
+The active runtime uses one tool-free structured provider request per admitted review. Invalid input makes zero calls. An ambiguous claimed provider attempt is never retried automatically. A request that exceeds the context allowance is rejected before dispatch rather than clipped.
 
 ## Boundaries
 

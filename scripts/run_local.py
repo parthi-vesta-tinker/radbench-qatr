@@ -50,14 +50,7 @@ def main():
     )
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL") or "gpt-6-astra")
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument('--spend-session', default=os.environ.get('QA_SPEND_SESSION'))
     args = parser.parse_args()
-    if not args.spend_session:
-        raise SystemExit('Authorize a test session with scripts/authorize_spend.py, then supply --spend-session. An API key alone does not authorize spending.')
-    os.environ['QA_SPEND_SESSION'] = args.spend_session
-    from backend import spend
-    with spend.db() as conn:
-        spend.session(conn, args.spend_session)
     ensure_frontend()
     os.environ["QA_MODE"] = "openai"
     os.environ["OPENAI_MODEL"] = args.model

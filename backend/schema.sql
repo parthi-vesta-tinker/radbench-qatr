@@ -1,4 +1,4 @@
--- Foundation schema 4. Fresh bootstrap only: never migrate or overwrite old data.
+-- Foundation schema 5. Fresh bootstrap only: never migrate or overwrite old data.
 CREATE TABLE tenants (id TEXT PRIMARY KEY, active_release TEXT);
 CREATE TABLE review_snapshots (
  tenant_id TEXT NOT NULL REFERENCES tenants(id), id TEXT NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE observations (
 );
 CREATE TABLE feedback (
  tenant_id TEXT NOT NULL, id TEXT NOT NULL, review_id TEXT NOT NULL,
- document TEXT NOT NULL CHECK(json_valid(document)), schema_version INTEGER NOT NULL CHECK(schema_version=4),
+ document TEXT NOT NULL CHECK(json_valid(document)), schema_version INTEGER NOT NULL CHECK(schema_version=5),
  result_version INTEGER GENERATED ALWAYS AS (json_extract(document,'$.result_version')) STORED NOT NULL,
  observation_id TEXT GENERATED ALWAYS AS (json_extract(document,'$.observation_id')) STORED,
  PRIMARY KEY(tenant_id,id), UNIQUE(id),
@@ -49,12 +49,40 @@ CREATE TABLE outcomes (
  FOREIGN KEY(tenant_id,review_id,result_version) REFERENCES review_results(tenant_id,review_id,result_version)
 );
 CREATE INDEX outcomes_review ON outcomes(tenant_id,review_id);
+-- A named tenant draft of a whole pack. It can be composed and run; it never serves live QA.
+-- forked_release/forked_content_sha256 pin the published pack this workspace was taken from, so
+-- a diff computed against a pack that has since moved is detectable rather than silently wrong.
+CREATE TABLE skill_workspaces (
+ tenant_id TEXT NOT NULL REFERENCES tenants(id), id TEXT NOT NULL,
+ name TEXT NOT NULL, created_at TEXT NOT NULL,
+ status TEXT NOT NULL CHECK(status IN ('open','submitted','published','closed')),
+ forked_release TEXT NOT NULL, forked_content_sha256 TEXT NOT NULL,
+ submitted_at TEXT, summary TEXT,
+ PRIMARY KEY(tenant_id,id)
+);
+-- workspace_id '' is an editorial draft that belongs to no workspace and never composes.
+-- A non-empty value is validated in code against skill_workspaces; SQLite cannot express a
+-- foreign key that tolerates the sentinel.
 CREATE TABLE knowledge_drafts (
- tenant_id TEXT NOT NULL REFERENCES tenants(id), document_id TEXT NOT NULL,
+ tenant_id TEXT NOT NULL REFERENCES tenants(id), workspace_id TEXT NOT NULL DEFAULT '',
+ document_id TEXT NOT NULL,
  revision INTEGER NOT NULL CHECK(revision>0), id TEXT NOT NULL,
  document TEXT NOT NULL CHECK(json_valid(document)),
- PRIMARY KEY(tenant_id,document_id,revision), UNIQUE(tenant_id,id)
+ PRIMARY KEY(tenant_id,workspace_id,document_id,revision), UNIQUE(tenant_id,id)
 );
+-- Playground runs are written only here. They never enter review_records, review_results or
+-- observations, and analytics, feedback and outcomes never read this table.
+CREATE TABLE playground_runs (
+ tenant_id TEXT NOT NULL REFERENCES tenants(id), workspace_id TEXT NOT NULL, id TEXT NOT NULL,
+ pack_ref TEXT NOT NULL CHECK(pack_ref LIKE 'draft:%@%'),
+ source TEXT NOT NULL CHECK(source IN ('pasted','example')),
+ example_id TEXT, report_text TEXT NOT NULL, created_at TEXT NOT NULL,
+ status TEXT NOT NULL CHECK(status IN ('queued','running','completed','needs_input','failed','stopped')),
+ result TEXT CHECK(result IS NULL OR json_valid(result)),
+ PRIMARY KEY(tenant_id,id),
+ FOREIGN KEY(tenant_id,workspace_id) REFERENCES skill_workspaces(tenant_id,id)
+);
+CREATE INDEX playground_workspace ON playground_runs(tenant_id,workspace_id,created_at,id);
 CREATE TABLE idempotency (
  tenant_id TEXT NOT NULL REFERENCES tenants(id), operation TEXT NOT NULL,
  key_hash TEXT NOT NULL, request_hash TEXT NOT NULL, api_version TEXT NOT NULL,
@@ -94,7 +122,7 @@ CREATE TRIGGER review_terminal_immutable BEFORE UPDATE ON review_records
 WHEN OLD.execution_status IN ('completed','failed','needs_input')
 BEGIN SELECT RAISE(ABORT,'Terminal review is immutable'); END;
 CREATE TABLE model_attempts (
- tenant_id TEXT NOT NULL, review_id TEXT NOT NULL, reservation_id TEXT NOT NULL UNIQUE,
+ tenant_id TEXT NOT NULL, review_id TEXT NOT NULL, attempt_id TEXT NOT NULL UNIQUE,
  outcome TEXT NOT NULL CHECK(outcome IN ('claimed','response','unknown')),
  response TEXT CHECK(response IS NULL OR json_valid(response)),
  PRIMARY KEY(tenant_id,review_id),
