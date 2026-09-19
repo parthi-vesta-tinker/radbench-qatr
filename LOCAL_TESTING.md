@@ -32,7 +32,7 @@ Use fresh schema-6 storage. The default is `.qa-data-foundation-v5`. To isolate 
 ## Live provider session
 
 ```sh
-uv run python scripts/run_local.py --model gpt-5.6-sol
+uv run python scripts/run_local.py --model gpt-6-astra
 ```
 
 The launcher prompts for `OPENAI_API_KEY` without storing it. Rotate any key exposed in chat before use.
@@ -48,6 +48,34 @@ There is no spend ledger, session authorization or cost ceiling; they were remov
 A review is admitted on configuration readiness and context size alone. A request whose composed instructions, report and bounded output exceed the context allowance is rejected before dispatch with `REVIEW_CONTEXT_TOO_LARGE`; instructions and report text are never clipped to make one fit.
 
 A valid live review makes one provider call. Invalid input makes zero. There is no automatic repair request. After a claimed request with no durable response, the review fails as `MODEL_OUTCOME_UNKNOWN` and is never retried automatically. Submitting a new review is a new explicit operation.
+
+## Playground
+
+QA Studio's **Playground** runs the real review against curated synthetic samples, in isolation.
+Its output never becomes a review: no history, feedback, analytics, outcome or copy action.
+
+Two of the six samples are served by the canned demo path, so the playground is usable with no
+provider key at all:
+
+| Category | Sample | Needs a provider? |
+|---|---|---|
+| Critical findings | Critical · documented flag | No — runs in demo |
+| Critical findings | Flagged critical comments remain visible | Yes |
+| Critical findings | Rich report with uncertain critical concern | Yes |
+| Findings and impression inconsistency | Laterality discrepancy | No — runs in demo |
+| Findings and impression inconsistency | Recommendation contradiction in rich report | Yes |
+| Findings and impression inconsistency | Rich report technique conflict | Yes |
+
+In demo mode the remaining samples are disabled and say why. Pasting your own report also needs a
+configured provider, because the demo path only recognises its own fixed reports.
+
+The playground model list is server controlled and currently offers `gpt-6-astra` only. It is
+independent of the live review model: when the two differ, the screen says so, because a
+playground result then does not predict live output. A model your OpenAI account cannot serve
+fails at dispatch like any other provider error, and is never retried automatically.
+
+Playground runs use a separate DBOS queue, so they cannot consume live review concurrency. Set
+`QA_PLAYGROUND_CONCURRENCY` to change it; the default is 2.
 
 ## Tenant content
 
