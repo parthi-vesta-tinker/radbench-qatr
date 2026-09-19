@@ -5,6 +5,8 @@
 # Skill pack and playground specification
 
 Status: **proposal for review** · 18 September 2026 · supersedes nothing until accepted
+Four of the five questions in §16 were answered on 19 September 2026. The interaction model is
+[PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md).
 
 ## 1. Why this exists
 
@@ -265,7 +267,9 @@ A publish takes a workspace and performs, in order:
    `owns:` code is reachable.
 2. Write skill files to disk and regenerate `MANIFEST.json` + `lock.json`.
 3. Run package validation (today's `validate.py`, adapted to the new layout).
-4. Run the **full** curated set, development and held-out, and record results.
+4. Run the **full** curated set, development and held-out, and record results. This is a
+   **regression** gate — it asserts that an edit changed nothing it should not have. It is not
+   clinical validation, and results are not presented as such.
 5. Bump the pack version and compose the pack changelog from workspace change notes.
 6. Refuse on any failure, leaving disk untouched.
 
@@ -327,8 +331,14 @@ Everything else in this document is UI and data on top of that one change.
 | `POST /api/v1/workspaces/{id}/submit` | `skills:write` | Submit a proposal |
 | publish | not an API | Engineer-only script (§9) |
 
-Idempotency keys, `QA-Version` pinning and tenant-from-credential rules are unchanged. A new
-`skills:run` scope is worth considering so a reviewer can edit without being able to spend.
+Idempotency keys, `QA-Version` pinning and tenant-from-credential rules are unchanged. No
+`skills:run` scope is added: the spend rationale for it was removed on 18 September 2026, and the
+approver rationale is deferred with §16.4. `skills:write` implies running, so introducing the split
+later stays additive.
+
+A workspace pins the published pack version it forked from. `POST .../runs` and `.../submit` refuse
+a workspace whose fork is no longer published; an explicit rebase re-points it, preserving saved
+revisions and invalidating stored diffs.
 
 ## 12. Running cost
 
@@ -384,12 +394,26 @@ skill readable by a non-specialist. They are separable.
 - Replaying historical reports against a draft pack. The test corpus is paste-your-own plus the
   curated set, by decision.
 
-## 16. Open questions
+## 16. Questions answered, and the one that is not
 
-1. Does a clinician need `skills:write` to run the playground, or is a separate `skills:run`
-   scope worth having for other reasons?
-2. Should a workspace pin the published pack version it forked from, and refuse to submit when
-   live has moved on — or rebase like today's `source_changed` warning?
-3. How many curated examples is a credible publish gate? 54 exist today, all synthetic.
-4. Who is the named approver on a proposal, and is one enough?
-5. Should the composed-prompt view be visible to every `skills:read` holder, or engineers only?
+Answered 19 September 2026. Interaction consequences are in
+[PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md).
+
+1. **A separate `skills:run` scope?** No. The spend rationale died with spend authorization on
+   18 September 2026; the remaining rationale is an approver who is not the author, which is §16.4,
+   deferred. `skills:write` implies running. The split stays available and additive.
+2. **Pin the forked pack version, or rebase like `source_changed`?** Pin. A workspace records the
+   version it forked from. When live moves past it, stored diffs are marked stale and submit is
+   refused until an explicit rebase. A diff against a pack that has moved does not describe what
+   publish will produce.
+3. **How many curated examples is a credible publish gate?** The full set, framed as a regression
+   gate rather than a validation claim. A count would imply clinical evidence that 54 synthetic
+   fixtures cannot supply; clinical adjudication stays in F5 per [BACKLOG.md](BACKLOG.md).
+4. **Who is the named approver, and is one enough?** *Still open, deliberately.* P5 delivers
+   proposals with no approval step and no approve control. The submit surface is built as a
+   read-only record with a status field so that adding an approval transition later does not
+   require re-modelling it.
+5. **Composed-prompt visibility?** Every `skills:read` holder. Hiding it from clinicians recreates
+   the invisible half of §3.1. This covers the published pack's composition only; a review record's
+   captured instructions stay out of public projection, and confirming that boundary in
+   `backend/presentation.py` is P1 work.

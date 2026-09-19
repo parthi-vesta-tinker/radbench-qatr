@@ -6,6 +6,7 @@
 # Playground UX interaction model
 
 Status: **proposal for review** · 19 September 2026 · companion to [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) §6
+Interaction decisions taken 19 September 2026 are recorded in §10.
 
 [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) decides *what* the playground is: a workspace draft of a
 whole pack that runs, never serves live QA, and is published only by an engineer. It does not
@@ -40,6 +41,12 @@ move.
 
 Playground occupies the Work region like every other Studio tool. Scope keeps showing **reports**.
 A workspace is never a row in the reports column.
+
+The composed prompt shown in Skills & knowledge is visible to **every `skills:read` holder**, by
+decision. A clinician editing half a prompt must be able to read the whole of it; that is the
+§3.1 transparency fix and the reason this feature exists. This concerns the *published pack's*
+composition. It does not relax `backend/presentation.py`: a review record's captured instruction
+snapshot stays out of public projection, and confirming that boundary in code is P1 work.
 
 ## 3. The spine: Edit → Run → Compare
 
@@ -102,6 +109,9 @@ pack's result for the same report text and published pack hash when one is alrea
 otherwise it dispatches the published pack too. The UI states which of the two it did, because it
 is the difference between one provider call and two.
 
+Caching is keyed on (report text, published pack hash), so a stale reuse is not expressible: a
+published pack that has moved has a different hash and misses the cache.
+
 An unmodified workspace is refused before dispatch with *"This workspace matches the published
 pack. Edit a skill before running."* — not run, not diffed.
 
@@ -156,10 +166,31 @@ result groups so the diff reads like the thing it will become.
 
 On narrow screens the two sides stack as labeled pairs. No status, count, or side is hidden.
 
+### 5.1 When live moves on
+
+A workspace pins the published pack version it forked from, by decision. A diff computed against a
+pack that has since been republished does not describe what publish will produce, so it is not
+presented as if it does.
+
+- The workspace header carries the fork: *"forked from pack 0.4.0"*.
+- When live moves past that version, the header reads **Out of date**, every stored diff in the
+  workspace is marked **stale** with the version it was computed against, and **Submit is refused**.
+- **Rebase** is an explicit action. It re-points the workspace at the current published pack,
+  preserves every saved skill revision, invalidates stored diffs, and records itself in the
+  workspace change notes.
+- Rebase never silently merges. Where a skill's published text changed under a saved draft, the
+  reviewer gets today's compare-with-installed view on that skill and reconciles it, which is the
+  existing `source_changed` reconciliation at pack granularity.
+- A rebase does not re-run anything. The workspace returns to Open with no diff until the reviewer
+  runs again — a diff always names the pack pair that produced it.
+- A workspace that goes out of date **after** submission is returned to Open with a stated reason.
+  The engineer's gate would run against a pack the reviewer never saw, so the submission no longer
+  means what it meant when it was made.
+
 ## 6. The wall, as the user experiences it
 
-Isolation is asserted in code and tests (§10 of the pack spec). These are the affordances that
-make it visible, so that no one has to remember which mode they are in.
+Isolation is asserted in code and tests ([SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) §10). These are
+the affordances that make it visible, so that no one has to remember which mode they are in.
 
 - A persistent, **non-dismissible** banner on every playground surface: the workspace name, the
   `draft:<workspace>@<hash>` stamp, and *"not a clinical review"*. It is not a colored border
@@ -179,8 +210,15 @@ A workspace has one visible status: **Open · Submitted · Published · Closed**
 
 - **Submit** requires a summary and at least one completed run in the workspace. Submitting makes
   every skill body read-only; the diff and run history stay readable.
-- A submitted workspace shows what an engineer will run at the gate — the full curated set,
-  development and held-out — as a stated expectation, not as a button.
+- **Submit is refused while the workspace is out of date** (§5.1).
+- A submitted workspace shows what an engineer will run at the gate — the **full** curated set,
+  development and held-out — as a stated expectation, not as a button. That gate is a **regression**
+  gate: it asserts that an edit changed nothing it should not have. It is not clinical validation,
+  and the UI says so where the gate is described. Clinical adjudication stays in F5 per
+  [BACKLOG.md](BACKLOG.md).
+- There is **no approver step**, by decision, and no approve control anywhere in the UI. A
+  submitted workspace waits for an engineer. Whether a named clinical approver is required is
+  deliberately deferred (§11), so the submit surface must not imply one exists.
 - There is **no publish control in the browser for any role**. It is structurally absent, not
   permission-disabled, matching today's "the browser has no publish button".
 - Reopening a submitted workspace is an explicit action that clears the submission and is recorded
@@ -193,8 +231,13 @@ A workspace has one visible status: **Open · Submitted · Published · Closed**
 | `skills:read` | Read Skills & knowledge, open workspaces, read diffs and run history |
 | `skills:write` | Everything above, plus edit, save, run, submit |
 
-Read-only users see the Playground tool and its content with edit, run and submit absent. Whether
-running should require a third `skills:run` scope is open (§10.1).
+Read-only users see the Playground tool and its content with edit, run and submit absent.
+
+There is **no `skills:run` scope**. Its only surviving rationale was a read-and-run approver who is
+not the author — spend authorization, the other rationale, was removed on 18 September 2026 — and
+the approver question is deferred (§11). A scope with no user is not added on speculation. If an
+approver role is later introduced, `skills:run` is introduced with it, and the split is
+additive: `skills:write` implies running, so existing credentials do not change meaning.
 
 ## 9. Acceptance criteria for P2
 
@@ -213,20 +256,32 @@ Testable, and phrased so a failing one blocks the phase.
 8. The draft banner is present on every playground route and cannot be dismissed.
 9. Narrow-viewport diff stacks without hiding a status or a count.
 10. Switching Studio tools preserves unsaved workspace edits; switching workspace warns first.
+11. A workspace whose forked pack version is no longer published reads **Out of date**, marks stored
+    diffs stale, and refuses submit. Rebase preserves every saved revision and clears the diffs.
+12. No approve control and no `skills:run` scope exist in the shipped surface or the generated
+    contract.
 
-## 10. Open questions for this document
+## 10. Decisions taken
 
-These are UX decisions that change what gets built. They are separate from the five in
-[SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) §16, which remain open.
+Confirmed 19 September 2026. They are not reopened here.
 
-1. **Does Skills & knowledge lose its editor?** This document says yes — editing lives in a
-   workspace, where it can be run. The alternative is two editors with different semantics, which
-   is the current confusion in a new form.
-2. **Is the published-pack result cached, or re-dispatched every run?** Cached is proposed.
-   Re-dispatching every run doubles calls but removes a staleness question.
-3. **Is copy absent or watermarked?** Absent is proposed. Watermarked keeps a workflow that only
-   exists in the live surface anyway.
-4. **Should a curated-set run be cancellable mid-flight**, given each example is a durable
-   workflow? Proposed yes, with completed results kept.
-5. **Does a reviewer need `skills:run`?** Restates §16.1 as a UI question: if running is separable
-   from editing, the Playground has a genuine read-and-run role for an approver who is not an author.
+| Question | Decision |
+|---|---|
+| Does Skills & knowledge lose its editor? | Yes. Editing lives in a workspace, where it can be run (§2) |
+| Published-pack result cached or re-dispatched? | Cached on (report text, published pack hash) (§4.3) |
+| Copy absent or watermarked? | Absent. Export a stamped run instead (§6) |
+| Curated-set run cancellable mid-flight? | Yes; completed results kept, rest marked `not run` (§4.2) |
+| Workspace behavior when live moves on | Pin the forked version, mark diffs stale, refuse submit, explicit rebase (§5.1) |
+| What the publish gate asserts | Regression across the full curated set, not clinical validation (§7) |
+| Composed-prompt visibility | Every `skills:read` holder (§2) |
+| Separate `skills:run` scope? | No. Deferred with the approver question (§8) |
+
+## 11. Still open
+
+One question, deferred by decision rather than undecided by omission:
+
+**Who is the named approver on a proposal, and is one enough?**
+([SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) §16.4.) P5 delivers proposals with no approval step. The
+cost is a submit surface that may be built twice, so it is built to accommodate one: a submitted
+workspace is a read-only record with a status field, not a two-state toggle, and adding an approval
+transition later must not require re-modelling it.
