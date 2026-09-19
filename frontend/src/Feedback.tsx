@@ -209,7 +209,7 @@ export function Feedback({
           </div>
         </form>
       )}
-      <details className="feedback-history">
+      <details className="disclosure disclosure-aside feedback-history">
         <summary>Saved feedback{entries.length ? ` · ${entries.length}${cursor ? "+" : ""}` : ""}</summary>
         {historyBusy && <p className="meta" role="status">Loading feedback…</p>}
         {!historyBusy && !entries.length && !historyError && <p className="meta">No feedback recorded.</p>}

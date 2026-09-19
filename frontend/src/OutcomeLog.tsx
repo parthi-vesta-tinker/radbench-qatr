@@ -43,7 +43,7 @@ export function OutcomeLog({ reviewId, resultVersion, disabled }: { reviewId: st
       setRetry(uncertain); setError(describeError(e));
     } finally { setSaving(false); }
   }
-  return <details className="outcome-log" open={open} onToggle={e => setOpen(e.currentTarget.open)}>
+  return <details className="disclosure disclosure-section outcome-log" open={open} onToggle={e => setOpen(e.currentTarget.open)}>
     <summary>Stakeholder outcomes</summary>
     <p className="meta">Record a decision from QA, the radiologist, or the facility. Operator-recorded—not a verified signature, delivery receipt, or clinical adjudication.</p>
     <form onSubmit={e => { e.preventDefault(); void save(); }}>

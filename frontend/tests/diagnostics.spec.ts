@@ -5,6 +5,10 @@ test('component status shows actual local checks and never probes OpenAI automat
   page.on('request', request => { if (request.url().endsWith('/diagnostics/openai')) probes++; });
   await page.goto('/');
   await page.getByText('Health · Local checks passed', {exact:true}).click();
+  await expect(page.getByRole('heading', {name:'Service health'})).toBeVisible();
+  // Healthy checks collapse behind a verdict; the full list stays one click away.
+  await expect(page.getByText(/All 5 checks passed/)).toBeVisible();
+  await page.getByText(/View all 5 checks/).click();
   for (const label of ['API backend', 'Database', 'DBOS', 'QA skills', 'OpenAI']) {
     await expect(page.locator('.system-status dt').filter({hasText:label})).toBeVisible();
   }

@@ -472,6 +472,15 @@ present these as current. Anyone following that instruction is designing against
 them historical in `prototype/README.md` the way superseded text is already marked elsewhere in
 this repo. Cheap, and it protects every future design decision made from these docs.
 
+> **Correction (2026-09-19).** This finding was made against `36624c2`. The documentation
+> clean-up in `c1b5377` had already **deleted** `prototype/assets/implementation-desktop.png`,
+> `implementation-feedback.png` and `implementation-mobile.png`, together with the
+> UX_DESIGN_SYSTEM text that pointed at them. The only surviving references are inside
+> `design-history/`, which holds its own copies of those files and is archived by definition.
+> There is therefore nothing stale left to mislead a reader, and nothing to regenerate:
+> re-adding current renders would introduce unreferenced binaries rather than correct anything.
+> Current-build evidence is kept in `assets/ui-research/` instead, where it is cited.
+
 ---
 
 ## 6. Sequenced build
@@ -629,3 +638,69 @@ retained three-panel architecture. As recorded in the constraint-provenance note
 this document, neither statement survives in the repository as of `c1b5377`. The verdicts stand as
 the product owner's intent; the justification offered for them at the gate no longer has a written
 source. Decision 15 is affected in the same way by the now-unwritten no-animation rule.
+
+---
+
+## 11. Implementation record — 2026-09-19
+
+All twelve accepted proposals are implemented. Frontend only: no backend, API, schema, workflow
+or skill-content change. Decision 13 (period comparison) is **not** implemented — it needs an API
+field and is out of this change's scope, as the gate recorded.
+
+### Measured before and after
+
+Both columns come from the same probe against the running build (Chromium, `/api/v1/*` stubbed to
+`generated-api.ts` shapes), not from estimates.
+
+| Measure | Before | After |
+|---|---|---|
+| Health panel height, all healthy | 610px | **285px** |
+| Close controls in the health panel | 0 | **1** (`aria-label="Close service health"`) |
+| Health panel ARIA role | none | **`dialog`** |
+| Outside click dismisses | no | **yes** |
+| Escape dismisses regardless of focus | no | **yes** |
+| Double-click leaves it open | yes (forced) | **no** |
+| Analytics pane height @1024 viewport | 1918px | **1670px** |
+| Analytics `<h2>` sizes | 16/16/16/16px | **18/18/18/18px** |
+| `failed` vs `completed` in history | identical `rgb(32,36,43)` w400 | **`rgb(156,36,27)` w600 vs `rgb(32,36,43)`** |
+| Mobile chrome before navigated content | 880px | **283px** |
+| Mobile acceptance table hidden width | 289px of 647px (45%) | **0px** (stacked cards) |
+| Horizontal page scroll at 390px | none | **none** (unchanged) |
+
+### A real defect found by the new test
+
+The first implementation of the health dialog attached its Escape and outside-click listeners from
+an effect keyed on React state set by `<details>`'s `onToggle`. That event is dispatched
+**asynchronously**, so a dismissal arriving before it landed was silently lost: opening the panel
+and pressing Escape immediately did nothing. `workspace.spec.ts` caught this; manual checks had
+hidden it behind incidental waits.
+
+The listeners are now mounted once and read `details.open` from the DOM, so no dismissal can race
+the toggle event. The `open` state and `onToggle` handler were removed as redundant.
+
+### Verification actually run
+
+- `npx tsc -b` — clean.
+- `npm run test:dom` — **19/19 pass**. Two tests were rewritten, not deleted: the health test now
+  asserts all four dismissal routes and that a double-click no longer forces the panel open; the
+  analytics test asserts the section-level `Not measured` verdict plus all four denominators
+  inside the disclosure, preserving exactly what it was protecting.
+- `npm run test:browser` — **8/8 pass** against the real FastAPI/DBOS backend in demo mode.
+  `workspace.spec.ts` and `diagnostics.spec.ts` were updated where they encoded replaced
+  behaviour; `f3.spec.ts` was not touched and still passes.
+- `uv run python scripts/check_docs.py` — passes.
+
+### Deviation from an accepted proposal
+
+P4 was accepted as "reorder, and collapse the rail to a summary row". The reorder is implemented
+and delivers the full measured saving (880px → 283px). The rail is **not** collapsed to a summary
+row: it is moved below the content with its list capped at 220px and scrollable. A true collapse
+needs a disclosure in `App.tsx` that would also affect desktop, which is beyond what was gated.
+Nothing is hidden or unreachable in the shipped form. Say the word and the summary-row version is
+a small follow-up.
+
+### Not established
+
+No usability testing, no accessibility audit, no contrast sweep, no screen-reader pass, and no
+clinical or domain review. The measurements above are geometry and computed style; they do not
+show that the screens are easier to use, only that the specific defects recorded in §§3–5 are gone.

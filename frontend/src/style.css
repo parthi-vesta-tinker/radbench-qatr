@@ -830,3 +830,90 @@ textarea::placeholder {color:var(--muted);}
  .input-pane {order:2;}.output-pane {order:3;}.workspace > .studio {order:4;}.history-pane {order:2;}
  .section-heading,.input-actions {flex-wrap:wrap;}.scope-footer {display:block;margin-top:12px;}.history-filters input {width:100%;}.history-filters label {max-width:100%;}
 }
+
+/* ── UI enhancement pass (gated 2026-09-19) ─────────────────────────────────
+   P2/P3/P6/P7/P8/P9/P10/P11/P12. Presentation only; no contract changes.    */
+
+/* P6 — one disclosure idiom. Section = structural, aside = supplementary. */
+.disclosure > summary {display:flex;align-items:center;gap:8px;min-height:34px;cursor:pointer;list-style:none;}
+.disclosure > summary::-webkit-details-marker {display:none;}
+.disclosure > summary::before {content:"\25B8";font-size:9px;line-height:1;color:var(--muted);flex-shrink:0;}
+.disclosure[open] > summary::before {content:"\25BE";}
+.disclosure > summary:focus-visible {outline:2px solid var(--accent);outline-offset:2px;}
+.disclosure-section > summary {font-weight:600;color:var(--text);}
+.disclosure-aside > summary {font-weight:400;color:var(--muted);}
+
+/* P3 — the health trigger regains a marker. The dot stays as the severity slot. */
+.system-status > summary::before {content:"\25B8";width:auto;height:auto;border:0;border-radius:0;font-size:9px;line-height:1;color:var(--muted);}
+.system-status[open] > summary::before {content:"\25BE";}
+/* The nested passing-checks disclosure must not inherit the trigger's dot or open state. */
+.health-panel .disclosure > summary::before {content:"\25B8";width:auto;height:auto;border:0;border-radius:0;font-size:9px;line-height:1;color:var(--muted);}
+.health-panel .disclosure[open] > summary::before {content:"\25BE";}
+.status-dot {width:7px;height:7px;border-radius:50%;flex-shrink:0;border:1px solid var(--muted);}
+.status-dot.danger {background:var(--danger);border-color:var(--danger);}
+.status-dot.attention {background:var(--attention);border-color:var(--attention);}
+
+/* P2/P9 — dialog affordances and a verdict-first body. */
+.health-panel {max-height:min(70vh,560px);overflow-y:auto;}
+.health-panel-heading {display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.health-panel-heading h3 {margin:0;flex-grow:1;}
+.health-verdict {display:flex;align-items:center;gap:7px;margin:0 0 4px;font-size:13.5px;font-weight:600;}
+.health-verdict.danger {color:var(--danger);}
+.health-verdict.attention {color:var(--attention);}
+.health-passing {margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+.system-status dt {display:flex;align-items:center;gap:8px;}
+
+/* P7 — one status idiom. Icon as well as colour; never colour alone. */
+.status-pill {display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border:1px solid var(--line);border-radius:3px;background:var(--soft);font-size:11.5px;font-weight:400;white-space:nowrap;}
+.status-pill.danger {border-color:var(--danger);color:var(--danger);background:var(--surface);font-weight:600;}
+.status-pill.attention {border-color:var(--attention);color:var(--attention);background:var(--surface);font-weight:600;}
+.metric-details > div.danger dt, .metric-details > div.danger dd {color:var(--danger);font-weight:600;}
+
+/* P8 — heading hierarchy and a per-section data-status line. */
+.operational-analytics h2 {font-size:18px;}
+.section-heading-row {display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.section-heading-row h2 {margin:0;}
+.section-status {margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap;}
+.section-status.danger {color:var(--danger);font-weight:600;}
+.section-status.attention {color:var(--attention);font-weight:600;}
+.critical-reason {margin:10px 0;font-size:13px;line-height:1.6;}
+.measurement-list {margin:12px 0;}
+.measurement-list > div {padding:9px 0;border-bottom:1px solid var(--line);}
+.measurement-list dt {font-size:12.5px;font-weight:600;}
+.measurement-list dt code {margin-left:8px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;font-weight:400;color:var(--muted);}
+.measurement-list dd {margin:3px 0 0;font-size:12.5px;}
+
+/* P12 — section-scoped filter sits inside what it governs. */
+.table-caption {display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0 8px;}
+.table-caption p {margin:0;}
+.section-filter {display:inline-flex;margin-left:auto;border:1px solid var(--control-border);border-radius:4px;overflow:hidden;}
+.section-filter button {min-height:30px;padding:5px 11px;border:0;border-radius:0;font-size:11.5px;background:var(--surface);}
+.section-filter button + button {border-left:1px solid var(--control-border);}
+.section-filter button[aria-pressed="true"] {background:var(--selected);color:var(--accent);font-weight:600;}
+
+/* P10 — the acceptance scroller is reachable by keyboard on desktop. */
+.history-table:focus-visible {outline:2px solid var(--accent);outline-offset:2px;}
+
+/* P11 — coarse pointers get the documented 32–36px minimum. */
+@media (pointer:coarse) {
+  .icon-button {min-width:36px;min-height:36px;}
+}
+
+@media (max-width:650px) {
+  /* P4 — navigated content precedes the report rail; the rail stays reachable. */
+  .studio-column {order:0;}
+  .history-pane {order:1;}
+  .scope {order:2;}
+  .workspace.history-open .scope .scope-nav {max-height:220px;overflow-y:auto;}
+
+  /* P10 — one card per perspective. Nothing hidden, nothing scrolls sideways. */
+  .acceptance-table {overflow-x:visible;}
+  .acceptance-table table, .acceptance-table tbody, .acceptance-table tr, .acceptance-table th, .acceptance-table td {display:block;}
+  .acceptance-table thead {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  .acceptance-table tr {margin-bottom:8px;padding:10px;border:1px solid var(--line);border-radius:4px;}
+  .acceptance-table th[scope="row"] {padding:0 0 6px;border:0;font-size:13px;font-weight:600;}
+  .acceptance-table td {display:flex;justify-content:space-between;gap:12px;padding:5px 0;border:0;font-size:12px;}
+  .acceptance-table td::before {content:attr(data-label);color:var(--muted);}
+  .acceptance-table td small {white-space:normal;text-align:right;}
+  .section-filter {margin-left:0;}
+}
