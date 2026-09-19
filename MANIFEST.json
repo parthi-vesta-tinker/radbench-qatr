@@ -9,8 +9,8 @@
   "files": [
     {
       "path": ".gitignore",
-      "bytes": 308,
-      "sha256": "fe28e6ada426591c8ca33e7c57260de13e525dcc3263afcc1050eb5d2150e204"
+      "bytes": 352,
+      "sha256": "609b0f8e66bc22a41b53a691e88b77bc033912eabc440739b0614063ca456bd5"
     },
     {
       "path": "AGENTS.md",
@@ -24,8 +24,8 @@
     },
     {
       "path": "LOCAL_TESTING.md",
-      "bytes": 3809,
-      "sha256": "ef6d583d8df6edd1f9465a603c54bb9eb9edee3edf41f61c42d6981267b9af82"
+      "bytes": 4307,
+      "sha256": "ddc9521be092306516bffd4ab0f7ce6f58416b8bb97f541ebe26148ec4c39798"
     },
     {
       "path": "README.md",
@@ -184,8 +184,8 @@
     },
     {
       "path": "frontend/src/AnalyticsView.tsx",
-      "bytes": 7442,
-      "sha256": "ead014bbbfa004b0c9f863f274b59691dc29b6626738b7cc6963327ef47c8fe1"
+      "bytes": 9391,
+      "sha256": "ac923a889265671d247b9127906c2363d9f150e0bf9d9b0c8b8d65be2af0883b"
     },
     {
       "path": "frontend/src/App.tsx",
@@ -194,18 +194,18 @@
     },
     {
       "path": "frontend/src/Feedback.tsx",
-      "bytes": 8263,
-      "sha256": "3dc20087ed8d5e9f418473eb1934714d383072dfd5ea11503682ee71fb67eca4"
+      "bytes": 8291,
+      "sha256": "7da2fff18ac01d6fc69fbf04a2240e41319c62074dafd3f60ea30407a715239f"
     },
     {
       "path": "frontend/src/FeedbackInbox.tsx",
-      "bytes": 5621,
-      "sha256": "e3f876addb08e8815c4329018fea51fa4c8902f2716df59e8731ce02ac574efe"
+      "bytes": 5661,
+      "sha256": "5ca58a538f37d516f45e309739f04b3a2a7cc4edebaeabaf9ed41542a4bf87a1"
     },
     {
       "path": "frontend/src/OutcomeLog.tsx",
-      "bytes": 6119,
-      "sha256": "fc58c8bbaf614cd26610e4a9ea72b6d276ed2eb410d3ed2a9bd5fd7507a6ff66"
+      "bytes": 6149,
+      "sha256": "4df4b8f3b6ac201aa8a639eef0e7bec649fe151dbcb127cabfd13dc579da444d"
     },
     {
       "path": "frontend/src/Playground.tsx",
@@ -219,8 +219,8 @@
     },
     {
       "path": "frontend/src/ReviewHistory.tsx",
-      "bytes": 4506,
-      "sha256": "e213132e987c81a0f472658ede2926c6bb93d0d8613c9dbfd79b6aa0a108e08d"
+      "bytes": 4550,
+      "sha256": "b4bfbe40c855b5ca265c2426483b75709129744074af3260dd4731effe4bec11"
     },
     {
       "path": "frontend/src/ReviewOutput.tsx",
@@ -229,8 +229,8 @@
     },
     {
       "path": "frontend/src/SkillsKnowledge.tsx",
-      "bytes": 11498,
-      "sha256": "61cf61db8455721860476583bfba369a5fd1dffe293d395ddfbaa3ce86234f64"
+      "bytes": 11558,
+      "sha256": "82fa911f233c5d591d1ab22023e2cf7dcdd4826af457b4caf5eac39e87e4e26e"
     },
     {
       "path": "frontend/src/Studio.tsx",
@@ -239,8 +239,8 @@
     },
     {
       "path": "frontend/src/SystemStatus.tsx",
-      "bytes": 3365,
-      "sha256": "909011623ef9c8fe5b20a35d0eb6672eb2924d5e4cc950d5cc4d7bad48897c9e"
+      "bytes": 5953,
+      "sha256": "247f0e25cb274b72e27afb971ba54ae2f859a6c31377199be10c1249db9795cf"
     },
     {
       "path": "frontend/src/api.ts",
@@ -263,9 +263,14 @@
       "sha256": "66b13a05278f63bed198dea75bb54b40da58be51ddd3b04e412d91ce464e6555"
     },
     {
+      "path": "frontend/src/statusPill.tsx",
+      "bytes": 1184,
+      "sha256": "1a833ecbc4ec96fda9848be3e9856f46d731f3b5067f84f605dd4a909cc8c76f"
+    },
+    {
       "path": "frontend/src/style.css",
-      "bytes": 29435,
-      "sha256": "e1c1bd3454d5b4a2d8f9486d4b22fffadbfaee61e6a2fc0544356278ab172485"
+      "bytes": 35379,
+      "sha256": "ec73e071b5f01f523ce940e8f875051b648fe62d4870ddc77ee0e0bc527235af"
     },
     {
       "path": "frontend/src/types.ts",
@@ -279,8 +284,8 @@
     },
     {
       "path": "frontend/tests/diagnostics.spec.ts",
-      "bytes": 1933,
-      "sha256": "d8e8d7787d22b6d11c439b77efb35ff5d0aea8de71184437eafb61c35dd814cb"
+      "bytes": 2220,
+      "sha256": "448f9d140da1d610a2e360460c61b8d941b11bb39063d8ecd2a65ae4a407217c"
     },
     {
       "path": "frontend/tests/f3.spec.ts",
@@ -289,8 +294,8 @@
     },
     {
       "path": "frontend/tests/workspace.spec.ts",
-      "bytes": 9085,
-      "sha256": "7989873d448f3f2c81867218ee73d1e916f3956dc6d08400c227d48721c9729c"
+      "bytes": 10302,
+      "sha256": "efabc7a6302a8b860f9fc041804d9faac9de2bd0f9c27ab0d56d84bf48533c8b"
     },
     {
       "path": "frontend/tsconfig.json",
@@ -299,8 +304,8 @@
     },
     {
       "path": "frontend/unit/workspace.test.tsx",
-      "bytes": 23911,
-      "sha256": "d3711a4251c5f350f7d3b0cdeda411faa975d760fc1ba11cdf9dc074cab9514f"
+      "bytes": 25246,
+      "sha256": "98d5488dcd61a2006fada719b793ca428805081e46bd051d411dbf59d1cf6a57"
     },
     {
       "path": "frontend/vite.config.ts",
@@ -359,8 +364,8 @@
     },
     {
       "path": "prototype/README.md",
-      "bytes": 1993,
-      "sha256": "a5688e3d8c6a66b98fdbe211b603a551a99f2551d553e7fe4136d8beaaf97ff8"
+      "bytes": 2307,
+      "sha256": "10a0531b30f1ae2f550e028e0a35ff2898e1853f14df64dce4dd2839cad72afd"
     },
     {
       "path": "prototype/SKILLS_STUDIO_SPEC.md",
@@ -373,9 +378,69 @@
       "sha256": "7fb421c81534100a8e1242724b5b1e416fce7e0b8340db19fcaad342dc7d0361"
     },
     {
+      "path": "prototype/UI_ENHANCEMENT_RESEARCH.md",
+      "bytes": 44288,
+      "sha256": "41574bd8bce1a341e176a144c927eeef7cac76e4385a20b8f845514008404257"
+    },
+    {
       "path": "prototype/WORKSPACE_SPEC.md",
       "bytes": 3592,
       "sha256": "6456074a95ffb53c51ffc5f42329badad8df78982f48a5260db21c2f86d0b41c"
+    },
+    {
+      "path": "prototype/assets/ui-research/after-analytics-desktop.png",
+      "bytes": 219081,
+      "sha256": "a022cfb857b00a4cb055eb8ceb7841c73a8a56ed56c41a1efcfa84a9ef473ab9"
+    },
+    {
+      "path": "prototype/assets/ui-research/after-analytics-mobile.png",
+      "bytes": 204320,
+      "sha256": "0eec195e60e84059d0de67757ceabf1ed367ed40733b3c62f135ef60cf656114"
+    },
+    {
+      "path": "prototype/assets/ui-research/after-health-degraded.png",
+      "bytes": 146222,
+      "sha256": "00b34c46ad084716e2360edc7946565316dc41207fcefab5216ac7f10be8b025"
+    },
+    {
+      "path": "prototype/assets/ui-research/after-health-healthy.png",
+      "bytes": 176275,
+      "sha256": "b87b6af25891ffbcc5bd5801ed050d24a63693f32eb04eaf49d392c9898b4459"
+    },
+    {
+      "path": "prototype/assets/ui-research/after-review-history.png",
+      "bytes": 123350,
+      "sha256": "1d2d5e84896cfaca017f2b3493c5116c972ada8f02a809b640ab42b17edc78c9"
+    },
+    {
+      "path": "prototype/assets/ui-research/analytics-desktop-full.png",
+      "bytes": 225041,
+      "sha256": "8ffdc3d3c9b185fcd25528b42120986d2886bfa3792ca1537cf9c2956893fa52"
+    },
+    {
+      "path": "prototype/assets/ui-research/analytics-mobile-full.png",
+      "bytes": 200524,
+      "sha256": "dc821aca35b34f7caa24e1aef5cc261bb8ec54b8c8f388a88bf7cd17a13efeed"
+    },
+    {
+      "path": "prototype/assets/ui-research/health-popover-degraded.png",
+      "bytes": 140930,
+      "sha256": "75eb9c51dc18b2032dc014f312192b2159902e825962ebfa87bdc1ac2d3094c1"
+    },
+    {
+      "path": "prototype/assets/ui-research/health-popover-open.png",
+      "bytes": 184338,
+      "sha256": "a53fdf43c3ba47af0f75d71f1dc34c5b3ea1bd2052ff54dcfa9a0e661bd45704"
+    },
+    {
+      "path": "prototype/assets/ui-research/review-history.png",
+      "bytes": 118988,
+      "sha256": "34c28e32b6cf511b16659a5e69b8c9cde44ecf1e8b6b405b8d2a37674648c0b1"
+    },
+    {
+      "path": "prototype/assets/ui-research/skills-knowledge.png",
+      "bytes": 196825,
+      "sha256": "ef362821d381a6edb25deb84d7e8d97eaa0a788728efb088a6c2f5eaa943931a"
     },
     {
       "path": "prototype/examples/comment-results.json",
@@ -689,8 +754,8 @@
     },
     {
       "path": "scripts/check_docs.py",
-      "bytes": 2173,
-      "sha256": "2bf1e20575644248cf2ceb57536acca37f812334140f56922332262ea3f8129d"
+      "bytes": 2207,
+      "sha256": "48b18552a520eca0fa2c4066e11619d869fd2fa67d5a43dc0d339808ed09edb0"
     },
     {
       "path": "scripts/evaluate.py",
@@ -729,8 +794,8 @@
     },
     {
       "path": "scripts/run_local.py",
-      "bytes": 2752,
-      "sha256": "c30790982b4bbba5852aa45321bc6ee0f11c0c4b87412a3e47c1a1c10cc6dae8"
+      "bytes": 3849,
+      "sha256": "244f46ed9c3d6878bd111674aeafad76873f94d3367d9fbf0b13334148409482"
     },
     {
       "path": "scripts/score_skill_evaluations.py",
@@ -784,8 +849,8 @@
     },
     {
       "path": "tests/test_local_launcher.py",
-      "bytes": 1544,
-      "sha256": "a89a403012b871bb110324e47df7b002373adabe40a33037e53ee804e9e7e529"
+      "bytes": 2894,
+      "sha256": "3ac0b7633f21e7a6ad5f81b037830cdbdcb1d57b8e978cb9fd7cb6c7e8632f45"
     },
     {
       "path": "tests/test_pack_reference.py",

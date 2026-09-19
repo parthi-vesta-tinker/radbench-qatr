@@ -105,11 +105,25 @@ test('theme persists and environment controls and canned input controls are abse
   await click('Switch to light theme');assert.equal(document.documentElement.dataset.theme,'light');
   assert.equal(document.querySelector('[aria-label="Execution mode for new reviews"]'),null);assert.equal(document.querySelector('[aria-label="Load synthetic example"]'),null);
 });
-test('health reports unavailable truthfully and double-click opens details',async()=>{
+test('health reports unavailable truthfully and dismisses on every route',async()=>{
   api.status=async()=>{throw new ApiError(0,'QA_CONNECTION_FAILED','Service unavailable');};
   await mount();const summary=document.querySelector('.system-status summary')!;assert.match(summary.textContent!,/Unavailable/);
+  const panel=document.querySelector('.system-status') as HTMLDetailsElement;
+  const open=async()=>act(async()=>{panel.open=true;panel.dispatchEvent(new window.Event('toggle',{bubbles:true}));});
+  // The close button exists and dismisses the panel.
+  await open();assert.equal(panel.open,true);
+  await click('Close service health');assert.equal(panel.open,false);
+  // Escape works wherever focus sits, not only on the summary.
+  await open();
+  await act(async()=>{document.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));});
+  assert.equal(panel.open,false);
+  // An outside pointer press dismisses it.
+  await open();
+  await act(async()=>{document.querySelector('.brand')!.dispatchEvent(new window.MouseEvent('pointerdown',{bubbles:true}));});
+  assert.equal(panel.open,false);
+  // The double-click force-open is gone: a dblclick no longer holds it open.
   await act(async()=>summary.dispatchEvent(new window.MouseEvent('dblclick',{bubbles:true})));
-  assert.equal((document.querySelector('.system-status') as HTMLDetailsElement).open,true);
+  assert.equal(panel.open,false);
 });
 test('Studio navigation preserves report input and exposes distinct tools',async()=>{
   await mount();await paste('draft to preserve');await click('Review history');await click('Current report');assert.equal(text(),'draft to preserve');
@@ -151,9 +165,17 @@ test('analytics uses service totals and preserves unknown clinical performance',
   api.analytics=async()=>({...analytics(),reviews:{...analytics().reviews,total:237},acceptance:[{stakeholder:'qa',subject:'report',eligible:10,recorded:0,accepted:0,rejected:0,review_requested:0,unknown:0,not_recorded:10,acceptance_rate:null}]});
   await mount();await click('Analytics');const pane=document.querySelector('.operational-analytics')!;
   assert.match(pane.textContent!,/237/);assert.match(pane.textContent!,/0 \/ 0 final decisions/);
-  assert.equal(pane.querySelectorAll('.measurement-grid strong').length,4);
-  assert.ok([...pane.querySelectorAll('.measurement-grid strong')].every(el=>el.textContent==='Not measured'));
-  await choose('Assess acceptance of','qa_comments');assert.equal(pane.querySelectorAll('tbody tr').length,0);
+  // Unmeasured clinical performance stays visible as a section-level verdict...
+  const critical=pane.querySelector('[aria-label="Critical finding performance"]')!;
+  assert.match(critical.querySelector('.section-status')!.textContent!,/Not measured/);
+  // ...and all four measures keep their distinct denominators and their null result.
+  const measures=critical.querySelectorAll('.measurement-list > div');
+  assert.equal(measures.length,4);
+  assert.ok([...measures].every(el=>/Not measured/.test(el.textContent!)));
+  for (const formula of ['TP / (TP + FN)','TP / (TP + FP)','FP / (FP + TN)','FP / (TP + FP)']) {
+    assert.ok(critical.textContent!.includes(formula),`Missing denominator: ${formula}`);
+  }
+  await click('QA comments');assert.equal(pane.querySelectorAll('tbody tr').length,0);
 });
 
 test('late analytics response cannot replace a new period',async()=>{

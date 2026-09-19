@@ -37,6 +37,12 @@ uv run python scripts/run_local.py --model gpt-5.6-sol
 
 The launcher prompts for `OPENAI_API_KEY` without storing it. Rotate any key exposed in chat before use.
 
+`frontend/dist` is generated and never committed, so a pull that changes the UI leaves the previous
+bundle on disk. The launcher compares the build against the frontend sources and rebuilds when they
+are newer, so a pull is enough; it never serves a stale UI. Starting uvicorn directly skips that
+check — run `npm --prefix frontend run build` yourself in that case. The static mount is resolved
+once at import, so a rebuilt UI needs the server restarted, and the browser may need a hard reload.
+
 There is no spend ledger, session authorization or cost ceiling; they were removed on 2026-09-18 by explicit user decision. Provider cost is managed in the OpenAI account. Live reviews incur ordinary provider charges.
 
 A review is admitted on configuration readiness and context size alone. A request whose composed instructions, report and bounded output exceed the context allowance is rejected before dispatch with `REVIEW_CONTEXT_TOO_LARGE`; instructions and report text are never clipped to make one fit.

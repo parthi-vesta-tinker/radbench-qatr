@@ -16,18 +16,45 @@ def npm_executable():
     return shutil.which("npm.cmd" if os.name == "nt" else "npm") or shutil.which("npm")
 
 
+def frontend_is_current():
+    """True when a build exists and no frontend source is newer than it.
+
+    frontend/dist is generated and never committed, so a pull that changes the UI
+    leaves a stale bundle behind. Serving it silently shows the previous release.
+    """
+    built = ROOT / "frontend/dist/index.html"
+    if not built.is_file():
+        return False
+    newest = 0.0
+    for folder in ("frontend/src", "frontend/index.html", "frontend/package.json",
+                   "frontend/vite.config.ts", "frontend/tsconfig.json"):
+        target = ROOT / folder
+        if target.is_file():
+            newest = max(newest, target.stat().st_mtime)
+        elif target.is_dir():
+            for path in target.rglob("*"):
+                if path.is_file():
+                    newest = max(newest, path.stat().st_mtime)
+    return newest <= built.stat().st_mtime
+
+
 def ensure_frontend():
-    if (ROOT / "frontend/dist/index.html").is_file():
+    if frontend_is_current():
         return
+    stale = (ROOT / "frontend/dist/index.html").is_file()
+    if stale:
+        print("Browser UI is older than the frontend source. Rebuilding...", flush=True)
     npm = npm_executable()
     if npm is None:
         raise SystemExit(
-            "The browser UI is not built and npm is not on PATH. Install Node.js 22 LTS, "
+            "The browser UI needs building and npm is not on PATH. Install Node.js 22 LTS, "
             "close and reopen PowerShell, then run this command again."
         )
-    print("Browser UI is not built. Installing locked frontend dependencies...", flush=True)
+    if not stale:
+        print("Browser UI is not built. Installing locked frontend dependencies...", flush=True)
     try:
-        subprocess.run([npm, "--prefix", "frontend", "ci"], cwd=ROOT, check=True)
+        if not (ROOT / "frontend/node_modules").is_dir():
+            subprocess.run([npm, "--prefix", "frontend", "ci"], cwd=ROOT, check=True)
         print("Building browser UI...", flush=True)
         subprocess.run([npm, "--prefix", "frontend", "run", "build"], cwd=ROOT, check=True)
     except subprocess.CalledProcessError as exc:

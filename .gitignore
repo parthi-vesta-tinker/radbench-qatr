@@ -19,3 +19,6 @@ frontend/dist/
 test-results/
 playwright-report/
 *.log
+
+# Claude Code worktrees
+.claude/worktrees/

@@ -24,9 +24,20 @@ test('drafts, Undo, Studio navigation and themes remain usable on desktop and mo
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('button',{name:'Switch to light theme'}).click();
-  await page.locator('.system-status summary').dblclick();
+  // A single click opens it; Escape, the close button and an outside click all dismiss it.
+  await page.locator('.system-status > summary').click();
   await expect(page.getByRole('heading',{name:'Service health'})).toBeVisible();
-  await page.locator('.system-status summary').press('Escape');
+  await page.locator('.system-status > summary').press('Escape');
+  await expect(page.getByRole('heading',{name:'Service health'})).toBeHidden();
+  await page.locator('.system-status > summary').click();
+  await page.getByRole('button',{name:'Close service health'}).click();
+  await expect(page.getByRole('heading',{name:'Service health'})).toBeHidden();
+  await page.locator('.system-status > summary').click();
+  await expect(page.getByRole('heading',{name:'Service health'})).toBeVisible();
+  await page.locator('.app-header .brand').click();
+  await expect(page.getByRole('heading',{name:'Service health'})).toBeHidden();
+  // A double click must close it, not force it open.
+  await page.locator('.system-status > summary').dblclick();
   await expect(page.getByRole('heading',{name:'Service health'})).toBeHidden();
   expect(errors).toEqual([]);
 });
@@ -67,7 +78,14 @@ test('Studio analytics and inbox work without provider inference',async({page})=
   await page.goto('/');
   await page.getByRole('button',{name:'Analytics',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Are stakeholders accepting the work?'})).toBeVisible();
-  await expect(page.locator('.measurement-grid strong')).toHaveText(['Not measured','Not measured','Not measured','Not measured']);
+  // Unmeasured clinical performance stays visible as a verdict, with all four denominators kept.
+  const critical=page.getByRole('region',{name:'Critical finding performance'});
+  await expect(critical.locator('.section-status')).toHaveText('Not measured');
+  await critical.getByText(/What is needed to measure this/).click();
+  await expect(critical.locator('.measurement-list > div')).toHaveCount(4);
+  for (const formula of ['TP / (TP + FN)','TP / (TP + FP)','FP / (FP + TN)','FP / (TP + FP)']) {
+    await expect(critical.getByText(formula,{exact:true})).toBeVisible();
+  }
   await page.getByRole('combobox',{name:'Period',exact:true}).selectOption('all');
   await expect(page.getByRole('region',{name:'Feedback totals'})).toBeVisible();
   await page.getByRole('button',{name:'Feedbacks',exact:true}).click();

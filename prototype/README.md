@@ -15,6 +15,7 @@ This directory contains the current application contract and generated artifacts
 | Change analytics or outcomes | [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) |
 | Change Skills Studio | [SKILLS_STUDIO_SPEC.md](SKILLS_STUDIO_SPEC.md) |
 | Review gates or deferred work | [ACCEPTANCE.md](ACCEPTANCE.md) and [BACKLOG.md](BACKLOG.md) |
+| Review UI problems and proposed enhancements | [UI_ENHANCEMENT_RESEARCH.md](UI_ENHANCEMENT_RESEARCH.md) |
 
 ## Proposals under review
 
@@ -30,6 +31,8 @@ These are not implementation authority. They describe target behavior that chang
 ```sh
 uv run python prototype/render_blueprint.py
 ```
+
+`UI_ENHANCEMENT_RESEARCH.md` records observed UI problems, gated enhancement proposals and their verdicts. It is research and a decision log, not implementation authority; the specifications above govern.
 
 `examples/` contains synthetic scenarios used by evaluation tooling. These examples are technical fixtures, not clinical validation.
 
