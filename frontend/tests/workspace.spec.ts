@@ -76,3 +76,25 @@ test('Studio analytics and inbox work without provider inference',async({page})=
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
+
+test('feedback dialog is dismissable by Escape and Cancel, and reopens cleanly',async({page})=>{
+  await page.goto('/');
+  // A demo sample produces a completed result without any provider call.
+  await page.getByLabel('Report text',{exact:true}).fill('Findings:\nLungs are clear. No pleural effusion or pneumothorax.\n\nImpression:\nNo acute cardiopulmonary abnormality.');
+  await page.getByRole('button',{name:'Review',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  const heading=page.getByRole('heading',{name:'What should we improve?'});
+  await page.getByRole('button',{name:'Thumbs down',exact:true}).click();
+  await expect(heading).toBeVisible();
+  await expect(page.getByRole('button',{name:'Save',exact:true})).toBeVisible();
+  // Escape closes the native dialog without a React synthetic close event.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  // A single click must reopen it: state and the element cannot drift apart.
+  await page.getByRole('button',{name:'Thumbs down',exact:true}).click();
+  await expect(heading).toBeVisible();
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();
+  await expect(dialog).toBeHidden();
+  await page.getByRole('button',{name:'Thumbs down',exact:true}).click();
+  await expect(heading).toBeVisible();
+});

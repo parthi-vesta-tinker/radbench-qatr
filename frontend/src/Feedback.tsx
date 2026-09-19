@@ -42,11 +42,21 @@ export function Feedback({
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const node = dialog.current;
-    // happy-dom and older engines lack showModal; the form still renders and submits.
-    if (!node || typeof node.showModal !== "function") return;
+    if (!node) return;
+    // happy-dom and older engines lack showModal; fall back to the plain open state.
+    if (typeof node.showModal !== "function") { node.open = open; return; }
     if (open && !node.open) node.showModal();
     if (!open && node.open) node.close();
   }, [open]);
+  useEffect(() => {
+    const node = dialog.current;
+    if (!node) return;
+    // close does not bubble, so Escape never reaches a React synthetic handler.
+    // Without this the dialog would shut while state still believed it was open.
+    const sync = () => { setOpen(false); setError(""); };
+    node.addEventListener("close", sync);
+    return () => node.removeEventListener("close", sync);
+  }, [setOpen]);
   const pending = useRef<{ payload: string; key: string } | null>(null);
   const result = review.result!;
   async function save(rating: "up" | "down") {
@@ -124,7 +134,6 @@ export function Feedback({
         className="feedback-dialog"
         ref={dialog}
         aria-labelledby="feedback-dialog-title"
-        onClose={() => { setOpen(false); setError(""); }}
       >
         <form
           className="feedback-form"
@@ -176,7 +185,7 @@ export function Feedback({
           )}
           <div className="form-actions">
             <button className="primary" disabled={saving || disabled}>
-              {saving ? "Saving…" : "Save feedback"}
+              {saving ? "Saving…" : "Save"}
             </button>
             <button
               type="button"

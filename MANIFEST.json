@@ -179,8 +179,8 @@
     },
     {
       "path": "frontend/src/Feedback.tsx",
-      "bytes": 7881,
-      "sha256": "d404ad106147bbe283fefb6a86e6a2b84d691cbb885098632154378237b8f07a"
+      "bytes": 8263,
+      "sha256": "3dc20087ed8d5e9f418473eb1934714d383072dfd5ea11503682ee71fb67eca4"
     },
     {
       "path": "frontend/src/FeedbackInbox.tsx",
@@ -269,8 +269,8 @@
     },
     {
       "path": "frontend/tests/workspace.spec.ts",
-      "bytes": 5693,
-      "sha256": "c52df6344c4405c6869049a33d069aced8d4f4eb3ecaf02ecc808cc9230d5f8a"
+      "bytes": 7015,
+      "sha256": "eef82cb8a40324494851f8ad06179678e00351c1c8997c78b80fb37eabe5302c"
     },
     {
       "path": "frontend/tsconfig.json",
