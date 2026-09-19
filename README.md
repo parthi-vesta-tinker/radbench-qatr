@@ -1,6 +1,6 @@
 # Vesta Report QA
 
-Application **0.13.0** · bundle **1.17** · foundation **F3** · API **2026-09-18** · schema **4**.
+Application **0.13.0** · bundle **1.18** · foundation **F3** · API **2026-09-18** · schema **5**.
 
 Vesta Report QA is a local FastAPI, DBOS, OpenAI Agents SDK, React, and SQLite prototype. A user pastes report text, runs one durable combined review request, reads two copy-ready comment groups, and records feedback or stakeholder outcomes. It also includes tenant-scoped analytics and a Skills Studio draft editor.
 

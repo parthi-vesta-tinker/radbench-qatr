@@ -1,5 +1,30 @@
 # Foundation implementation decisions and releases
 
+## Pack references and skill workspaces — schema 5 / bundle 1.18
+
+Implemented 2026-09-19 as P1 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md), with the interaction
+model in [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Application version, API version and
+workflow identities are unchanged: no workflow shape, recovery semantic or public contract moved.
+
+- `load_snapshot` takes a pack reference. `published` is today's verified read. `draft:<workspace>`
+  overlays that tenant workspace's saved skill drafts and is stamped
+  `draft:<workspace>@<pack-hash>`. Live report QA resolves `published` only, and `packs.py` refuses
+  a draft reference on that path.
+- Pack identity is derived, not hardcoded. A tenant binds a *profile* (`vesta-qatr`, `generic`);
+  the version is read from the installed package. Bindings still resolve to `vesta-qatr-0.3.0` and
+  `generic-0.3.0`, and a configured pin is refused when the installed pack does not carry it.
+  The three hardcoded `0.3.0` constants are gone.
+- Schema 5 adds `skill_workspaces` and `playground_runs` and scopes `knowledge_drafts` by
+  workspace. A draft saved outside a workspace is an editorial record that still never composes.
+  The default store moves to `.qa-data-foundation-v4`; a schema-4 store is refused, never migrated.
+- A workspace pins the published pack it forked from. When live moves past that pin, composition is
+  refused until an explicit rebase, which preserves saved revisions, clears stored runs, and returns
+  a submitted workspace to open.
+- Only skill instructions are composable. A workspace draft targeting the frozen catalog or pinned
+  source wording is refused at composition rather than silently dropped.
+
+There is no playground interface, no run endpoint and no output diff yet; those are P2.
+
 # Spend removal — 2026-09-18
 
 Removed by explicit user decision: "spending is not a problem", after the running application

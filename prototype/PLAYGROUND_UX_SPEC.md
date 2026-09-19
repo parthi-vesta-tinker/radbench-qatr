@@ -1,7 +1,9 @@
-> Design proposal, not implemented. This document describes the interaction model for the
-> playground proposed in [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md). It changes no current behavior.
-> Application **0.13.0**, bundle **1.17**, foundation **F3** remain as described in
-> [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md).
+> Design proposal, no interface implemented. This document describes the interaction model for
+> the playground proposed in [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md). Its P1 foundation — pack
+> references, draft composition, workspace fork pinning and the schema-5 tables — landed on
+> 19 September 2026; see [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md). Every screen, route
+> and control described here is still unbuilt. Application **0.13.0**, bundle **1.18**,
+> foundation **F3**, schema **5**.
 
 # Playground UX interaction model
 
@@ -176,8 +178,9 @@ presented as if it does.
 - When live moves past that version, the header reads **Out of date**, every stored diff in the
   workspace is marked **stale** with the version it was computed against, and **Submit is refused**.
 - **Rebase** is an explicit action. It re-points the workspace at the current published pack,
-  preserves every saved skill revision, invalidates stored diffs, and records itself in the
-  workspace change notes.
+  preserves every saved skill revision, and records itself in the workspace change notes. Past
+  runs are kept, not deleted: each carries the pack hash it was composed against, so a run from
+  before the rebase identifies itself as a superseded composition and is shown as one.
 - Rebase never silently merges. Where a skill's published text changed under a saved draft, the
   reviewer gets today's compare-with-installed view on that skill and reconciles it, which is the
   existing `source_changed` reconciliation at pack granularity.
@@ -271,7 +274,7 @@ Confirmed 19 September 2026. They are not reopened here.
 | Published-pack result cached or re-dispatched? | Cached on (report text, published pack hash) (§4.3) |
 | Copy absent or watermarked? | Absent. Export a stamped run instead (§6) |
 | Curated-set run cancellable mid-flight? | Yes; completed results kept, rest marked `not run` (§4.2) |
-| Workspace behavior when live moves on | Pin the forked version, mark diffs stale, refuse submit, explicit rebase (§5.1) |
+| Workspace behavior when live moves on | Pin the forked version, mark diffs stale, refuse submit, explicit rebase that keeps saved revisions and past runs (§5.1) |
 | What the publish gate asserts | Regression across the full curated set, not clinical validation (§7) |
 | Composed-prompt visibility | Every `skills:read` holder (§2) |
 | Separate `skills:run` scope? | No. Deferred with the approver question (§8) |

@@ -1,6 +1,8 @@
-> Design proposal, not implemented. This document describes a target organization for report QA
-> skills and a playground. It changes no current behavior. Application **0.13.0**, bundle **1.17**,
-> foundation **F3** remain as described in [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md).
+> Proposal, P1 implemented. This document describes a target organization for report QA skills
+> and a playground. **P1 landed on 19 September 2026** — pack references, derived pack identity and
+> the schema-5 workspace tables; see [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md). P2–P6
+> remain proposals and change no current behavior. Application **0.13.0**, bundle **1.18**,
+> foundation **F3**, schema **5**.
 
 # Skill pack and playground specification
 
@@ -370,7 +372,7 @@ tangled; this separates them.
 
 | Phase | Delivers | Risk |
 |---|---|---|
-| P1 | Pack reference in `load_snapshot()`; remove hardcoded `0.3.0`; workspaces table | Low; no user-visible change |
+| ~~P1~~ | **Implemented 2026-09-19.** Pack reference in `load_snapshot()`; hardcoded `0.3.0` removed; workspace and run tables | Low; no user-visible change |
 | P2 | Playground: paste-your-own, run, output diff | Medium; first draft composition path |
 | P3 | Format migration: frontmatter, `PACK.md`, manifest/lock as build outputs | Medium; one-time conversion, validator rewrite |
 | P4 | `_review-contract` moved out of Python; ownership map generated from `owns:` | Medium; prompt changes, needs live comparison |
