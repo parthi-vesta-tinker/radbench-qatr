@@ -24,8 +24,8 @@
     },
     {
       "path": "LOCAL_TESTING.md",
-      "bytes": 3809,
-      "sha256": "8214a41c30110a3bfbd32f2984eea84596c27f34ebebf15ebe6b7d49464329b4"
+      "bytes": 4307,
+      "sha256": "9cd9d62c7fedafea6f77f476ae0dbd926c4ee3247f64ca5cb7d18fa8c52f44fe"
     },
     {
       "path": "README.md",
@@ -704,8 +704,8 @@
     },
     {
       "path": "scripts/run_local.py",
-      "bytes": 2752,
-      "sha256": "c30790982b4bbba5852aa45321bc6ee0f11c0c4b87412a3e47c1a1c10cc6dae8"
+      "bytes": 3849,
+      "sha256": "244f46ed9c3d6878bd111674aeafad76873f94d3367d9fbf0b13334148409482"
     },
     {
       "path": "scripts/score_skill_evaluations.py",
@@ -759,8 +759,8 @@
     },
     {
       "path": "tests/test_local_launcher.py",
-      "bytes": 1544,
-      "sha256": "a89a403012b871bb110324e47df7b002373adabe40a33037e53ee804e9e7e529"
+      "bytes": 2894,
+      "sha256": "3ac0b7633f21e7a6ad5f81b037830cdbdcb1d57b8e978cb9fd7cb6c7e8632f45"
     },
     {
       "path": "tests/test_recovery.py",
