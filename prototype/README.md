@@ -25,6 +25,7 @@ These are not implementation authority. They describe target behavior that chang
 |---|---|
 | Skill pack reorganization and playground | [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md) |
 | Playground interaction model | [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md) |
+| Feedback comment classification | [FEEDBACK_CLASSIFICATION_SPEC.md](FEEDBACK_CLASSIFICATION_SPEC.md) |
 
 `BLUEPRINT.html` is a generated reading edition of this current set. Rebuild it with:
 
