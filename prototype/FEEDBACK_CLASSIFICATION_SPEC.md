@@ -54,15 +54,20 @@ A `Choice` primitive does not solve (2). Its distribution sums to 1, so a 0.4 / 
 
 ### The two Nouls
 
-Two independent questions, each returning one probability, evaluated in parallel:
+Two independent Jev Nouls, each carrying explicit true and false criteria. They are evaluated as a
+**multilabel task: one `system_one` request carrying both questions**, not two requests.
 
-| Noul | Question put to the classifier |
-|---|---|
-| `clinical_inconsistency` | Does this comment say something in the report contradicts something else in the report, or contradicts itself? |
-| `critical_findings` | Is this comment about a critical or urgent finding — that one was missed, wrongly raised, or mishandled? |
+| Noul | `true_criteria` | `false_criteria` |
+|---|---|---|
+| `clinical_inconsistency` | The comment says something in the report contradicts something else in the report, or contradicts itself. | The comment raises no contradiction within the report. |
+| `critical_findings` | The comment is about a critical or urgent finding — that one was missed, wrongly raised, or mishandled. | The comment is not about a critical or urgent finding. |
 
-Both may be true. Both may be false; a comment matching neither is **Other topic**, a first-class
-visible outcome and not an error state.
+Each Noul returns one probability. Both may be true. Both may be false; a comment matching neither
+is **Other topic**, a first-class visible outcome and not an error state.
+
+The criteria wording above is a **starting draft, not the specification**. It is the artifact the
+alignment loop under Validation optimizes, and the accepted wording ships as a versioned classifier
+pack. Do not hand-tune it in application code.
 
 A Noul is a label on **the comment**, never a claim about the report. `clinical_inconsistency: 0.9`
 means "this person is writing about an inconsistency", not "the report is inconsistent". No
@@ -141,17 +146,26 @@ things, so disagreement between them is not an error signal and a differs-filter
 ### Bands and threshold
 
 Bands are derived at **read time** from the stored probability, never baked into the stored record,
-so the threshold can be retuned without reclassifying:
+so the threshold can be retuned without reclassifying.
 
-| Band | Range |
+Use the standard ambiguity measure rather than hand-picked cut points:
+
+```
+ambiguity(p) = 1 - 2 * |p - 0.5|        # 1.0 at p=0.5, 0.0 at p=0 or p=1
+```
+
+| Band | Condition |
 |---|---|
-| likely | p ≥ 0.70 *(to confirm)* |
-| unclear | 0.30 ≤ p < 0.70 *(to confirm)* |
-| unlikely | p < 0.30 *(to confirm)* |
+| unclear | `ambiguity(p) >= 0.8`, i.e. `0.4 <= p <= 0.6` |
+| likely | `p > 0.6` |
+| unlikely | `p < 0.4` |
+
+`0.8` is `jev-align`'s default capture threshold, so the rows the inbox marks `unclear` are exactly
+the rows its alignment loop would select for labelling. One number governs both, which is the point:
+tuning the band retunes what gets queued for review.
 
 Thresholds ship in the API response, not hardcoded in the frontend, and the inbox states the active
-threshold in a footnote. **The numbers above are placeholders**, to be set by the validation run
-below rather than by intuition.
+threshold in a footnote. The value is confirmed by the validation run below, not assumed.
 
 ### What the classifier receives
 
@@ -175,16 +189,30 @@ cannot produce free text, call a tool, or reach a report.
 not say whether the missed thing was a contradiction or a critical finding. Only the text does. The
 reason field is a weak prior, not a label, and cannot grade this classifier.
 
-Real validation needs the comment text hand-adjudicated against the two Noul questions:
+Real validation needs the comment text hand-adjudicated against the two Noul questions. Rather than
+building that loop, use [`jev-align`](https://github.com/sutro-sh/jev-align), an Apache-2.0 CLI
+that implements exactly it for multilabel Jev functions:
 
-- Draw a sample of feedback entries that carry explanation text.
-- Two people independently answer both Noul questions per comment, yes / no / can't tell.
-- Compare against the model probabilities; set the band thresholds from that comparison.
-- Record inter-rater disagreement. If two readers cannot agree on whether a comment is about a
-  critical finding, the question is badly worded and gets rewritten before the model sees it again.
+- Export feedback comment text to CSV and run `jeva optimize` as a multilabel task with the two
+  labels above.
+- It selects the most ambiguous rows plus a random audit sample each round, so adjudication effort
+  lands where it changes the answer instead of on easy cases.
+- The adjudicator labels each row and may attach a free-text rationale. GEPA then proposes new
+  `true_criteria` / `false_criteria` wording from those rationales; a human accepts or rejects every
+  proposal and a higher training score never auto-accepts.
+- It reports per-label precision, recall, F1 and support against a 20% held-out split, which is the
+  measurement this document previously called for without supplying any machinery for.
+
+This replaces the ad-hoc two-rater procedure in the earlier draft. Inter-rater disagreement is still
+worth recording: if two readers cannot agree whether a comment is about a critical finding, the
+criteria are badly worded and get rewritten before the model sees them again — which is what the
+tool's accept/reject gate is for.
+
+**Adopt it as a design-time tool, not a runtime dependency.** See the Tooling note under
+Implementation Notes.
 
 The schema-7 cutover below discards the current store. Export the existing comment *text* to a
-fixture under `prototype/examples/` before cutting over, so the adjudication sample survives.
+fixture under `prototype/examples/` before cutting over, so the adjudication set survives.
 
 Unlike the one-shot gate in the earlier draft, iteration 1 keeps producing material: every
 classified row is a candidate for re-adjudication, so drift is detectable by re-sampling rather
@@ -222,6 +250,39 @@ here so it is not rediscovered as a surprise:
 ## Implementation Notes
 
 Scope below is **iteration 1 only**.
+
+### Tooling: jev-align at design time only
+
+[`jev-align`](https://github.com/sutro-sh/jev-align) (Apache-2.0, Sutro; not affiliated with
+TypeSafe) is the right tool for authoring and optimizing the two Nouls' criteria, and the wrong
+thing to run inside this application. Three concrete reasons, all verified against the source at
+`49753df`:
+
+1. **Its runtime call is synchronous and its own AGENTS.md says so.** `AIFunction.__call__` reaches
+   `TypeSafeJevEvaluator.evaluate_many`, which is `asyncio.run(...)`. This application's provider
+   calls are async DBOS workflows (`backend/reviewer.py:170`), so an `asyncio.run` inside one raises
+   `RuntimeError: asyncio.run() cannot be called from a running event loop` — the hazard `AGENTS.md`
+   already names under Runtime and persistence. An `asyncio.to_thread` hop would work (the pattern
+   exists at `backend/main.py:87`) but puts the provider call outside DBOS's step accounting.
+2. **It depends on `gepa[full]`.** The optimizer belongs on a workstation, not in the served
+   application's dependency tree.
+3. **Its `Capture` writes JSONL to local disk** from a background thread with no durability
+   guarantee, containing the user's feedback text. That is a second persistence story beside SQLite
+   and DBOS, and it would need its own retention answer.
+
+Adopt it this way instead:
+
+- **Design time.** Run `jeva optimize` on exported feedback text to author, adjudicate and optimize
+  the criteria.
+- **Artifact.** Commit the accepted `instructions` and per-label `true_criteria` / `false_criteria`
+  as a versioned, hashed classifier pack, governed the way `qa-skills/` packs already are — pinned
+  version, changelog, evaluation record. The wording is content, not code.
+- **Runtime.** The DBOS step calls `AsyncTypeSafeClient.system_one` directly with the packed
+  criteria, as one multilabel request carrying both Nouls. Runtime dependency is `typesafe-sdk`
+  alone.
+- **Feeding the loop back.** Do not install `Capture`. The `feedback_classifications` table already
+  records every probability durably; an export script selects the ambiguous and audit rows from it
+  for the next `jeva` round. Same active-learning cycle, one persistence story.
 
 ### Relevant area
 
@@ -344,6 +405,8 @@ enqueue, no inbox column.
   with the derived one marked as derived.
 - A comment about both an internal contradiction and a missed critical finding shows both topics as
   `likely`, alongside whatever single reason the user picked.
+- Classifying one comment issues exactly one provider request carrying both Nouls, not two.
+- The criteria wording in use is read from the versioned classifier pack, not literal in Python.
 - Bands are shown as words; the probability is reachable only behind a disclosure.
 - A comment matching neither Noul renders as **Other topic**, not as an error or a blank.
 - A down-vote with no explanation text is never enqueued and renders `—` in the derived column.
