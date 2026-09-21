@@ -24,8 +24,8 @@
     },
     {
       "path": "LOCAL_TESTING.md",
-      "bytes": 5869,
-      "sha256": "4d7ddb061f7fa29d18943da57556eea1efd0af566b7df8ade46dd9fd858acaa8"
+      "bytes": 7155,
+      "sha256": "f82d26709dc56962a643170c2c0465801105b81994bf4677d9f44db217ae8ffb"
     },
     {
       "path": "README.md",
@@ -49,8 +49,8 @@
     },
     {
       "path": "backend/access.py",
-      "bytes": 4374,
-      "sha256": "f6ef435de7851c62f132c5f673d288ec01c15bcb4cd927855cfe6cc94106d66e"
+      "bytes": 4468,
+      "sha256": "0576bf015d52be0538fc6a026a25696dbbca798cb6fef565d1b8506fe898a867"
     },
     {
       "path": "backend/attempts.py",
@@ -84,8 +84,8 @@
     },
     {
       "path": "backend/main.py",
-      "bytes": 22916,
-      "sha256": "3fbb428d4de6e5ce49cefb60c4c33ea0418dec4cc056041fced8180f67873422"
+      "bytes": 23958,
+      "sha256": "db797a19ba3632095fee164dee6544edb69a5b90adadac854bee9dae5650f410"
     },
     {
       "path": "backend/outcomes.py",
@@ -309,8 +309,8 @@
     },
     {
       "path": "frontend/vite.config.ts",
-      "bytes": 175,
-      "sha256": "1d33b5836e723150dd91acb1d60bcc7cc81cc7e797d3035e6201c7799af79644"
+      "bytes": 256,
+      "sha256": "7cb578e3b9f5138ce8a86b7cdaff2c0ffe330fa5dc2acc6f98d0efb4afd7324e"
     },
     {
       "path": "prototype/ACCEPTANCE.md",
@@ -324,8 +324,8 @@
     },
     {
       "path": "prototype/API_DESIGN.md",
-      "bytes": 3190,
-      "sha256": "46c8ab25b89c79363ce7e472823447073ae47a02adc1508fdc75fa4979a27974"
+      "bytes": 3886,
+      "sha256": "4fbd62ea52fc8d994a417295118c89c8e496019efae57931814fe4545c33b5e3"
     },
     {
       "path": "prototype/BACKLOG.md",
@@ -334,8 +334,8 @@
     },
     {
       "path": "prototype/BLUEPRINT.html",
-      "bytes": 80577,
-      "sha256": "3525dd3171ade2372fb8b61a0b09a461f01ca8fe3d35119ad4d6ae445212e09f"
+      "bytes": 83590,
+      "sha256": "06bd551a012c9c055ae719f4135a450c30e8e6d1b90c5c5953954b43eb50273c"
     },
     {
       "path": "prototype/DBOS_VALIDATION.md",
@@ -344,8 +344,8 @@
     },
     {
       "path": "prototype/FOUNDATION_CHANGELOG.md",
-      "bytes": 17289,
-      "sha256": "cc67480e8062e59219961291c201a9067d3ab1ead664a389e4d0520390de7e2b"
+      "bytes": 17874,
+      "sha256": "eb654e858fb1c5ae9011ef403beb639cdce3e5d3aa9236a4b3ce785eee3fba9f"
     },
     {
       "path": "prototype/FOUNDATION_PLAN.md",
@@ -354,8 +354,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 7972,
-      "sha256": "ee8576f1f91dbec6690762bbdeb7b0ae6037223b8d60262e7be6864b7b232dca"
+      "bytes": 9294,
+      "sha256": "550671f88f959fbcab9831f0fa9e71d68c11f427c34549b902851f025b861070"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",
@@ -454,8 +454,8 @@
     },
     {
       "path": "prototype/openapi.json",
-      "bytes": 129230,
-      "sha256": "c2afa14a638f2e45a6f625d4dfeb184f29013c45d5f73fb29ca963803f2ca158"
+      "bytes": 132500,
+      "sha256": "5210e916045190e7198b9aa5d51b58ce73c3ffdde57e55a06eb51599f9acbcce"
     },
     {
       "path": "prototype/render_blueprint.py",
@@ -814,8 +814,8 @@
     },
     {
       "path": "tests/test_api_design.py",
-      "bytes": 11653,
-      "sha256": "4bd4ea7d1248e0858b3c044418d8e5c69abe92aa164f2d99e5f888dd5d036a9f"
+      "bytes": 14577,
+      "sha256": "8edc23b4b3c6fcc9ec51bc3eaf3e6460a145207be8c528d9105d6a77aa286f4c"
     },
     {
       "path": "tests/test_content_foundation.py",
@@ -891,6 +891,11 @@
       "path": "tests/test_skill_evaluation.py",
       "bytes": 4387,
       "sha256": "48799bc23bdf71c6257cde492cb62cf29673aa6e639ee1110908c4b346054fab"
+    },
+    {
+      "path": "tests/test_ui_caching.py",
+      "bytes": 1260,
+      "sha256": "f4693013b527829ac89de217a61712f9043c433d6bd1bb96bca9be4a275a0475"
     },
     {
       "path": "tests/test_workspace_queue.py",

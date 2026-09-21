@@ -8,7 +8,7 @@
     "/api/v1/config": {
       "get": {
         "summary": "Config",
-        "description": "Required scope in api_key mode: reviews:read. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: reviews:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "config_api_v1_config_get",
         "security": [
           {
@@ -233,7 +233,7 @@
     "/api/v1/status": {
       "get": {
         "summary": "Operational Status",
-        "description": "Required scope in api_key mode: reviews:read. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: reviews:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "operational_status_api_v1_status_get",
         "security": [
           {
@@ -348,7 +348,7 @@
     "/api/v1/diagnostics/openai": {
       "post": {
         "summary": "Openai Connection",
-        "description": "Required scope in api_key mode: reviews:read. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: reviews:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "openai_connection_api_v1_diagnostics_openai_post",
         "security": [
           {
@@ -463,7 +463,7 @@
     "/api/v1/reviews": {
       "post": {
         "summary": "Create Review",
-        "description": "Required scope in api_key mode: reviews:write. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: reviews:write. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "create_review_api_v1_reviews_post",
         "security": [
           {
@@ -600,7 +600,7 @@
       },
       "get": {
         "summary": "List Reviews",
-        "description": "Required scope in api_key mode: reviews:read. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: reviews:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "list_reviews_api_v1_reviews_get",
         "security": [
           {
@@ -831,7 +831,7 @@
     "/api/v1/reviews/{review_id}": {
       "get": {
         "summary": "Get Review",
-        "description": "Required scope in api_key mode: reviews:read. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: reviews:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "get_review_api_v1_reviews__review_id__get",
         "security": [
           {
@@ -957,7 +957,7 @@
     "/api/v1/reviews/{review_id}/feedback": {
       "post": {
         "summary": "Add Feedback",
-        "description": "Required scope in api_key mode: feedback:write. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: feedback:write. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "add_feedback_api_v1_reviews__review_id__feedback_post",
         "security": [
           {
@@ -1103,7 +1103,7 @@
       },
       "get": {
         "summary": "Get Feedback",
-        "description": "Required scope in api_key mode: feedback:read. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: feedback:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "get_feedback_api_v1_reviews__review_id__feedback_get",
         "security": [
           {
@@ -1257,7 +1257,7 @@
     "/api/v1/reviews/{review_id}/outcomes": {
       "post": {
         "summary": "Record Outcome",
-        "description": "Requires feedback:write and reviews:read. Operator-recorded decisions, not stakeholder signatures.",
+        "description": "Requires feedback:write and reviews:read. Operator-recorded decisions, not stakeholder signatures. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "record_outcome_api_v1_reviews__review_id__outcomes_post",
         "security": [
           {
@@ -1406,7 +1406,7 @@
       },
       "get": {
         "summary": "Get Outcomes",
-        "description": "Requires feedback:read and reviews:read. Operator-recorded decisions, not stakeholder signatures.",
+        "description": "Requires feedback:read and reviews:read. Operator-recorded decisions, not stakeholder signatures. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "get_outcomes_api_v1_reviews__review_id__outcomes_get",
         "security": [
           {
@@ -1563,7 +1563,7 @@
     "/api/v1/feedback": {
       "get": {
         "summary": "List Feedback Inbox",
-        "description": "Requires feedback:read and reviews:read. Newest-first tenant feedback with bounded report context.",
+        "description": "Requires feedback:read and reviews:read. Newest-first tenant feedback with bounded report context. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "list_feedback_inbox_api_v1_feedback_get",
         "security": [
           {
@@ -1781,7 +1781,7 @@
     "/api/v1/analytics": {
       "get": {
         "summary": "Get Analytics",
-        "description": "Required scope in api_key mode: reviews:read. Local mode is Vesta-only loopback access.",
+        "description": "Required scope in api_key mode: reviews:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "get_analytics_api_v1_analytics_get",
         "security": [
           {
@@ -1928,7 +1928,7 @@
     "/api/v1/knowledge": {
       "get": {
         "summary": "Knowledge Catalog",
-        "description": "Requires skills:read. Draft editing only; installed model instructions remain unchanged.",
+        "description": "Requires skills:read. Draft editing only; installed model instructions remain unchanged. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "knowledge_catalog_api_v1_knowledge_get",
         "security": [
           {
@@ -2047,7 +2047,7 @@
     "/api/v1/knowledge/{document_id}": {
       "get": {
         "summary": "Knowledge Detail",
-        "description": "Requires skills:read. Draft editing only; installed model instructions remain unchanged.",
+        "description": "Requires skills:read. Draft editing only; installed model instructions remain unchanged. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "knowledge_detail_api_v1_knowledge__document_id__get",
         "security": [
           {
@@ -2175,7 +2175,7 @@
     "/api/v1/knowledge/{document_id}/drafts": {
       "post": {
         "summary": "Save Knowledge Draft",
-        "description": "Requires skills:read and skills:write. Draft editing only; installed model instructions remain unchanged.",
+        "description": "Requires skills:read and skills:write. Draft editing only; installed model instructions remain unchanged. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "save_knowledge_draft_api_v1_knowledge__document_id__drafts_post",
         "security": [
           {
@@ -2326,7 +2326,7 @@
     "/api/v1/knowledge/{document_id}/drafts/{revision}/export": {
       "get": {
         "summary": "Export Knowledge Draft",
-        "description": "Requires skills:read. Draft editing only; installed model instructions remain unchanged.",
+        "description": "Requires skills:read. Draft editing only; installed model instructions remain unchanged. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "export_knowledge_draft_api_v1_knowledge__document_id__drafts__revision__export_get",
         "security": [
           {
@@ -2464,7 +2464,7 @@
     "/api/v1/playground": {
       "get": {
         "summary": "Playground Catalog",
-        "description": "Requires skills:read. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes.",
+        "description": "Requires skills:read. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "playground_catalog_api_v1_playground_get",
         "security": [
           {
@@ -2583,7 +2583,7 @@
     "/api/v1/playground/runs": {
       "post": {
         "summary": "Create Playground Run",
-        "description": "Requires skills:read and skills:write. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes.",
+        "description": "Requires skills:read and skills:write. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "create_playground_run_api_v1_playground_runs_post",
         "security": [
           {
@@ -2725,7 +2725,7 @@
     "/api/v1/playground/runs/{run_id}": {
       "get": {
         "summary": "Read Playground Run",
-        "description": "Requires skills:read. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes.",
+        "description": "Requires skills:read. Isolated test runs against the published pack. Playground output is never a review and never enters review history, feedback, analytics or outcomes. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
         "operationId": "read_playground_run_api_v1_playground_runs__run_id__get",
         "security": [
           {

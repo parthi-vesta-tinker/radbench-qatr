@@ -4,6 +4,7 @@ Current release: application **0.13.0**, bundle **1.19**, foundation **F3**, API
 
 ## Implemented
 
+- Explicit `QA_AUTH_MODE=public` for unauthenticated remote use of the shared Vesta workspace. Local-only remains the default; API-key scopes and tenant-override rejection are preserved.
 - Fresh schema-6 application storage and separate DBOS system storage. Older nonempty schemas fail with an actionable error and are never silently migrated or reset.
 - Tenant-scoped review history, feedback, outcomes, analytics, and Skills Studio draft revisions.
 - Server-controlled tenant release binding with immutable complete content snapshots. Vesta can use `vesta-qatr-0.3.0`; other tenants use the generic profile unless explicitly configured.
@@ -55,6 +56,23 @@ Run on 19 September 2026 for P2 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md).
 - No provider request was made. Recorded provider spend was **$0**.
 
 These are controlled tests with canned or mocked provider responses. They establish no clinical claim, and the playground performs no automatic regression comparison.
+
+## Verification completed for explicit public access
+
+Run on 21 September 2026 after the user requested public Funnel access.
+
+- **34 controlled Python tests passed** in `tests/test_api_design.py`, `tests/test_foundation.py`
+  and `tests/test_api.py`. The targeted access subset first passed all 8 selected tests.
+- Coverage includes forwarded remote clients, default/local rejection, explicit public acceptance,
+  a demo review read by a second public visitor, feedback, Studio/playground reads, tenant spoofing
+  rejection, invalid-mode rejection, and existing API-key scope and tenant isolation behaviour.
+- Generated OpenAPI and TypeScript checks, the frontend production build, and the documentation
+  boundary check passed. Wire payloads and generated TypeScript types are unchanged.
+- No provider call, external Funnel verification, browser acceptance or process recovery test was
+  run for this change. No running server was restarted; enable the mode using the documented
+  startup command in [LOCAL_TESTING.md](../LOCAL_TESTING.md).
+
+These are controlled access and API checks, not public deployment or clinical validation.
 
 ## Remaining phases
 

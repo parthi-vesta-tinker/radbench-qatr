@@ -116,6 +116,8 @@
 </tbody></table></div>
 <p>Reference entrypoints: [API design](API_DESIGN.md), [DBOS validation](DBOS_VALIDATION.md), [acceptance](ACCEPTANCE.md), [Workspace](WORKSPACE_SPEC.md), [Analytics](ANALYTICS_SPEC.md), [Skills Studio](SKILLS_STUDIO_SPEC.md), [backlog](BACKLOG.md).</p>
 <p>Sources: <a href="https://github.com/parthi-vesta-tinker/qatr/tree/b906151a2bdef8c206325de64d46b61cdf5b7ad7/src/qatr/_vendor/qa_skills/skills/qa-critical-match/references">pinned qatr references</a> and <a href="https://developers.openai.com/api/docs/guides/structured-outputs">OpenAI structured outputs</a>. Structured schemas constrain shape, not clinical correctness; refusal and incomplete output need explicit handling. Runtime/DBOS claims must be checked against installed code and F3 tests.</p></section><section id="changes"><h2 id="changes-foundation-implementation-decisions-and-releases">Foundation implementation decisions and releases</h2>
+<h3 id="changes-explicit-public-access-2026-09-21">Explicit public access — 2026-09-21</h3>
+<p>By user request, <code>QA_AUTH_MODE=public</code> permits unauthenticated remote access through Funnel to the shared Vesta tenant with all scopes. The default remains loopback-only <code>local</code>; <code>api_key</code> keeps credential-scoped tenant access. Caller-controlled tenant overrides remain rejected. Forwarded client addresses are preserved rather than disguised as loopback. This is an access configuration change; API payloads, schema and workflow identities are unchanged. See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for controlled verification.</p>
 <h3 id="changes-qa-studio-playground-schema-6-bundle-1-19">QA Studio playground — schema 6 / bundle 1.19</h3>
 <p>Implemented 2026-09-19 as P2 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md). The shipped contract is Part one of [PLAYGROUND_UX_SPEC.md](PLAYGROUND_UX_SPEC.md). Application version, API version and workflow identities for live review are unchanged.</p>
 <p>Scope was set by explicit user decision: curated samples in two categories plus paste-your-own, run the real review, show results and a phase log. No editing, no output comparison, no history, feedback or analytics. Skills are presented as one read-only set.</p>
@@ -322,6 +324,7 @@
 <p>Current release: application <strong>0.13.0</strong>, bundle <strong>1.19</strong>, foundation <strong>F3</strong>, API <strong>2026-09-18</strong>, SQLite schema <strong>6</strong>.</p>
 <h3 id="status-implemented">Implemented</h3>
 <ul>
+<li>Explicit <code>QA_AUTH_MODE=public</code> for unauthenticated remote use of the shared Vesta workspace. Local-only remains the default; API-key scopes and tenant-override rejection are preserved.</li>
 <li>Fresh schema-6 application storage and separate DBOS system storage. Older nonempty schemas fail with an actionable error and are never silently migrated or reset.</li>
 <li>Tenant-scoped review history, feedback, outcomes, analytics, and Skills Studio draft revisions.</li>
 <li>Server-controlled tenant release binding with immutable complete content snapshots. Vesta can use <code>vesta-qatr-0.3.0</code>; other tenants use the generic profile unless explicitly configured.</li>
@@ -369,6 +372,25 @@
 <li>No provider request was made. Recorded provider spend was <strong>$0</strong>.</li>
 </ul>
 <p>These are controlled tests with canned or mocked provider responses. They establish no clinical claim, and the playground performs no automatic regression comparison.</p>
+<h3 id="status-verification-completed-for-explicit-public-access">Verification completed for explicit public access</h3>
+<p>Run on 21 September 2026 after the user requested public Funnel access.</p>
+<ul>
+<li><strong>34 controlled Python tests passed</strong> in <code>tests/test_api_design.py</code>, <code>tests/test_foundation.py</code></li>
+</ul>
+<p>  and <code>tests/test_api.py</code>. The targeted access subset first passed all 8 selected tests.</p>
+<ul>
+<li>Coverage includes forwarded remote clients, default/local rejection, explicit public acceptance,</li>
+</ul>
+<p>  a demo review read by a second public visitor, feedback, Studio/playground reads, tenant spoofing   rejection, invalid-mode rejection, and existing API-key scope and tenant isolation behaviour.</p>
+<ul>
+<li>Generated OpenAPI and TypeScript checks, the frontend production build, and the documentation</li>
+</ul>
+<p>  boundary check passed. Wire payloads and generated TypeScript types are unchanged.</p>
+<ul>
+<li>No provider call, external Funnel verification, browser acceptance or process recovery test was</li>
+</ul>
+<p>  run for this change. No running server was restarted; enable the mode using the documented   startup command in [LOCAL_TESTING.md](../LOCAL_TESTING.md).</p>
+<p>These are controlled access and API checks, not public deployment or clinical validation.</p>
 <h3 id="status-remaining-phases">Remaining phases</h3>
 <ul>
 <li><strong>F4 — product regression and handoff:</strong> repeat integrated acceptance on a fresh store, review operator-facing failure handling and recovery guidance, verify the distributable bundle, and record any release-blocking issue.</li>
@@ -379,13 +401,15 @@
 <h3 id="api-general-rules">General rules</h3>
 <ul>
 <li><code>/api/v1</code> resources are JSON and reject unknown input fields.</li>
-<li>Authentication resolves the tenant. No request body or caller-controlled tenant header can select it.</li>
+<li>Server access configuration or authentication resolves the tenant. No request body or caller-controlled tenant header can select it.</li>
 <li>List limits and cursors are bounded and tenant/filter bound.</li>
 <li>Errors use the structured API error envelope with stable codes and request IDs.</li>
 <li>POST idempotency is scoped by tenant, operation, and key. The original request fingerprint, response status, body, and <code>Location</code> replay unchanged. Reusing a key with a different body conflicts.</li>
 <li>Receipt replay precedes current model/content readiness checks.</li>
 <li><code>backend/presentation.py</code> is the public projection boundary. Provider prompts, exact internal snapshots, source paths, credentials, database details, and DBOS internals remain private.</li>
 </ul>
+<h3 id="api-access-modes">Access modes</h3>
+<p><code>QA_AUTH_MODE=local</code> is the default: unauthenticated loopback clients share the Vesta tenant. <code>QA_AUTH_MODE=public</code> explicitly permits unauthenticated remote clients, including proxy-forwarded addresses, with all scopes in that same shared Vesta tenant. Public visitors can read existing reports and use review, feedback, outcomes, analytics, Studio and playground actions. <code>QA_AUTH_MODE=api_key</code> requires a valid bearer key and applies its tenant and scope grants. Local and public modes reject supplied Authorization credentials rather than implying that a key selected another tenant. All modes reject <code>X-Tenant-Id</code>; unknown modes fail closed.</p>
 <h3 id="api-review-resources">Review resources</h3>
 <p><code>POST /api/v1/reviews</code> accepts only <code>report_text</code> and an <code>Idempotency-Key</code>. The server resolves tenant, model, policy, content release, snapshot, workflow identity, and spend session. Acceptance returns <code>202</code> and a stable resource location.</p>
 <p><code>GET /api/v1/reviews/{id}</code> returns one tenant-scoped resource. States are <code>queued</code>, <code>running</code>, <code>completed</code>, <code>needs_input</code>, or <code>failed</code>. Only <code>completed</code> has a result. Progress uses:</p>

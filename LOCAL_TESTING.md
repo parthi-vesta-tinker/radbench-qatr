@@ -49,6 +49,30 @@ A review is admitted on configuration readiness and context size alone. A reques
 
 A valid live review makes one provider call. Invalid input makes zero. There is no automatic repair request. After a claimed request with no durable response, the review fails as `MODEL_OUTCOME_UNKNOWN` and is never retried automatically. Submitting a new review is a new explicit operation.
 
+## Public sharing through Tailscale Funnel
+
+For an intentionally public, unauthenticated shared workspace, stop the backend with Ctrl+C
+and restart it from the project root:
+
+```sh
+QA_AUTH_MODE=public uv run python scripts/run_local.py
+```
+
+The launcher honours the existing model configuration and builds stale frontend assets.
+Keep Funnel forwarding to the same local port as before (8000 for the combined app, or
+the Vite port when using the separate dev server). `frontend/vite.config.ts` also permits
+`homarchy.velociraptor-pauling.ts.net` for Vite development access.
+
+Public mode permits remote and proxy-forwarded clients without credentials. Every visitor
+shares the Vesta tenant, including its saved reports, feedback, analytics, Studio drafts,
+and review/playground actions. Live model calls use the server's configured provider account.
+Tenant selection remains server controlled; request tenant overrides are rejected.
+
+`QA_AUTH_MODE` defaults to `local`, which accepts loopback clients only. `api_key` retains
+its existing credential and scope checks. To return to local-only access, stop the backend
+and restart with `QA_AUTH_MODE=local`. This changes access only; it does not reset storage.
+Do not disable forwarded-header handling to make remote clients appear local.
+
 ## Playground
 
 QA Studio's **Playground** runs the real review against curated synthetic samples, in isolation.

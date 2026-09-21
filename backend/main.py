@@ -656,7 +656,7 @@ for route in app.routes:
         else family + (":write" if "POST" in methods else ":read")
     )
     route.openapi_extra = {"x-required-scope": scope}
-    route.description = f"Required scope in api_key mode: {scope}. Local mode is Vesta-only loopback access."
+    route.description = f"Required scope in api_key mode: {scope}."
     if path == "/api/v1/feedback":
         route.openapi_extra = {"x-required-scopes": ["feedback:read", "reviews:read"]}
         route.description = "Requires feedback:read and reviews:read. Newest-first tenant feedback with bounded report context."
@@ -674,3 +674,8 @@ for route in app.routes:
         route.description = ("Requires " + " and ".join(rights) + ". Isolated test runs against the "
                              "published pack. Playground output is never a review and never enters "
                              "review history, feedback, analytics or outcomes.")
+    route.description += (
+        " Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access."
+        " Explicit public mode permits unauthenticated remote access to the shared Vesta tenant"
+        " with all scopes."
+    )

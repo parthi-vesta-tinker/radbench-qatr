@@ -1,4 +1,4 @@
-"""Tenant identity comes from server credentials, never a client-selected tenant."""
+"""Tenant identity comes from server configuration or credentials, never the caller."""
 
 from dataclasses import dataclass
 import hashlib
@@ -44,8 +44,8 @@ def tenants():
 
 def auth_mode():
     mode = os.environ.get("QA_AUTH_MODE", "local")
-    if mode not in ("local", "api_key"):
-        raise ValueError("QA_AUTH_MODE must be local or api_key.")
+    if mode not in ("local", "public", "api_key"):
+        raise ValueError("QA_AUTH_MODE must be local, public or api_key.")
     return mode
 
 
@@ -86,10 +86,12 @@ def principal(
         raise AccessError(
             400,
             "TENANT_OVERRIDE_NOT_ALLOWED",
-            "Tenant identity is determined by server credentials.",
+            "Tenant identity is determined by server configuration or credentials.",
         )
-    if mode == "local":
-        if not request.client or request.client.host not in ("127.0.0.1", "::1"):
+    if mode in ("local", "public"):
+        if mode == "local" and (
+            not request.client or request.client.host not in ("127.0.0.1", "::1")
+        ):
             raise AccessError(
                 403, "LOCAL_ACCESS_ONLY", "Local mode accepts loopback requests only."
             )

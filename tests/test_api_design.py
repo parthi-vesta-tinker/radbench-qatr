@@ -192,6 +192,74 @@ def test_local_mode_cannot_select_tenant_or_accept_remote_client(client):
         remote.close()
 
 
+@pytest.mark.parametrize("mode, status", [(None, 403), ("local", 403), ("public", 200)])
+def test_forwarded_remote_client_requires_explicit_public_mode(client, monkeypatch, mode, status):
+    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+
+    if mode is None:
+        monkeypatch.delenv("QA_AUTH_MODE", raising=False)
+    else:
+        monkeypatch.setenv("QA_AUTH_MODE", mode)
+    proxy = ProxyHeadersMiddleware(app, trusted_hosts=["127.0.0.1"])
+    remote = TestClient(proxy, client=("127.0.0.1", 1234))
+    try:
+        response = remote.get("/api/v1/config", headers={"X-Forwarded-For": "203.0.113.10"})
+        assert response.status_code == status, response.text
+        if status == 200:
+            assert response.json()["tenant_id"] == "vesta"
+        else:
+            assert response.json()["error"]["code"] == "LOCAL_ACCESS_ONLY"
+    finally:
+        remote.close()
+
+
+def test_public_visitors_share_vesta_reviews_without_credentials(client, monkeypatch):
+    from backend.access import validate_access_config
+
+    monkeypatch.setenv("QA_AUTH_MODE", "public")
+    monkeypatch.delenv("QA_TENANT_KEYS_FILE", raising=False)
+    validate_access_config()
+    visitor = TestClient(app, client=("203.0.113.10", 1234))
+    other = TestClient(app, client=("203.0.113.11", 1234))
+    try:
+        accepted = post(visitor)
+        result = finish(visitor, accepted)
+        assert result["execution_status"] == "completed"
+        assert result["tenant_id"] == "vesta"
+        assert other.get(accepted.headers["Location"]).json() == result
+        feedback = other.post(
+            accepted.headers["Location"] + "/feedback",
+            headers={"Idempotency-Key": uuid.uuid4().hex},
+            json={"result_version": 1, "rating": "up"},
+        )
+        assert feedback.status_code == 201, feedback.text
+        assert other.get("/api/v1/knowledge").status_code == 200
+        assert other.get("/api/v1/playground").status_code == 200
+        spoofed = other.get("/api/v1/config", headers={"X-Tenant-Id": "tenant_b"})
+        assert spoofed.status_code == 400
+        assert spoofed.json()["error"]["code"] == "TENANT_OVERRIDE_NOT_ALLOWED"
+        credential = other.get("/api/v1/config", headers={"Authorization": "Bearer invalid"})
+        assert credential.status_code == 401
+        assert credential.json()["error"]["code"] == "AUTH_MODE_MISMATCH"
+        forged = other.post(
+            "/api/v1/reviews",
+            headers={"Idempotency-Key": uuid.uuid4().hex},
+            json={"report_text": SAMPLES[0]["report_text"], "tenant_id": "tenant_b"},
+        )
+        assert forged.status_code == 422
+    finally:
+        visitor.close()
+        other.close()
+
+
+def test_unknown_auth_mode_fails_closed(monkeypatch):
+    from backend.access import auth_mode
+
+    monkeypatch.setenv("QA_AUTH_MODE", "publci")
+    with pytest.raises(ValueError, match="QA_AUTH_MODE"):
+        auth_mode()
+
+
 def test_feedback_concurrent_replay_conflict_and_cursor_page(client):
     d = finish(client, post(client))
     url = f"/api/v1/reviews/{d['id']}/feedback"

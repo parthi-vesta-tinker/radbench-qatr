@@ -5,12 +5,22 @@ The active public contract is `QA-Version: 2026-09-18`; omitting the header sele
 ## General rules
 
 - `/api/v1` resources are JSON and reject unknown input fields.
-- Authentication resolves the tenant. No request body or caller-controlled tenant header can select it.
+- Server access configuration or authentication resolves the tenant. No request body or caller-controlled tenant header can select it.
 - List limits and cursors are bounded and tenant/filter bound.
 - Errors use the structured API error envelope with stable codes and request IDs.
 - POST idempotency is scoped by tenant, operation, and key. The original request fingerprint, response status, body, and `Location` replay unchanged. Reusing a key with a different body conflicts.
 - Receipt replay precedes current model/content readiness checks.
 - `backend/presentation.py` is the public projection boundary. Provider prompts, exact internal snapshots, source paths, credentials, database details, and DBOS internals remain private.
+
+## Access modes
+
+`QA_AUTH_MODE=local` is the default: unauthenticated loopback clients share the Vesta tenant.
+`QA_AUTH_MODE=public` explicitly permits unauthenticated remote clients, including proxy-forwarded
+addresses, with all scopes in that same shared Vesta tenant. Public visitors can read existing
+reports and use review, feedback, outcomes, analytics, Studio and playground actions.
+`QA_AUTH_MODE=api_key` requires a valid bearer key and applies its tenant and scope grants.
+Local and public modes reject supplied Authorization credentials rather than implying that a
+key selected another tenant. All modes reject `X-Tenant-Id`; unknown modes fail closed.
 
 ## Review resources
 

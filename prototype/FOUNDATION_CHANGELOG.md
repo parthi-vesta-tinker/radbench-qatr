@@ -1,5 +1,14 @@
 # Foundation implementation decisions and releases
 
+## Explicit public access — 2026-09-21
+
+By user request, `QA_AUTH_MODE=public` permits unauthenticated remote access through Funnel
+to the shared Vesta tenant with all scopes. The default remains loopback-only `local`;
+`api_key` keeps credential-scoped tenant access. Caller-controlled tenant overrides remain
+rejected. Forwarded client addresses are preserved rather than disguised as loopback.
+This is an access configuration change; API payloads, schema and workflow identities are unchanged.
+See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for controlled verification.
+
 ## QA Studio playground — schema 6 / bundle 1.19
 
 Implemented 2026-09-19 as P2 of [SKILL_PACK_SPEC.md](SKILL_PACK_SPEC.md). The shipped contract is
