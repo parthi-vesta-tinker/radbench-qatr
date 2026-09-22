@@ -8,8 +8,8 @@ from .contracts import (
     StepState,
 )
 
-API_VERSION = "2026-09-18"
-RECORD_SCHEMA_VERSION = 6
+API_VERSION = "2026-09-22"
+RECORD_SCHEMA_VERSION = 7
 PROVENANCE = {
     "skill_content_version",
     "skill_content_sha256",
@@ -77,14 +77,14 @@ def review(record, version=API_VERSION):
             )
 
         general, critical = result["general_comments"], result["critical_comments"]
-        result["general_copy_text"] = (f"QA review:\n\nGeneral Comments:\n{lines(general)}" if general else "")
+        result["general_copy_text"] = (f"General Comments:\n{lines(general)}" if general else "")
         result["comments_copy_text"] = (
-            f"QA review:\n\nGeneral Comments:\n{lines(general)}\n\nCritical Findings comments:\n{lines(critical)}"
+            f"General Comments:\n{lines(general)}\n\nCritical Findings comments:\n{lines(critical)}"
             if general or critical
             else ""
         )
         result["critical_comments_copy_text"] = (
-            f"QA review:\n\nCritical Findings comments:\n{lines(critical)}"
+            f"Critical Findings comments:\n{lines(critical)}"
             if critical
             else ""
         )

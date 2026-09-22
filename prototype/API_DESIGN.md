@@ -1,6 +1,6 @@
 # API contract
 
-The active public contract is `QA-Version: 2026-09-18`; omitting the header selects the same version. Other explicit versions are rejected. Generated [openapi.json](openapi.json) is the schema authority and must be regenerated from the FastAPI application.
+The active public contract is `QA-Version: 2026-09-22`; omitting the header selects the same version. Other explicit versions are rejected. Generated [openapi.json](openapi.json) is the schema authority and must be regenerated from the FastAPI application.
 
 ## General rules
 
@@ -33,15 +33,14 @@ key selected another tenant. All modes reject `X-Tenant-Id`; unknown modes fail 
 3. `output_validation`
 4. `comment_assembly`
 
-A result contains ordered server-validated observations, two display/copy groups, full-template copy when applicable, immutable version metadata, and safe usage/cost fields. An ambiguous provider attempt is a failed review with `MODEL_OUTCOME_UNKNOWN`, never an empty result.
+A result contains ordered server-validated observations, two display/copy groups, full-template copy when applicable, current input-version metadata, and safe usage/cost fields. An ambiguous provider attempt is a failed review with `MODEL_OUTCOME_UNKNOWN`, never an empty result.
 
 `GET /api/v1/reviews` provides bounded tenant history and stable pagination. Analytics queries the whole matching database population rather than this page.
 
 ## Related resources
 
-- Per-review feedback POST/GET and the feedback inbox preserve immutable result binding. Down feedback requires a reason.
-- Per-review stakeholder outcomes are append-only, result-bound operator records. They are not verified signatures or clinical ground truth.
-- Analytics returns operational and acceptance aggregates. Clinical performance remains null until an independent adjudicated reference cohort exists.
+- Per-review feedback POST/GET and the feedback inbox belong to the review, without a result-version or input-hash binding. Down feedback requires a reason.
+- Analytics returns operational and feedback aggregates. Clinical performance remains null until an independent adjudicated reference cohort exists.
 - Knowledge catalog/detail/draft/export routes expose verified installed content and tenant-scoped draft history. Draft writes use optimistic revision and source/package hash checks and never activate runtime instructions.
 - Config, health, status, and explicit diagnostics expose safe operational state. Provider diagnostics do not perform inference.
 
@@ -57,3 +56,20 @@ npm --prefix frontend run build
 ```
 
 Do not hand-edit generated files or add a compatibility projection without an explicit version decision.
+
+## Same-review replacement (0.14.0)
+
+`PUT /api/v1/reviews/{id}` accepts `report_text`, `expected_input_version` and an
+Idempotency-Key. It returns 202 with the same ID and an incremented concurrency counter.
+Missing tenant-scoped IDs return 404; queued/running reviews or stale versions return
+409 REVIEW_CONFLICT. Receipt replay precedes readiness and concurrency checks.
+Acceptance atomically replaces current text, submission timestamp, status, config snapshot
+and result; feedback is retained, prior outcomes and provider checkpoints are cleared.
+A new workflow identity includes the counter, fencing all old state/checkpoint writes.
+GET and history return only latest state. `created_at` is the latest submission time.
+Feedback requests no longer accept result_version; resources no longer expose input_hash.
+Comment-target feedback keeps its quoted comment as feedback context, without a result FK.
+Operational idempotency receipts and DBOS checkpoints remain for safe replay/recovery;
+they are not a user-facing report-version history.
+
+Stakeholder outcome endpoints and schemas are retired; analytics no longer returns acceptance counts. All copy projections start with their content group, without the UI-only QA review prefix. Dormant outcome storage is retained for schema-7 compatibility; no application path reads it.

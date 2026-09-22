@@ -1,5 +1,122 @@
 # Foundation implementation decisions and releases
 
+## Combined release verification before commit — 2026-09-22
+
+Full backend suite: 135 passed. Direct component suite: 22 passed. Full browser suite:
+15 passed and one outdated feedback-location selector failed after the requested move below
+the title; corrected that selector and all three panel checks passed on rerun. Production
+build, generated contracts, documentation and source bundle checks passed. Controlled fixtures
+only; no real-provider calls or clinical assessment. Release remains 0.14.0 / bundle 1.20.
+
+## Review context placement and shorter stages — 2026-09-22
+
+Rename Awaiting inputs to Input and Input check to Validate. Move the single contextual
+message below the review title and above the report field, preserving its live status/alert
+semantics and restore action. The journey stays beside Review. Production build and the
+replacement browser scenario passed, including placement/alignment checks at 1536, 390 and
+320px. Mobile screenshot inspected. No backend or contract changes.
+
+## Single unfinished Current review — 2026-09-22
+
+Remove numbered draft rows, draft deletion and Undo. Keep one unfinished report per tab,
+reusing it when New review is selected again. Current review restores that unfinished input
+when returning from a saved report. Pending and uncertain submissions retain their original
+text and idempotency key. Saved review history and Skills editorial drafts are unchanged.
+Production build, 22 direct component tests and 9 targeted workspace/panel browser tests
+passed. No backend, API or database changes, and no provider calls.
+
+## Compact monochrome review journey and outcome removal — 2026-09-22
+
+Remove stakeholder outcome controls, endpoints, contract schemas and acceptance analytics.
+Legacy outcome storage stays dormant for schema-7 compatibility; no additional migration.
+Copy projections omit the UI-only QA review prefix. The four stages Awaiting inputs,
+Input check, AI review and Output sit beside Review, with a single contextual message below.
+The interface is monochrome, with warning color reserved for progress problems.
+
+Verification: 33 affected backend tests, 22 direct component tests and all 16 browser tests
+passed, as did the production build and generated OpenAPI/TypeScript checks. Browser checks
+cover four stages, button alignment at desktop/390px/320px, removed outcome controls and
+copy without the title prefix. Mobile screenshot inspected. No real-provider calls or
+clinical evaluation were performed.
+
+## Latest-state report reviews and single journey — 2026-09-22
+
+Application 0.14.0, bundle 1.20, API 2026-09-22, schema 7. Explicit user decision
+supersedes immutable report-resource/history behavior: Review again replaces the same
+review ID with the latest report text, submission time and outcome. No parent-linked
+report snapshots or additional draft/history entry are created. Acceptance clears the
+old result, observations, configuration snapshot and provider checkpoint atomically.
+Review-level feedback survives; prior stakeholder outcomes are cleared so old acceptance
+cannot apply to corrected text. History and analytics read the single current projection.
+An internal input_version counter fences stale submissions/workers; queued/running work
+cannot be replaced. Idempotency receipts and DBOS operational checkpoints remain for safe
+replay and recovery, not as a report version-history feature. Comment-specific feedback
+retains its quoted comment as feedback context without a result foreign key.
+
+Rename the sidebar and mobile controls to Report reviews and Current review. Remove the
+Report text only badge and permanent input instruction. Contextual feedback reports pasted
+text, edits and uncertain submission; stale output cannot be copied. The single horizontal
+journey below it is New review, Awaiting inputs, Input check, AI review, Output. Output covers
+output validation and comment assembly; those remain separate backend phases. Complete,
+needs-input and failed states use ticks, warning and blocker icons. Remove both duplicate
+progress displays; Studio guidance remains.
+
+Schema-6 storage is upgraded only with scripts/upgrade_review_storage.py while stopped,
+with no pending live/playground work. It backs up SQLite, retains existing independent
+reviews and feedback, and validates foreign keys. Existing records are not inferred or
+merged. No running user database was upgraded during implementation.
+
+Verification: production build, generated OpenAPI/TypeScript drift checks, 24 directly
+executed DOM tests and all 16 browser tests passed. Full Python suite: 134 passed with one
+legacy configuration-equality assertion updated for the concurrency counter and passed on
+rerun. Final 10 targeted replacement/storage tests passed, including the additional pending
+upgrade refusal, outcome invalidation and foreign-key checks. The full suite included
+controlled DBOS process-recovery tests. Desktop, 390px and 320px journey screenshots checked.
+All execution used demo fixtures or provider doubles; no real-provider or clinical evaluation.
+
+## Secondary workspace typography — 2026-09-22
+
+Extend the shared hierarchy to history, Feedbacks, Analytics, Skills and Playground.
+Group filter controls, increase metadata readability, standardize empty states, and
+stack history entries with column labels on phones. Keep source editors monospace and
+all saved-review, feedback, editorial and playground boundaries unchanged.
+
+Verification: production build and DOM suite passed. All 14 existing browser tests passed;
+the additional section navigation/layout check passed separately at 1536, 390 and 320px
+using keyboard activation after its first pointer-based run encountered an overlapping
+tooltip. Desktop/mobile screenshots inspected. Demo fixtures only, no provider calls.
+
+## Application identity and typography — 2026-09-22
+
+Promote Radiology Report Review as the application title with a secondary Vesta label beside
+the supplied logo. Rename the draft heading and Studio action to New review, including collapsed
+tooltips. Keep the system font with consistent work/panel/subsection sizes, larger tool labels
+and report input, and aligned panel heading spacing. At narrow widths, header actions move to
+a second row so the full application name stays readable.
+
+Verification: frontend production build, DOM suite and four targeted Playwright header/panel
+checks passed. Desktop and mobile screenshots inspected. Demo fixtures only; no provider calls.
+
+## Branded header and Studio notice — 2026-09-22
+
+Use the user-supplied Vesta icon in the header and favicon. Group Share and Settings placeholders,
+Health and appearance as top-right icons; the first two have no functional action. Health keeps
+its existing read-only diagnostics and dismissal behaviour behind an icon trigger. Add a
+single-line dismissible Studio feature notice without a Try it action. Panel artwork was subsequently
+corrected against the user's close-up references: rounded outline and inset bar when expanded,
+inset opposite-side bar and inward chevron when collapsed, mirrored for the left panel. The shared
+Google glyph was removed. No external font request, backend contract or workflow changes.
+
+## Collapsible workspace panels — 2026-09-22
+
+By user request, rename the QA Studio tool and destination to Skills and give it the same tile
+placement as the other tools. Reports and QA Studio gain independent desktop rails and
+responsive mobile drawers. Collapsed controls retain explicit hover/focus tooltips and accessible
+names. Collapse preserves mounted editorial state and the selected report; the center retains
+review status when the full phases are hidden. Desktop preferences persist separately from
+temporary compact/mobile layout state. This changes presentation only; no API, clinical content,
+storage schema or workflow identity changes. See [WORKSPACE_SPEC.md](WORKSPACE_SPEC.md).
+
 ## Explicit public access — 2026-09-21
 
 By user request, `QA_AUTH_MODE=public` permits unauthenticated remote access through Funnel

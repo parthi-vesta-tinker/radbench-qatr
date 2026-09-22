@@ -49,10 +49,10 @@ export function FeedbackInbox({ openReview }: { openReview: (id: string) => void
       {rows.map(({ feedback: entry, report_preview, source, target_comment }) => <li key={entry.id}>
         <div className="saved-feedback-heading"><h2>{entry.rating === 'down' ? <ThumbsDown size={15} /> : <ThumbsUp size={15} />}{entry.reason ? reasonLabel(entry.reason) : entry.rating === 'up' ? 'Useful' : 'Needs improvement'}</h2>
           <time dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleString()}</time></div>
-        <p className="meta">{entry.rating === 'down' ? 'Needs improvement' : 'Useful'} · Result v{entry.result_version} · {entry.target === 'observation' ? `Comment ${entry.observation_id?.replace('obs-', '')}` : entry.target === 'result' ? 'Whole review' : 'Historical flag feedback'} · {source === 'demo' ? 'Legacy fixture' : 'Live AI'}</p>
+        <p className="meta">{entry.rating === 'down' ? 'Needs improvement' : 'Useful'} · {entry.target === 'observation' ? `Comment ${entry.observation_id?.replace('obs-', '')}` : entry.target === 'result' ? 'Whole review' : 'Historical flag feedback'} · {source === 'demo' ? 'Legacy fixture' : 'Live AI'}</p>
         {entry.explanation && <p className="feedback-note">{entry.explanation}</p>}
         {entry.suggested_comment && <div className="suggested-wording"><span className="meta">Suggested wording · Feedback only</span><p>{entry.suggested_comment}</p></div>}
-        {entry.target === 'observation' && <details className="disclosure disclosure-aside"><summary>Original QA comment</summary><p>{target_comment ?? 'Original comment unavailable for this result version.'}</p></details>}
+        {entry.target === 'observation' && <details className="disclosure disclosure-aside"><summary>Original QA comment</summary><p>{target_comment ?? 'Original comment unavailable.'}</p></details>}
         <div className="inbox-report"><div><p>{report_preview}</p><span className="meta review-id">{entry.review_id}</span></div><button onClick={() => openReview(entry.review_id)}>Open report</button></div>
       </li>)}
     </ol>

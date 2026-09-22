@@ -6,23 +6,22 @@ import { act } from 'react';
 import App from '../src/App';
 import { api, ApiError } from '../src/api';
 import type { Review } from '../src/types';
-import { OutcomeLog } from '../src/OutcomeLog';
-import type { Analytics, OutcomeRecord, KnowledgeCatalog, KnowledgeDetail, KnowledgeDraftInput } from '../src/types';
+import type { Analytics, KnowledgeCatalog, KnowledgeDetail, KnowledgeDraftInput } from '../src/types';
 import type { PlaygroundCatalog, PlaygroundRun } from '../src/types';
 const window = new Window({url:'http://localhost:8000'});
 Object.assign(globalThis, {window, document:window.document, HTMLElement:window.HTMLElement,
-  sessionStorage:window.sessionStorage, localStorage:window.localStorage, IS_REACT_ACT_ENVIRONMENT:true});
+  InputEvent:window.InputEvent, sessionStorage:window.sessionStorage, localStorage:window.localStorage, IS_REACT_ACT_ENVIRONMENT:true});
 const {createRoot} = await import('react-dom/client');
 let root: ReturnType<typeof createRoot>;
 let requests: {text:string; key:string}[];
 const results = new Map<string, Review>();
-function review(id:string,text:string): Review { return {id,object:'qa_review', tenant_id:'vesta',api_version:'2026-09-18',input:{report_text:text},execution_status:'running',steps:[],result:null,error:null,provenance:{mode:'openai',policy_status:'provisional_no_manual'}}; }
+function review(id:string,text:string): Review { return {id,object:'qa_review', tenant_id:'vesta',api_version:'2026-09-22',input:{report_text:text},input_version:1,created_at:new Date().toISOString(),input_hash:'test',execution_status:'failed',steps:[],result:null,error:null,provenance:{mode:'openai',policy_status:'provisional_no_manual'}}; }
 function button(name: string) { const node=[...document.querySelectorAll('button')].find(el=>el.getAttribute('aria-label')===name || el.textContent?.trim()===name); assert.ok(node, `Missing button: ${name}`); return node as HTMLButtonElement; }
 async function click(name:string) { await act(async()=>{button(name).click();}); }
 async function paste(text:string) { await act(async()=>{const input=document.querySelector('#report-text') as HTMLTextAreaElement; assert.ok(input && !input.readOnly); Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value')!.set!.call(input,text);input.dispatchEvent(new window.Event('input',{bubbles:true}));}); }
 async function mount() {await act(async()=>{root.render(<App/>);});}
 const text = () => (document.querySelector('#report-text') as HTMLTextAreaElement).value;
-const analytics = (): Analytics => ({object:'qa_analytics',tenant_id:'vesta',checked_at:new Date().toISOString(),period:'7d',period_start:null,source:'openai',reviews:{total:0,with_comments:0,no_comments:0,critical:0,statuses:{queued:0,running:0,completed:0,needs_input:0,failed:0}},feedback:{total:0,reviews:0,up:0,down:0,reasons:{}},acceptance:[],critical_evaluation:{status:'not_measured',precision:null,recall:null,false_positive_rate:null,false_alert_share:null,reason:'No adjudicated reference cohort.'}});
+const analytics = (): Analytics => ({object:'qa_analytics',tenant_id:'vesta',checked_at:new Date().toISOString(),period:'7d',period_start:null,source:'openai',reviews:{total:0,with_comments:0,no_comments:0,critical:0,statuses:{queued:0,running:0,completed:0,needs_input:0,failed:0}},feedback:{total:0,reviews:0,up:0,down:0,reasons:{}},critical_evaluation:{status:'not_measured',precision:null,recall:null,false_positive_rate:null,false_alert_share:null,reason:'No adjudicated reference cohort.'}});
 const knowledgeDetail = (): KnowledgeDetail => ({document:{document_id:'skill_test',title:'Review instructions',kind:'skill',description:'Controlled editorial content.',source_path:'skills/test/SKILL.md',version:'0.2.0',source_sha256:'a'.repeat(64),stages:['critical_finding_review'],used_by:['test'],runtime_use:'model_instruction',latest_revision:0,has_changes:false,source_changed:false},package_sha256:'b'.repeat(64),installed_content:'Installed instructions.',draft:null,saved_diff:'',recent_revisions:[],history_truncated:false});
 const playgroundCatalog = (mode:'demo'|'openai'='openai'): PlaygroundCatalog => ({object:'qa_playground_catalog',mode,ready:true,models:['gpt-6-astra'],live_model:'configured-model',pack_version:'0.3.0',pack_release:'vesta-qatr-0.3.0',skills:['a','b'],boundary:'Playground output is not a clinical review.',
   categories:[{id:'critical_finding',title:'Critical findings',description:'Reports containing a critical observation.'},{id:'inconsistency',title:'Findings and impression inconsistency',description:'Impression does not follow from findings.'}],
@@ -38,12 +37,11 @@ async function choose(label:string,value:string) { await act(async()=>{const sel
 beforeEach(()=>{
   sessionStorage.clear();localStorage.clear();results.clear();requests=[];
   document.body.innerHTML='<div id="root"></div>';root=createRoot(document.getElementById('root')!);
-  api.config=async()=>({tenant_id:'vesta',api_version:'2026-09-18',mode:'openai',ready:true,model:'configured-model',policy_status:'provisional_no_manual',samples:[]});
+  api.config=async()=>({tenant_id:'vesta',api_version:'2026-09-22',mode:'openai',ready:true,model:'configured-model',policy_status:'provisional_no_manual',samples:[]});
   api.status=async()=>({status:'ready',checked_at:new Date().toISOString(),readiness_scope:'Local checks only',components:{api:{status:'ok',message:'API responds'},dbos:{status:'ok',message:'Checkpoint store responds'},openai:{status:'configured',message:'Inference not verified'}}});
   api.history=async()=>({items:[],has_more:false,next_cursor:null});
   api.feedbackInbox=async()=>({items:[],has_more:false,next_cursor:null});
   api.analytics=async()=>analytics();
-  api.outcomes=async()=>({items:[],has_more:false,next_cursor:null});
   api.knowledgeCatalog=async()=>knowledgeCatalog();
   api.knowledgeDetail=async()=>knowledgeDetail();
   api.playground=async()=>playgroundCatalog();
@@ -51,27 +49,31 @@ beforeEach(()=>{
   api.playgroundRun=async()=>playgroundRun('completed');
   window.confirm=()=>false;
   api.get=async(id)=>{const r=results.get(id);assert.ok(r);return r;};
+  api.replace=async(id,text,version,key)=>{requests.push({text,key});const r={...review(id,text),input_version:version+1};results.set(id,r);return r;};
   api.create=async(input,key)=>{requests.push({text:input.report_text,key});const r=review('qr-'+requests.length,input.report_text);results.set(r.id,r);return r;};
 });
 afterEach(async()=>{await act(async()=>root.unmount());});
-test('draft deletion has Undo and does not remove another draft',async()=>{
-  await mount();await paste('first draft');await click('New report');await paste('second draft');
-  await click('Delete draft 1');assert.equal(text(),'second draft');assert.match(document.body.textContent!,/Draft deleted/);
-  await click('Undo');assert.equal(text(),'first draft');assert.equal(document.querySelectorAll('.draft-row').length,2);
+test('Current review is the only unfinished entry and New review preserves its text',async()=>{
+  await mount();await paste('first input');await click('New review');await click('New review');
+  assert.equal(text(),'first input');
+  assert.equal(document.querySelectorAll('.draft-row').length,0);
+  assert.equal(document.querySelector('[aria-label="Delete draft 1"]'),null);
+  assert.equal(document.querySelector('.undo-bar'),null);
+  await click('Review history');await click('Current review');assert.equal(text(),'first input');
 });
-test('empty New report reuses a draft; deleting the final draft leaves usable input',async()=>{
-  await mount();await click('New report');await click('New report');assert.equal(document.querySelectorAll('.draft-row').length,1);
-  await click('Delete draft 1');assert.equal(text(),'');assert.equal(document.querySelectorAll('.draft-row').length,1);
+test('New review remains usable when selected repeatedly with no text',async()=>{
+  await mount();await click('New review');await click('New review');assert.equal(text(),'');
+  await paste('one report');await click('Review');assert.equal(requests.length,1);
 });
 test('submitted input stays editable and new work can proceed',async()=>{
   await mount();await paste('Findings: source A. Impression: source A.');await click('Review');
   // A submitted report is editable; reviewing again is a new review, never a mutation.
   assert.equal((document.querySelector('#report-text') as HTMLTextAreaElement).readOnly,false);
-  assert.equal(button('Review again').disabled,true);
-  await click('New report');await paste('Findings: source B. Impression: source B.');await click('Review');
+  assert.equal(button('Review again').disabled,false);
+  await click('New review');await paste('Findings: source B. Impression: source B.');await click('Review');
   assert.equal(requests.length,2);assert.notEqual(requests[0].key,requests[1].key);
 });
-test('editing a submitted report enables Review again and creates a separate review',async()=>{
+test('editing a submitted report enables Review again and updates the same review',async()=>{
   await mount();await paste('Findings: original. Impression: original.');await click('Review');
   assert.equal(requests.length,1);
   await paste('Findings: corrected. Impression: corrected.');
@@ -81,23 +83,25 @@ test('editing a submitted report enables Review again and creates a separate rev
   assert.equal(requests[1].text,'Findings: corrected. Impression: corrected.');
   assert.notEqual(requests[0].key,requests[1].key);
   // The first review keeps the text it was accepted with.
-  assert.equal(results.get('qr-1')!.input.report_text,'Findings: original. Impression: original.');
+  assert.equal(results.size,1);
+  assert.equal(results.get('qr-1')!.input.report_text,'Findings: corrected. Impression: corrected.');
+  assert.equal(document.querySelectorAll('.draft-row').length,0);
 });
-test('late acceptance never replaces a newly selected draft',async()=>{
+test('New review keeps an in-flight submission until acceptance',async()=>{
   let accept!:(r:Review)=>void;
   api.create=()=>new Promise(resolve=>{accept=resolve;});
   await mount();await paste('first input');await click('Review');
   assert.equal((document.querySelector('#report-text') as HTMLTextAreaElement).readOnly,true);
-  await click('New report');await paste('second input');
+  await click('New review');assert.equal(text(),'first input');
   const r=review('qr-late','first input');results.set(r.id,r);
-  await act(async()=>accept(r));assert.equal(text(),'second input');assert.equal(document.querySelectorAll('.draft-row').length,1);
+  await act(async()=>accept(r));assert.equal(text(),'first input');assert.equal(document.querySelectorAll('.draft-row').length,0);
 });
 test('ambiguous network failure locks input and retries the identical operation',async()=>{
   let calls=0;
   api.create=async(input,key)=>{requests.push({text:input.report_text,key});if(calls++===0)throw new ApiError(0,'QA_CONNECTION_FAILED','Connection lost');const r=review('qr-retry',input.report_text);results.set(r.id,r);return r;};
   await mount();await paste('immutable request');await click('Review');
   assert.equal((document.querySelector('#report-text') as HTMLTextAreaElement).readOnly,true);
-  assert.equal(button('Delete draft 1').disabled,true);
+  await click('New review');assert.equal(text(),'immutable request');
   await click('Retry submission');assert.equal(requests.length,2);assert.deepEqual(requests[0],requests[1]);
 });
 test('theme persists and environment controls and canned input controls are absent',async()=>{
@@ -107,29 +111,29 @@ test('theme persists and environment controls and canned input controls are abse
 });
 test('health reports unavailable truthfully and dismisses on every route',async()=>{
   api.status=async()=>{throw new ApiError(0,'QA_CONNECTION_FAILED','Service unavailable');};
-  await mount();const summary=document.querySelector('.system-status summary')!;assert.match(summary.textContent!,/Unavailable/);
-  const panel=document.querySelector('.system-status') as HTMLDetailsElement;
-  const open=async()=>act(async()=>{panel.open=true;panel.dispatchEvent(new window.Event('toggle',{bubbles:true}));});
+  await mount();const summary=document.querySelector('.health-trigger')!;assert.match(summary.getAttribute('aria-label')!,/Unavailable/);
+  const panel=document.querySelector('.health-panel') as HTMLDivElement;
+  const open=async()=>act(async()=>{(summary as HTMLButtonElement).click();});
   // The close button exists and dismisses the panel.
-  await open();assert.equal(panel.open,true);
-  await click('Close service health');assert.equal(panel.open,false);
+  await open();assert.equal(panel.hidden,false);
+  await click('Close service health');assert.equal(panel.hidden,true);
   // Escape works wherever focus sits, not only on the summary.
   await open();
   await act(async()=>{document.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));});
-  assert.equal(panel.open,false);
+  assert.equal(panel.hidden,true);
   // An outside pointer press dismisses it.
   await open();
   await act(async()=>{document.querySelector('.brand')!.dispatchEvent(new window.MouseEvent('pointerdown',{bubbles:true}));});
-  assert.equal(panel.open,false);
+  assert.equal(panel.hidden,true);
   // The double-click force-open is gone: a dblclick no longer holds it open.
   await act(async()=>summary.dispatchEvent(new window.MouseEvent('dblclick',{bubbles:true})));
-  assert.equal(panel.open,false);
+  assert.equal(panel.hidden,true);
 });
 test('Studio navigation preserves report input and exposes distinct tools',async()=>{
-  await mount();await paste('draft to preserve');await click('Review history');await click('Current report');assert.equal(text(),'draft to preserve');
+  await mount();await paste('draft to preserve');await click('Review history');await click('Current review');assert.equal(text(),'draft to preserve');
   await click('Feedbacks');assert.match(document.querySelector('.history-pane h1')!.textContent!,/Feedbacks/);
   await click('Analytics');assert.match(document.querySelector('.history-pane')!.textContent!,/Not measured/);
-  await click('Current report');assert.equal(text(),'draft to preserve');
+  await click('Current review');assert.equal(text(),'draft to preserve');
 });
 
 test('feedback inbox reads notes and opens associated report without losing draft',async()=>{
@@ -137,7 +141,7 @@ test('feedback inbox reads notes and opens associated report without losing draf
   api.feedbackInbox=async query=>{assert.equal(new URLSearchParams(query).get('rating'),'down');return {items:[{feedback:{id:'qf-1',review_id:r.id,created_at:new Date().toISOString(),result_version:1,rating:'down',target:'result',reason:'unclear_wording',explanation:'Make the comment shorter.'},report_preview:'Associated report',source:'openai',target_comment:null}],has_more:false,next_cursor:null};};
   await mount();await paste('preserved draft');await click('Feedbacks');
   assert.match(document.querySelector('.inbox-list')!.textContent!,/Make the comment shorter/);
-  await click('Open report');assert.equal(text(),'Associated report');await click('Draft 1Draft');assert.equal(text(),'preserved draft');
+  await click('Open report');assert.equal(text(),'Associated report');await click('Current review');assert.equal(text(),'preserved draft');
 });
 
 test('feedback inbox filters and request errors are recoverable',async()=>{
@@ -162,9 +166,9 @@ test('feedback inbox paginates once per entry and resets on filter change',async
 });
 
 test('analytics uses service totals and preserves unknown clinical performance',async()=>{
-  api.analytics=async()=>({...analytics(),reviews:{...analytics().reviews,total:237},acceptance:[{stakeholder:'qa',subject:'report',eligible:10,recorded:0,accepted:0,rejected:0,review_requested:0,unknown:0,not_recorded:10,acceptance_rate:null}]});
+  api.analytics=async()=>({...analytics(),reviews:{...analytics().reviews,total:237}});
   await mount();await click('Analytics');const pane=document.querySelector('.operational-analytics')!;
-  assert.match(pane.textContent!,/237/);assert.match(pane.textContent!,/0 \/ 0 final decisions/);
+  assert.match(pane.textContent!,/237/);assert.doesNotMatch(pane.textContent!,/stakeholders accepting/);
   // Unmeasured clinical performance stays visible as a section-level verdict...
   const critical=pane.querySelector('[aria-label="Critical finding performance"]')!;
   assert.match(critical.querySelector('.section-status')!.textContent!,/Not measured/);
@@ -175,7 +179,7 @@ test('analytics uses service totals and preserves unknown clinical performance',
   for (const formula of ['TP / (TP + FN)','TP / (TP + FP)','FP / (FP + TN)','FP / (TP + FP)']) {
     assert.ok(critical.textContent!.includes(formula),`Missing denominator: ${formula}`);
   }
-  await click('QA comments');assert.equal(pane.querySelectorAll('tbody tr').length,0);
+
 });
 
 test('late analytics response cannot replace a new period',async()=>{
@@ -186,42 +190,21 @@ test('late analytics response cannot replace a new period',async()=>{
   const totals=document.querySelector('[aria-label="Review totals"]')!.textContent!;assert.match(totals,/300/);assert.doesNotMatch(totals,/999/);
 });
 
-test('outcome form retries the same operation after lost confirmation',async()=>{
-  const calls:{key:string;payload:unknown}[]=[];let first=true;
-  api.saveOutcome=async(id,payload,key)=>{calls.push({key,payload});if(first){first=false;throw new ApiError(0,'QA_CONNECTION_FAILED','Lost confirmation');}return {...payload,outcome_id:'qo-test',review_id:id,created_at:new Date().toISOString(),recording_method:'operator_recorded'} as OutcomeRecord;};
-  await act(async()=>root.render(<OutcomeLog reviewId="qr-outcome" resultVersion={1} disabled={false}/>));
-  await act(async()=>{const details=document.querySelector('details')!;details.open=true;details.dispatchEvent(new window.Event('toggle'));});
-  await act(async()=>{const input=document.querySelector('#outcome-source')!;Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value')!.set!.call(input,'QA reviewer requested clarification.');input.dispatchEvent(new window.Event('input',{bubbles:true}));});
-  await click('Record outcome');assert.equal(document.querySelector('fieldset')!.disabled,true);
-  await click('Retry same outcome');assert.equal(calls.length,2);assert.deepEqual(calls[0],calls[1]);
-  assert.match(document.querySelector('.outcome-log')!.textContent!,/Outcome recorded/);
-});
-
-test('malformed success is an ambiguous outcome, not permission to create another',async()=>{
-  api.saveOutcome=async()=>{throw new ApiError(201,'INVALID_API_RESPONSE','Response could not be read');};
-  await act(async()=>root.render(<OutcomeLog reviewId="qr-outcome" resultVersion={1} disabled={false}/>));
-  await act(async()=>{const details=document.querySelector('details')!;details.open=true;details.dispatchEvent(new window.Event('toggle'));});
-  await act(async()=>{const input=document.querySelector('#outcome-source')!;Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value')!.set!.call(input,'A recorded decision.');input.dispatchEvent(new window.Event('input',{bubbles:true}));});
-  await click('Record outcome');
-  assert.equal(document.querySelector('fieldset')!.disabled,true);
-  assert.equal(button('Retry same outcome').disabled,false);
-});
-
 test('Studio skills editor preserves unsaved edits across report navigation',async()=>{
-  await mount();await paste('Report draft stays intact');await click('Skills & knowledge');
+  await mount();await paste('Report draft stays intact');await click('Skills');
   assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).value,'Installed instructions.');
   await field('knowledge-content','Proposed instructions.');
   await click('Compare with installed');
   assert.equal(document.querySelectorAll('.knowledge-content textarea').length,2);
-  await click('Current report');assert.equal(text(),'Report draft stays intact');
-  await click('Skills & knowledge');assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).value,'Proposed instructions.');
+  await click('Current review');assert.equal(text(),'Report draft stays intact');
+  await click('Skills');assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).value,'Proposed instructions.');
   await click('Reload source');assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).value,'Proposed instructions.'); // declined discard
 });
 
 test('draft save retry is idempotent and never changes installed content',async()=>{
   const calls:{payload:KnowledgeDraftInput;key:string}[]=[];
   api.saveKnowledgeDraft=async(id,payload,key)=>{calls.push({payload,key});if(calls.length===1)throw new ApiError(0,'LOST','Confirmation lost');return {...payload,draft_id:'kd-1',document_id:id,revision:1,content_sha256:'c'.repeat(64),created_at:new Date().toISOString(),status:'draft_not_active'};};
-  await mount();await click('Skills & knowledge');await field('knowledge-content','Proposed instruction');await field('knowledge-note','Clarify behavior');
+  await mount();await click('Skills');await field('knowledge-content','Proposed instruction');await field('knowledge-note','Clarify behavior');
   await click('Save draft');assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).readOnly,true);
   await click('Retry same save');assert.deepEqual(calls[0],calls[1]);
   assert.match(document.querySelector('.knowledge-pane')!.textContent!,/Draft revision 1 saved/);
@@ -231,7 +214,7 @@ test('draft save retry is idempotent and never changes installed content',async(
 
 test('editor permissions and unavailable catalog are explicit',async()=>{
   let fail=true;api.knowledgeCatalog=async()=>{if(fail)throw new ApiError(503,'SOURCE_UNAVAILABLE','Source unavailable');return {...knowledgeCatalog(),can_edit:false};};
-  await mount();await click('Skills & knowledge');assert.match(document.querySelector('.knowledge-pane [role="alert"]')!.textContent!,/Source unavailable/);
+  await mount();await click('Skills');assert.match(document.querySelector('.knowledge-pane [role="alert"]')!.textContent!,/Source unavailable/);
   fail=false;await click('Retry catalog');
   assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).readOnly,true);
   assert.equal(document.querySelector('#knowledge-note'),null);
@@ -239,7 +222,7 @@ test('editor permissions and unavailable catalog are explicit',async()=>{
 
 test('revision conflict retains text for reconciliation',async()=>{
   api.saveKnowledgeDraft=async()=>{throw new ApiError(409,'KNOWLEDGE_REVISION_CONFLICT','A newer draft exists.');};
-  await mount();await click('Skills & knowledge');await field('knowledge-content','Keep this proposal.');await field('knowledge-note','Reason');await click('Save draft');
+  await mount();await click('Skills');await field('knowledge-content','Keep this proposal.');await field('knowledge-note','Reason');await click('Save draft');
   assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).value,'Keep this proposal.');
   assert.match(document.querySelector('.knowledge-pane [role="alert"]')!.textContent!,/A newer draft exists/);
   assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).readOnly,false);
@@ -275,4 +258,28 @@ test('demo mode blocks samples it cannot serve and the playground never enters h
   await click('Review history');
   assert.equal(document.querySelector('.playground-pane')!.hasAttribute('hidden'),true);
   assert.equal(requests.length,0);
+});
+
+test('panel preferences preserve drafts and unsaved Skills content',async()=>{
+  window.happyDOM.setWindowSize({width:1536,height:1024});
+  await mount();await paste('Keep the report');await click('Skills');
+  await field('knowledge-content','Keep this unsaved edit');
+  await click('Collapse Report reviews');await click('Collapse QA Studio');
+  assert.equal(button('Expand Report reviews').getAttribute('aria-expanded'),'false');
+  assert.equal(button('Expand QA Studio').getAttribute('aria-expanded'),'false');
+  await click('Current review');assert.equal(text(),'Keep the report');
+  await click('Skills');assert.equal((document.getElementById('knowledge-content') as HTMLTextAreaElement).value,'Keep this unsaved edit');
+  await click('Expand QA Studio');
+  assert.deepEqual(JSON.parse(localStorage.getItem('vesta.panels.v1')!),{reports:true,studio:false});
+});
+
+test('collapsed tooltips appear on focus and dismiss with Escape',async()=>{
+  window.happyDOM.setWindowSize({width:1536,height:1024});
+  await mount();await click('Collapse QA Studio');
+  await act(async()=>{button('Skills').focus();});
+  const id=button('Skills').getAttribute('aria-describedby');assert.ok(id);
+  assert.equal(document.getElementById(id)?.textContent,'Skills');
+  await act(async()=>{document.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));});
+  assert.equal(button('Skills').getAttribute('aria-describedby'),null);
+  assert.equal(document.activeElement,button('Skills'));
 });

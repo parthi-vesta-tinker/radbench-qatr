@@ -93,7 +93,7 @@ export function Playground({ active, openSkills }: { active: boolean; openSkills
       <div className="playground-setup">
         <p className="meta">
           Instructions: pack <strong>{catalog.pack_version}</strong> · {catalog.skills.length} skills, used as one set and not editable here.
-          {' '}<button type="button" className="linklike" onClick={openSkills}>Read them in Skills &amp; knowledge <ExternalLink size={13} aria-hidden="true"/></button>
+          {' '}<button type="button" className="linklike" onClick={openSkills}>Read them in Skills <ExternalLink size={13} aria-hidden="true"/></button>
         </p>
         <label htmlFor="playground-model">Model
           <select id="playground-model" value={model} disabled={busy} onChange={e => setModel(e.target.value)}>

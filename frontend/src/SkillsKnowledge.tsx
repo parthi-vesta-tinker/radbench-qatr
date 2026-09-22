@@ -79,14 +79,14 @@ export function SkillsKnowledge({active}: {active:boolean}) {
   }
   const visible=catalog?.items.filter(item=>(filter==='all' || (filter==='skills' ? item.kind==='skill' : item.kind!=='skill')) && `${item.title} ${item.description}`.toLowerCase().includes(search.toLowerCase())) ?? [];
   return <main className="history-pane knowledge-pane" hidden={!active}>
-    <div className="section-heading"><div><h1>Skills &amp; knowledge</h1><p className="meta">Review AI instructions and prepare changes</p></div><button onClick={reload} disabled={locked || loading}>Reload source</button></div>
+    <div className="section-heading"><div><h1>Skills</h1><p className="meta">Review AI instructions and prepare changes</p></div><button onClick={reload} disabled={locked || loading}>Reload source</button></div>
     <p className="knowledge-boundary">Saved edits are drafts. Models continue using the installed package until an evaluated version is released.</p>
     {catalogError && <p className="error" role="alert">{catalogError} <button onClick={()=>setCatalogRefresh(n=>n+1)}>Retry catalog</button></p>}
     {!catalog && !catalogError && <p role="status">Loading skills…</p>}
     {catalog && <>
       <div className="history-filters"><label>Show<select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All content</option><option value="skills">Skills</option><option value="knowledge">Knowledge base</option></select></label><label>Find content<input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Name or purpose"/></label><span className="meta">Installed package {catalog.package_version}</span></div>
       <div className="knowledge-layout">
-        <nav className="knowledge-list" aria-label="Skills and knowledge documents">
+        <nav className="knowledge-list" aria-label="Skill and reference documents">
           {visible.map(item=><button key={item.document_id} aria-pressed={selected===item.document_id} disabled={locked} onClick={()=>select(item.document_id)}><strong>{item.title}</strong><span>{kinds[item.kind]} · {item.version}</span>{(item.latest_revision ?? 0)>0 && <span>{item.source_changed?'Source changed':item.has_changes?'Saved draft':'Draft matches source'} · r{item.latest_revision}</span>}</button>)}
           {!visible.length && <p className="meta">No matching content.</p>}
         </nav>

@@ -57,7 +57,7 @@ def test_report_only_results(client, sample, missed, critical, status, outcome):
     if outcome == "no_observations":
         assert not r["copy_text"]
     else:
-        assert r["copy_text"].startswith("QA review:\n\nGeneral Comments:")
+        assert r["copy_text"].startswith("General Comments:")
         label = "Cannot determine" if missed is None else "Yes" if missed else "No"
         assert "Critical Findings missed flag: " + label in r["copy_text"]
         assert (
@@ -119,11 +119,11 @@ def test_concurrent_idempotency_and_report_change(client):
 def test_feedback_minimal_and_bindings(client):
     d = finish(client, post(client, "clean"))
     url = "/api/v1/reviews/" + d["id"] + "/feedback"
-    payload = dict(result_version=1, rating="down", reason="missed_observation")
+    payload = dict(rating="down", reason="missed_observation")
     key = str(uuid.uuid4())
     r = client.post(url, headers={"Idempotency-Key": key}, json=payload)
     assert r.status_code == 201, r.text
-    assert r.json()["explanation"] is None and r.json()["input_hash"] == d["input_hash"]
+    assert r.json()["explanation"] is None and "input_hash" not in r.json()
     assert (
         client.post(url, headers={"Idempotency-Key": key}, json=payload).json()[
             "id"
@@ -151,7 +151,7 @@ def test_feedback_minimal_and_bindings(client):
         client.post(
             url,
             headers={"Idempotency-Key": str(uuid.uuid4())},
-            json={"result_version": 1, "rating": "down"},
+            json={"rating": "down"},
         ).status_code
         == 422
     )

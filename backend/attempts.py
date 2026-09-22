@@ -17,8 +17,17 @@ def table(config):
     return name
 
 
-def response(tenant, rid, table=LIVE):
+def current(conn, tenant, rid, table, generation):
+    if table == LIVE and generation is not None:
+        row = conn.execute('SELECT input_version FROM review_records WHERE tenant_id=? AND id=?', (tenant, rid)).fetchone()
+        if not row or row[0] != generation:
+            raise ReviewProblem('REVIEW_SUPERSEDED', 'This execution has been replaced.')
+
+
+def response(tenant, rid, table=LIVE, generation=None):
     with store.db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        current(conn, tenant, rid, table, generation)
         row = conn.execute(f'SELECT * FROM {table} WHERE tenant_id=? AND review_id=?', (tenant, rid)).fetchone()
     if row and row['outcome'] == 'response':
         return ADAPTER.validate_json(row['response'])
@@ -27,20 +36,26 @@ def response(tenant, rid, table=LIVE):
     return None
 
 
-def claim(tenant, rid, attempt, table=LIVE):
+def claim(tenant, rid, attempt, table=LIVE, generation=None):
     with store.db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        current(conn, tenant, rid, table, generation)
         conn.execute(f'INSERT INTO {table} VALUES(?,?,?,?,NULL)', (tenant, rid, attempt, 'claimed'))
 
 
-def save(tenant, rid, value, table=LIVE):
+def save(tenant, rid, value, table=LIVE, generation=None):
     encoded = ADAPTER.dump_json(value).decode()
     with store.db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        current(conn, tenant, rid, table, generation)
         if conn.execute(f"UPDATE {table} SET outcome='response',response=? WHERE tenant_id=? AND review_id=? AND outcome='claimed'", (encoded, tenant, rid)).rowcount != 1:
             raise RuntimeError('Attempt checkpoint conflict')
 
 
-def unknown(tenant, rid, table=LIVE):
+def unknown(tenant, rid, table=LIVE, generation=None):
     with store.db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        current(conn, tenant, rid, table, generation)
         conn.execute(f"UPDATE {table} SET outcome='unknown' WHERE tenant_id=? AND review_id=? AND outcome='claimed'", (tenant, rid))
 
 

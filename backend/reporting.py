@@ -51,13 +51,7 @@ def feedback_inbox(tenant, version, limit=20, starting_after=None, query="",
     items = []
     for row in rows[:limit]:
         feedback, review = json.loads(row["feedback"]), json.loads(row["review"])
-        result = review.get("result") or {}
-        # Never attach a comment from a different result version to historical feedback.
-        target = None
-        if result.get("result_version") == feedback["result_version"]:
-            target = next((x["comment"] for group in ("general_comments", "critical_comments")
-                           for x in result.get(group, [])
-                           if x["observation_id"] == feedback.get("observation_id")), None)
+        target = feedback.get('target_comment')
         items.append(dict(
             feedback=presentation.feedback(feedback, version),
             report_preview=" ".join(review["input"]["report_text"].split())[:140],
@@ -99,8 +93,6 @@ def analytics(tenant, period="7d", source="openai", include_feedback=False):
             if row["status"] == "completed":
                 for key in ("with_comments", "no_comments", "critical"):
                     totals[key] += row[key]
-        from .outcomes import acceptance_counts
-        acceptance = acceptance_counts(conn, review_terms, review_values, counts["completed"]) if include_feedback else None
         feedback = None
         if include_feedback:
             joined = " FROM feedback f JOIN reviews r ON r.tenant_id=f.tenant_id AND r.id=f.review_id WHERE " + " AND ".join(feedback_terms)
@@ -118,10 +110,10 @@ def analytics(tenant, period="7d", source="openai", include_feedback=False):
             feedback = dict(summary) | {"reasons": {row["reason"] or "other": row["total"] for row in reasons}}
     return dict(object="qa_analytics", tenant_id=tenant, checked_at=checked.isoformat(),
                 period=period, period_start=start, source=source,
-                reviews=totals | {"statuses": counts}, feedback=feedback, acceptance=acceptance,
+                reviews=totals | {"statuses": counts}, feedback=feedback,
                 critical_evaluation=dict(
                     status="not_measured", unit="report", scope="report_text_only",
                     precision=None, recall=None, false_positive_rate=None,
                     false_alert_share=None, tp=None, fp=None, fn=None, tn=None,
-                    reason="No independent adjudicated reference cohort is connected. Feedback and acceptance are not ground truth.",
+                    reason="No independent adjudicated reference cohort is connected. Feedback is not ground truth.",
                 ))

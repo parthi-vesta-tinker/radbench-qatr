@@ -142,23 +142,24 @@ class GuardedModel(Model):
     async def get_response(self, *args, **kwargs):
         from .workflow import boundary_hook
         table = attempts.table(self.config)
-        cached = attempts.response(self.tenant, self.rid, table)
+        generation = self.config.get("input_version")
+        cached = attempts.response(self.tenant, self.rid, table, generation)
         if cached is not None:
             return cached
         boundary_hook(self.rid, 'before_provider_claim')
-        attempts.claim(self.tenant, self.rid, store.new_id('qa'), table)
+        attempts.claim(self.tenant, self.rid, store.new_id('qa'), table, generation)
         boundary_hook(self.rid, 'after_provider_claim')
         try:
             result = await self.model.get_response(*args, **kwargs)
             boundary_hook(self.rid, 'after_provider_response')
-            attempts.save(self.tenant, self.rid, result, table)
+            attempts.save(self.tenant, self.rid, result, table, generation)
             boundary_hook(self.rid, 'after_response_checkpoint')
             return result
         except ReviewProblem:
-            attempts.unknown(self.tenant, self.rid, table)
+            attempts.unknown(self.tenant, self.rid, table, generation)
             raise
         except Exception:
-            attempts.unknown(self.tenant, self.rid, table)
+            attempts.unknown(self.tenant, self.rid, table, generation)
             raise ReviewProblem('MODEL_OUTCOME_UNKNOWN', 'The provider attempt did not finish durably. It will not be sent again automatically.') from None
 
     async def stream_response(self, *args, **kwargs):
@@ -166,7 +167,7 @@ class GuardedModel(Model):
         yield
 
 
-@DBOS.workflow(name="qa.openai.combined.f3.v1")
+@DBOS.workflow(name="qa.openai.combined.f3.v2")
 async def openai_combined(tenant, rid, payload, config):
     from openai.types.shared import Reasoning
     # Pin the public endpoint and standard tier.

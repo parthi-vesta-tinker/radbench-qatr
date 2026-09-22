@@ -35,7 +35,7 @@ def result():
 def test_normalized_storage_snapshot_and_idempotent_completion(fresh):
     rid = accept()
     with store.db() as conn:
-        assert conn.execute("PRAGMA user_version").fetchone()[0] == store.SCHEMA_VERSION == 6
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == store.SCHEMA_VERSION == 7
         assert conn.execute("SELECT type FROM sqlite_master WHERE name='reviews'").fetchone()[0] == "view"
         assert "document" not in {row[1] for row in conn.execute("PRAGMA table_info(review_records)")}
         assert conn.execute("SELECT count(*) FROM review_snapshots").fetchone()[0] == 1

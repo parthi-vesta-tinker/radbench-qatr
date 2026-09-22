@@ -1,4 +1,4 @@
-import type { Review, ReviewInput, Config, FeedbackPayload, FeedbackRecord, ReviewSummary, Page, FeedbackInboxItem, Analytics, OutcomeInput, OutcomeRecord } from "./types";
+import type { Review, ReviewInput, Config, FeedbackPayload, FeedbackRecord, ReviewSummary, Page, FeedbackInboxItem, Analytics } from "./types";
 import type { KnowledgeCatalog, KnowledgeDetail, KnowledgeDraft, KnowledgeDraftInput } from './types';
 import type { PlaygroundCatalog, PlaygroundRun, PlaygroundRunInput } from './types';
 export class ApiError extends Error {
@@ -18,7 +18,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     response = await fetch(url, {
       ...init,
       signal: AbortSignal.timeout(15000),
-      headers: { "QA-Version": "2026-09-18", ...init?.headers },
+      headers: { "QA-Version": "2026-09-22", ...init?.headers },
     });
   } catch (error) {
     throw new ApiError(0, "QA_CONNECTION_FAILED", window.location.protocol === "file:"
@@ -51,8 +51,6 @@ export const api = {
   knowledgeDetail: (id: string) => request<KnowledgeDetail>('/api/v1/knowledge/' + encodeURIComponent(id)),
   saveKnowledgeDraft: (id: string, payload: KnowledgeDraftInput, key: string) => request<KnowledgeDraft>('/api/v1/knowledge/' + encodeURIComponent(id) + '/drafts', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': key }, body: JSON.stringify(payload) }),
   exportKnowledgeDraft: (id: string, revision: number) => request<unknown>(`/api/v1/knowledge/${encodeURIComponent(id)}/drafts/${revision}/export`),
-  outcomes: (id: string, cursor?: string) => request<Page<OutcomeRecord>>(`/api/v1/reviews/${encodeURIComponent(id)}/outcomes?limit=20${cursor ? '&starting_after=' + encodeURIComponent(cursor) : ''}`),
-  saveOutcome: (id: string, payload: OutcomeInput, key: string) => request<OutcomeRecord>(`/api/v1/reviews/${encodeURIComponent(id)}/outcomes`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': key }, body: JSON.stringify(payload) }),
   feedbackInbox: (query: string) => request<Page<FeedbackInboxItem>>("/api/v1/feedback?" + query),
   analytics: (query: string) => request<Analytics>("/api/v1/analytics?" + query),
   history: (query: string) => request<Page<ReviewSummary>>("/api/v1/reviews?" + query),
@@ -62,6 +60,11 @@ export const api = {
   config: () => request<Config>("/api/v1/config"),
   get: (id: string) =>
     request<Review>("/api/v1/reviews/" + encodeURIComponent(id)),
+  replace: (id: string, report_text: string, expected_input_version: number, key: string) =>
+    request<Review>("/api/v1/reviews/" + encodeURIComponent(id), {
+      method: "PUT", headers: {"Content-Type":"application/json", "Idempotency-Key":key},
+      body: JSON.stringify({report_text, expected_input_version}),
+    }),
   create: (input: ReviewInput, key: string) =>
     request<Review>("/api/v1/reviews", {
       method: "POST",

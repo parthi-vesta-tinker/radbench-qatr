@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Vesta Report QA API",
-    "version": "0.13.0"
+    "version": "0.14.0"
   },
   "paths": {
     "/api/v1/config": {
@@ -22,7 +22,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -133,7 +133,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -247,7 +247,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -362,7 +362,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -489,7 +489,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -728,7 +728,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -829,6 +829,152 @@
       }
     },
     "/api/v1/reviews/{review_id}": {
+      "put": {
+        "summary": "Replace Review",
+        "description": "Required scope in api_key mode: reviews:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
+        "operationId": "replace_review_api_v1_reviews__review_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Review Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^\\S+$",
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-22",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewReplacement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scope": "reviews:read"
+      },
       "get": {
         "summary": "Get Review",
         "description": "Required scope in api_key mode: reviews:read. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
@@ -854,7 +1000,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -992,7 +1138,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -1154,7 +1300,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -1252,312 +1398,6 @@
           }
         },
         "x-required-scope": "feedback:read"
-      }
-    },
-    "/api/v1/reviews/{review_id}/outcomes": {
-      "post": {
-        "summary": "Record Outcome",
-        "description": "Requires feedback:write and reviews:read. Operator-recorded decisions, not stakeholder signatures. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
-        "operationId": "record_outcome_api_v1_reviews__review_id__outcomes_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "review_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Review Id"
-            }
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 255,
-              "pattern": "^\\S+$",
-              "title": "Idempotency-Key"
-            }
-          },
-          {
-            "name": "QA-Version",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "2026-09-18",
-              "title": "Qa-Version"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OutcomeInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OutcomeResource"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Unprocessable Content"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "x-required-scopes": [
-          "feedback:write",
-          "reviews:read"
-        ]
-      },
-      "get": {
-        "summary": "Get Outcomes",
-        "description": "Requires feedback:read and reviews:read. Operator-recorded decisions, not stakeholder signatures. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
-        "operationId": "get_outcomes_api_v1_reviews__review_id__outcomes_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "review_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Review Id"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 100,
-              "minimum": 1,
-              "default": 20,
-              "title": "Limit"
-            }
-          },
-          {
-            "name": "starting_after",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Starting After"
-            }
-          },
-          {
-            "name": "QA-Version",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "2026-09-18",
-              "title": "Qa-Version"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OutcomeList"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Unprocessable Content"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/APIErrorEnvelope"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "x-required-scopes": [
-          "feedback:read",
-          "reviews:read"
-        ]
       }
     },
     "/api/v1/feedback": {
@@ -1675,7 +1515,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -1825,7 +1665,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -1942,7 +1782,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -2070,7 +1910,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -2210,7 +2050,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -2359,7 +2199,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -2478,7 +2318,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -2609,7 +2449,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -2748,7 +2588,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "2026-09-18",
+              "default": "2026-09-22",
               "title": "Qa-Version"
             }
           }
@@ -2924,80 +2764,6 @@
         ],
         "title": "APIErrorEnvelope"
       },
-      "AcceptanceCounts": {
-        "properties": {
-          "stakeholder": {
-            "type": "string",
-            "enum": [
-              "qa",
-              "radiologist",
-              "facility"
-            ],
-            "title": "Stakeholder"
-          },
-          "subject": {
-            "type": "string",
-            "enum": [
-              "report",
-              "qa_comments"
-            ],
-            "title": "Subject"
-          },
-          "eligible": {
-            "type": "integer",
-            "title": "Eligible"
-          },
-          "recorded": {
-            "type": "integer",
-            "title": "Recorded"
-          },
-          "accepted": {
-            "type": "integer",
-            "title": "Accepted"
-          },
-          "rejected": {
-            "type": "integer",
-            "title": "Rejected"
-          },
-          "review_requested": {
-            "type": "integer",
-            "title": "Review Requested"
-          },
-          "unknown": {
-            "type": "integer",
-            "title": "Unknown"
-          },
-          "not_recorded": {
-            "type": "integer",
-            "title": "Not Recorded"
-          },
-          "acceptance_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Acceptance Rate"
-          }
-        },
-        "type": "object",
-        "required": [
-          "stakeholder",
-          "subject",
-          "eligible",
-          "recorded",
-          "accepted",
-          "rejected",
-          "review_requested",
-          "unknown",
-          "not_recorded",
-          "acceptance_rate"
-        ],
-        "title": "AcceptanceCounts"
-      },
       "AnalyticsResource": {
         "properties": {
           "object": {
@@ -3054,20 +2820,6 @@
                 "type": "null"
               }
             ]
-          },
-          "acceptance": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/AcceptanceCounts"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Acceptance"
           },
           "critical_evaluation": {
             "$ref": "#/components/schemas/CriticalEvaluationReadiness"
@@ -3692,11 +3444,6 @@
       },
       "FeedbackInput": {
         "properties": {
-          "result_version": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Result Version"
-          },
           "rating": {
             "type": "string",
             "enum": [
@@ -3773,7 +3520,6 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "result_version",
           "rating"
         ],
         "title": "FeedbackInput"
@@ -3824,11 +3570,6 @@
       },
       "FeedbackResource": {
         "properties": {
-          "result_version": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Result Version"
-          },
           "rating": {
             "type": "string",
             "enum": [
@@ -3922,10 +3663,6 @@
             "type": "string",
             "title": "Review Id"
           },
-          "input_hash": {
-            "type": "string",
-            "title": "Input Hash"
-          },
           "created_at": {
             "type": "string",
             "title": "Created At"
@@ -3934,186 +3671,15 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "result_version",
           "rating",
           "id",
           "object",
           "tenant_id",
           "api_version",
           "review_id",
-          "input_hash",
           "created_at"
         ],
         "title": "FeedbackResource"
-      },
-      "OutcomeInput": {
-        "properties": {
-          "result_version": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Result Version"
-          },
-          "stakeholder": {
-            "type": "string",
-            "enum": [
-              "qa",
-              "radiologist",
-              "facility"
-            ],
-            "title": "Stakeholder"
-          },
-          "subject": {
-            "type": "string",
-            "enum": [
-              "report",
-              "qa_comments"
-            ],
-            "title": "Subject"
-          },
-          "decision": {
-            "type": "string",
-            "enum": [
-              "accepted",
-              "rejected",
-              "review_requested",
-              "unknown"
-            ],
-            "title": "Decision"
-          },
-          "source_note": {
-            "type": "string",
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Source Note"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "result_version",
-          "stakeholder",
-          "subject",
-          "decision",
-          "source_note"
-        ],
-        "title": "OutcomeInput"
-      },
-      "OutcomeList": {
-        "properties": {
-          "object": {
-            "type": "string",
-            "const": "list",
-            "title": "Object",
-            "default": "list"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/OutcomeResource"
-            },
-            "type": "array",
-            "title": "Items"
-          },
-          "has_more": {
-            "type": "boolean",
-            "title": "Has More"
-          },
-          "next_cursor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Next Cursor"
-          },
-          "url": {
-            "type": "string",
-            "title": "Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "items",
-          "has_more",
-          "next_cursor",
-          "url"
-        ],
-        "title": "OutcomeList"
-      },
-      "OutcomeResource": {
-        "properties": {
-          "result_version": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Result Version"
-          },
-          "stakeholder": {
-            "type": "string",
-            "enum": [
-              "qa",
-              "radiologist",
-              "facility"
-            ],
-            "title": "Stakeholder"
-          },
-          "subject": {
-            "type": "string",
-            "enum": [
-              "report",
-              "qa_comments"
-            ],
-            "title": "Subject"
-          },
-          "decision": {
-            "type": "string",
-            "enum": [
-              "accepted",
-              "rejected",
-              "review_requested",
-              "unknown"
-            ],
-            "title": "Decision"
-          },
-          "source_note": {
-            "type": "string",
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Source Note"
-          },
-          "outcome_id": {
-            "type": "string",
-            "title": "Outcome Id"
-          },
-          "review_id": {
-            "type": "string",
-            "title": "Review Id"
-          },
-          "created_at": {
-            "type": "string",
-            "title": "Created At"
-          },
-          "recording_method": {
-            "type": "string",
-            "const": "operator_recorded",
-            "title": "Recording Method",
-            "default": "operator_recorded"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "result_version",
-          "stakeholder",
-          "subject",
-          "decision",
-          "source_note",
-          "outcome_id",
-          "review_id",
-          "created_at"
-        ],
-        "title": "OutcomeResource"
       },
       "PlaygroundCatalog": {
         "properties": {
@@ -4627,6 +4193,28 @@
         ],
         "title": "ReviewList"
       },
+      "ReviewReplacement": {
+        "properties": {
+          "report_text": {
+            "type": "string",
+            "maxLength": 40000,
+            "minLength": 1,
+            "title": "Report Text"
+          },
+          "expected_input_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Input Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "report_text",
+          "expected_input_version"
+        ],
+        "title": "ReviewReplacement"
+      },
       "ReviewResource": {
         "properties": {
           "id": {
@@ -4648,7 +4236,8 @@
           },
           "created_at": {
             "type": "string",
-            "title": "Created At"
+            "title": "Created At",
+            "description": "Latest accepted submission timestamp for this review."
           },
           "completed_at": {
             "anyOf": [
@@ -4844,7 +4433,8 @@
           },
           "created_at": {
             "type": "string",
-            "title": "Created At"
+            "title": "Created At",
+            "description": "Latest accepted submission timestamp for this review."
           },
           "execution_status": {
             "type": "string",

@@ -1,6 +1,6 @@
 # Local setup and verification
 
-These instructions apply to application **0.13.0**, foundation **F3**, API **2026-09-18**, and schema **6**.
+These instructions apply to application **0.14.0**, foundation **F3**, API **2026-09-22**, and schema **7**.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ Run canned demo behavior without a provider call:
 QA_MODE=demo uv run uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-Use fresh schema-6 storage. The default is `.qa-data-foundation-v5`. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are not migrated or deleted.
+Use schema-7 storage. The default is `.qa-data-foundation-v5`. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are never automatically migrated or deleted.
 
 ## Live provider session
 
@@ -145,3 +145,19 @@ uv run python verify_bundle.py
 - The health panel performs a provider metadata check only when explicitly requested; startup does not make an inference call.
 
 Current executed evidence and limitations are recorded in [prototype/IMPLEMENTATION_STATUS.md](prototype/IMPLEMENTATION_STATUS.md).
+
+## Upgrade existing schema-6 storage
+
+Stop the application and finish pending live/playground work with the previous build.
+Then run (substitute the actual QA_DATA_DIR):
+
+```sh
+.venv/bin/python scripts/upgrade_review_storage.py --data-dir .qa-data-foundation-v5
+npm --prefix frontend run build
+```
+
+The upgrade writes a timestamped SQLite backup, preserves existing review rows and feedback,
+and checks foreign keys before committing schema 7. It refuses pending work and other schema
+versions. Restart the application normally and refresh the browser. Existing separate reviews
+are not guessed or merged. Future Review again submissions replace the selected review.
+API clients must use QA-Version 2026-09-22 and the generated replacement/feedback contracts.

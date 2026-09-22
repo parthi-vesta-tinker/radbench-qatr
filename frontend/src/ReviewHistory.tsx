@@ -41,10 +41,10 @@ export function ReviewHistory({busy, openReview}: {busy:boolean; openReview:(id:
       <label>Feedback<select value={feedback} onChange={e=>{reset();setFeedback(e.target.value);}}><option value="">Any feedback status</option><option value="true">Feedback recorded</option><option value="false">No feedback yet</option></select></label>
     </form>
     {error && <p className="error" role="alert">{error} <button onClick={()=>setRefresh(n=>n+1)}>Retry history</button></p>}
-    <div className="history-table"><table><thead><tr><th>Report</th><th>Submitted</th><th>Status</th><th>Comments</th><th>Feedback</th></tr></thead><tbody>{rows.map(row=><tr key={row.id}>
-      <td><button className="report-link" disabled={busy || loading} onClick={()=>openReview(row.id)}>{row.preview || row.id}</button><div className="meta review-id">{row.id} · {row.mode === 'demo' ? 'Demo' : 'AI'}</div></td>
-      <td><time dateTime={row.created_at}>{new Date(row.created_at).toLocaleString()}</time></td>
-      <td><StatusPill status={row.execution_status}/></td><td>{row.execution_status !== 'completed' ? '—' : row.outcome === 'no_observations' ? 'None' : `${row.general_count} general · ${row.critical_count} critical`}</td><td>{row.feedback_count ?? '—'}</td>
+    <div className="history-table review-history-table" role="region" aria-label="Saved reviews" tabIndex={0}><table><thead><tr><th>Report</th><th>Last submitted</th><th>Status</th><th>Comments</th><th>Feedback</th></tr></thead><tbody>{rows.map(row=><tr key={row.id}>
+      <td data-label="Report"><button className="report-link" disabled={busy || loading} onClick={()=>openReview(row.id)}>{row.preview || row.id}</button><div className="meta review-id">{row.id} · {row.mode === 'demo' ? 'Demo' : 'AI'}</div></td>
+      <td data-label="Last submitted"><time dateTime={row.created_at}>{new Date(row.created_at).toLocaleString()}</time></td>
+      <td data-label="Status"><StatusPill status={row.execution_status}/></td><td data-label="Comments">{row.execution_status !== 'completed' ? '—' : row.outcome === 'no_observations' ? 'None' : `${row.general_count} general · ${row.critical_count} critical`}</td><td data-label="Feedback">{row.feedback_count ?? '—'}</td>
     </tr>)}</tbody></table></div>
     {loading && <p className="meta" role="status">Loading reviews…</p>}
     {!loading && !error && !rows.length && <div className="empty">No reviews match these filters.</div>}

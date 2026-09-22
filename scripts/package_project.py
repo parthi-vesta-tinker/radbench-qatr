@@ -42,6 +42,7 @@ def files():
                     ".tsbuildinfo",
                     ".log",
                     ".sqlite",
+                    ".sqlite.bak",
                     ".sqlite-wal",
                     ".sqlite-shm",
                     ".db",

@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Copy, FileCheck2 } from "lucide-react";
 import type { Review } from "./types";
-import { ProgressSummary } from "./ProgressSummary";
 import { Feedback } from "./Feedback";
-import { OutcomeLog } from "./OutcomeLog";
 export function ReviewOutput({
   review,
   stale,
@@ -49,55 +47,12 @@ export function ReviewOutput({
           </button>
         )}
       </div>
-      <ProgressSummary review={review} stale={stale} disconnected={disconnected} />
-      {disconnected && (
-        <div className="notice" role="status">
-          Connection lost. The current review status is unknown; reconnecting…
-        </div>
-      )}
-      {stale && (
-        <div className="notice">
-          These results belong to the previous input.{" "}
-          <button className="text-button" type="button" onClick={restore}>
-            Restore reviewed input
-          </button>
-        </div>
-      )}
       {!review && (
         <div className="empty">
           <FileCheck2 size={26} strokeWidth={1.4} />
           <p>The quality review will appear here.</p>
-          <span className="meta">
-            Paste findings and impression, then request review.
-          </span>
         </div>
       )}
-      {review && ["queued", "running"].includes(review.execution_status) && (
-        <div className="empty" role="status">
-          <p>Review in progress</p>
-          <span className="meta">
-            {review.provenance.mode === "demo"
-              ? "Running controlled examples through the review workflow."
-              : "Reviewing the submitted report."}
-          </span>
-        </div>
-      )}
-      {review &&
-        ["needs_input", "failed"].includes(review.execution_status) && (
-          <div className="notice" role="alert">
-            <h3>
-              {review.execution_status === "needs_input"
-                ? "More information needed"
-                : "Review could not finish"}
-            </h3>
-            <p>{review.error?.message}</p>
-            <p className="meta">
-              {review.execution_status === "needs_input"
-                ? "Edit the report, then select Review again."
-                : "No completed result is available. Edit the report and select Review again."}
-            </p>
-          </div>
-        )}
       {result && (
         <>
           {result.outcome === "no_observations" ? (
@@ -156,7 +111,6 @@ export function ReviewOutput({
             setOpen={setFeedbackOpen}
             disabled={stale || disconnected}
           />
-          <OutcomeLog key={`outcomes-${review!.id}`} reviewId={review!.id} resultVersion={result.result_version} disabled={stale || disconnected}/>
         </>
       )}
     </section>

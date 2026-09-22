@@ -12,12 +12,13 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 from dbos import DBOS
 from agents import set_tracing_disabled
-from . import store, presentation, reporting, outcomes, knowledge, playground
+from . import store, presentation, reporting, knowledge, playground
 from .access import AccessError, Principal, require, validate_access_config
 from .contracts import (
     ReviewProblem,
     FeedbackInput,
     ReviewInput,
+    ReviewReplacement,
     ReviewResource,
     FeedbackResource,
     FeedbackList,
@@ -26,9 +27,6 @@ from .contracts import (
     FeedbackInbox,
     AnalyticsResource,
     REASONS,
-    OutcomeInput,
-    OutcomeResource,
-    OutcomeList,
 )
 from .settings import APP_VERSION, DATA, ROOT, runtime_config
 from .workflow import dispatch, workflow_id
@@ -49,7 +47,9 @@ log = logging.getLogger("qa.api")
 def reconcile():
     for tenant, rid in store.pending():
         try:
-            status = DBOS.get_workflow_status(workflow_id(tenant, rid))
+            doc = store.get(tenant, rid)
+            generation = doc["input_version"]
+            status = DBOS.get_workflow_status(workflow_id(tenant, rid, generation))
             if status is None:
                 dispatch(tenant, rid)
             elif status.status in (
@@ -67,6 +67,7 @@ def reconcile():
                 store.update(
                     tenant,
                     rid,
+                    input_version=generation,
                     execution_status="failed",
                     step=active,
                     step_status="failed",
@@ -154,7 +155,7 @@ ERROR_RESPONSES = {
 }
 app = FastAPI(
     title="Vesta Report QA API",
-    version="0.13.0",
+    version="0.14.0",
     lifespan=lifespan,
     dependencies=[Depends(api_version)],
     responses=ERROR_RESPONSES,
@@ -223,6 +224,11 @@ async def request_context(request, call_next):
 @app.exception_handler(AccessError)
 async def access_failure(request, exc):
     return error(request, exc.status, exc.code, exc.message)
+
+
+@app.exception_handler(store.ReviewConflict)
+def review_conflict(request: Request, exc):
+    return error(request, 409, "REVIEW_CONFLICT", str(exc))
 
 
 @app.exception_handler(store.IdempotencyConflict)
@@ -331,9 +337,19 @@ def create_review(
     p: Write,
     version: Version,
 ):
+    return accept_review(request, payload, idempotency_key, p, version)
+
+
+@app.put("/api/v1/reviews/{review_id}", status_code=202, response_model=ReviewResource, response_model_exclude_unset=True)
+def replace_review(request: Request, review_id: str, payload: ReviewReplacement, idempotency_key: Key, p: Write, version: Version):
+    return accept_review(request, payload, idempotency_key, p, version, review_id)
+
+
+def accept_review(request, payload, idempotency_key, p, version, replace_id=None):
+    operation = f"PUT /api/v1/reviews/{replace_id}" if replace_id else store.CREATE_REVIEW
     # Replay precedes mutable provider readiness. A previously accepted request remains accepted.
     saved = store.replay(
-        p.tenant_id, store.CREATE_REVIEW, idempotency_key, payload.model_dump(), version
+        p.tenant_id, operation, idempotency_key, payload.model_dump(), version
     )
     if saved:
         return respond(saved, True)
@@ -363,7 +379,12 @@ def create_review(
             input_bound(cfg, payload.report_text)
         except ReviewProblem as exc:
             return error(request, 422, exc.code, exc.message)
-    saved, created = store.reserve(p.tenant_id, idempotency_key, payload, cfg, version)
+    try:
+        saved, created = store.reserve(p.tenant_id, idempotency_key, payload, cfg, version, replace_id)
+    except KeyError:
+        return error(request, 404, "REVIEW_NOT_FOUND", "Review not found.")
+    except store.ReviewConflict as exc:
+        return error(request, 409, "REVIEW_CONFLICT", str(exc))
     if created:
         try:
             dispatch(p.tenant_id, saved["body"]["id"])
@@ -469,13 +490,6 @@ def add_feedback(
         return error(
             request, 422, "RESULT_NOT_COMPLETE", "Feedback requires a completed result."
         )
-    if payload.result_version != result["result_version"]:
-        return error(
-            request,
-            422,
-            "RESULT_VERSION_MISMATCH",
-            "Feedback must reference this result version.",
-        )
     ids = {
         x["observation_id"]
         for x in result["general_comments"] + result["critical_comments"]
@@ -520,32 +534,6 @@ def get_feedback(
         next_cursor=items[-1]["feedback_id"] if more else None,
         url=f"/api/v1/reviews/{review_id}/feedback",
     )
-
-
-@app.post("/api/v1/reviews/{review_id}/outcomes", response_model=OutcomeResource, status_code=201)
-def record_outcome(request: Request, review_id: str, payload: OutcomeInput, idempotency_key: Key,
-                   p: FeedbackWrite, report_access: Read, version: Version):
-    try:
-        saved, created = outcomes.save(p.tenant_id, review_id, idempotency_key, payload, version)
-    except KeyError:
-        return error(request, 404, "REVIEW_NOT_FOUND", "Review not found.")
-    except ValueError:
-        return error(request, 422, "RESULT_VERSION_MISMATCH", "A completed matching result version is required.")
-    return respond(saved, not created)
-
-
-@app.get("/api/v1/reviews/{review_id}/outcomes", response_model=OutcomeList)
-def get_outcomes(request: Request, review_id: str, p: FeedbackRead, report_access: Read,
-                 limit: Annotated[int, Query(ge=1, le=100)] = 20, starting_after: str | None = None):
-    if store.get(p.tenant_id, review_id) is None:
-        return error(request, 404, "REVIEW_NOT_FOUND", "Review not found.")
-    try:
-        items, more = outcomes.history(p.tenant_id, review_id, limit, starting_after)
-    except store.InvalidCursor:
-        return error(request, 400, "INVALID_CURSOR", "Cursor does not belong to this outcome collection.")
-    return dict(object="list", items=items, has_more=more,
-                next_cursor=items[-1]["outcome_id"] if more else None,
-                url=f"/api/v1/reviews/{review_id}/outcomes")
 
 
 @app.get("/api/v1/feedback", response_model=FeedbackInbox)
@@ -660,10 +648,6 @@ for route in app.routes:
     if path == "/api/v1/feedback":
         route.openapi_extra = {"x-required-scopes": ["feedback:read", "reviews:read"]}
         route.description = "Requires feedback:read and reviews:read. Newest-first tenant feedback with bounded report context."
-    if path.endswith("/outcomes"):
-        rights = ["feedback:write" if "POST" in methods else "feedback:read", "reviews:read"]
-        route.openapi_extra = {"x-required-scopes": rights}
-        route.description = "Requires " + " and ".join(rights) + ". Operator-recorded decisions, not stakeholder signatures."
     if path.startswith("/api/v1/knowledge"):
         rights = ["skills:read", "skills:write"] if "POST" in methods else ["skills:read"]
         route.openapi_extra = {"x-required-scopes": rights}

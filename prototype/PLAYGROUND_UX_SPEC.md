@@ -1,7 +1,7 @@
 > Playground v1 is implemented. This document has two parts: the **shipped contract** for the
 > QA Studio playground, and, below it, the **later-phase design** for editing instructions and
-> comparing output, which is not built. Application **0.13.0**, bundle **1.19**, foundation
-> **F3**, schema **6**. See [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md).
+> comparing output, which is not built. Application **0.14.0**, bundle **1.20**, foundation
+> **F3**, schema **7**. See [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md).
 
 # Playground
 
@@ -23,7 +23,7 @@ Analytics. Scope keeps showing reports. A playground run is never a row in the r
 ### The screen
 
 1. A **non-dismissible banner**: playground output is not a clinical review.
-2. **Instructions**, read only: pack version and skill count, with a link to Skills & knowledge
+2. **Instructions**, read only: pack version and skill count, with a link to Skills
    for the text. Skills are presented as one set; nothing here edits them.
 3. **Model**, chosen from a server-controlled list. When the choice differs from the live model,
    the screen says so rather than implying the result predicts live behaviour.

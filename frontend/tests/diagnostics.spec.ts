@@ -4,7 +4,7 @@ test('component status shows actual local checks and never probes OpenAI automat
   let probes = 0;
   page.on('request', request => { if (request.url().endsWith('/diagnostics/openai')) probes++; });
   await page.goto('/');
-  await page.getByText('Health · Local checks passed', {exact:true}).click();
+  await page.getByRole('button', {name:'Service health: Local checks passed',exact:true}).click();
   await expect(page.getByRole('heading', {name:'Service health'})).toBeVisible();
   // Healthy checks collapse behind a verdict; the full list stays one click away.
   await expect(page.getByText(/All 5 checks passed/)).toBeVisible();

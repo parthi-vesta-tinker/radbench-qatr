@@ -28,21 +28,15 @@ def seed(tenant="vesta", source="openai", status="completed", days=0, critical=F
         conn.execute("INSERT OR IGNORE INTO tenants(id) VALUES(?)", (tenant,))
         conn.execute("INSERT INTO review_snapshots VALUES(?,?,?,?)", (tenant, rid, 'controlled', '{}'))
         conn.execute("INSERT INTO review_records(tenant_id,id,snapshot_id,report_text,input_hash,created_at,execution_status,steps,provenance,api_version) VALUES(?,?,?,?,?,?,?,?,?,?)",
-                     (tenant, rid, rid, doc['input']['report_text'], doc['input_hash'], doc['created_at'], 'queued', '[]', store.canonical(doc['provenance']), '2026-09-18'))
+                     (tenant, rid, rid, doc['input']['report_text'], doc['input_hash'], doc['created_at'], 'queued', '[]', store.canonical(doc['provenance']), '2026-09-22'))
     store.update(tenant, rid, execution_status=status, result=doc['result'] if status == 'completed' else None)
     return rid
 
 
 def feedback(rid, tenant="vesta", rating="down", note="Please be concise.", target="result"):
-    data = FeedbackInput(result_version=1, rating=rating, reason="unclear_wording" if rating == "down" else None,
+    data = FeedbackInput( rating=rating, reason="unclear_wording" if rating == "down" else None,
                          explanation=note, target=target, observation_id="obs-1" if target == "observation" else None)
     return store.save_feedback(tenant, rid, uuid.uuid4().hex, data)[0]["body"]
-
-
-def outcome(client, rid, decision="accepted", stakeholder="qa", subject="report", key=None, headers=None):
-    return client.post(f"/api/v1/reviews/{rid}/outcomes", headers={"Idempotency-Key": key or uuid.uuid4().hex, **(headers or {})},
-                       json=dict(result_version=1, stakeholder=stakeholder, subject=subject,
-                                 decision=decision, source_note="Controlled QA note, not a clinical adjudication."))
 
 
 def test_inbox_filters_pagination_projection_and_source(reporting_db):
@@ -85,70 +79,25 @@ def test_analytics_database_totals_not_page_counts_and_period(reporting_db):
     assert client.get('/api/v1/analytics?source=all&period=all').json()['reviews']['total'] == 26
     assert week['critical_evaluation']['recall'] is None
     assert week['critical_evaluation']['fp'] is None
-    assert all(row['acceptance_rate'] is None for row in week['acceptance'])
+    assert 'acceptance' not in week
 
 
-def test_outcome_idempotency_latest_decision_and_retraction(reporting_db):
+def test_stakeholder_outcomes_removed(reporting_db):
     client = reporting_db
-    rid = seed()
-    key = uuid.uuid4().hex
-    first = outcome(client, rid, key=key)
-    assert first.status_code == 201, first.text
-    again = outcome(client, rid, key=key)
-    assert first.content == again.content
-    assert again.headers['Idempotency-Replayed'] == 'true'
-    assert outcome(client, rid, decision='rejected', key=key).status_code == 409
-    outcome(client, rid, decision='rejected')
-    outcome(client, rid, stakeholder='radiologist', subject='qa_comments')
-    stats = client.get('/api/v1/analytics').json()['acceptance']
-    qa = next(x for x in stats if x['stakeholder'] == 'qa' and x['subject'] == 'report')
-    assert qa['recorded'] == 1 and qa['rejected'] == 1 and qa['accepted'] == 0
-    assert qa['acceptance_rate'] == 0
-    outcome(client, rid, decision='unknown')
-    qa = next(x for x in client.get('/api/v1/analytics').json()['acceptance'] if x['stakeholder'] == 'qa' and x['subject'] == 'report')
-    assert qa['acceptance_rate'] is None and qa['unknown'] == 1
-    page = client.get(f'/api/v1/reviews/{rid}/outcomes?limit=2').json()
-    assert len(page['items']) == 2 and page['has_more']
-    tail = client.get(f'/api/v1/reviews/{rid}/outcomes', params={'starting_after': page['next_cursor']}).json()
-    assert len(tail['items']) == 2  # append-only history: no duplicate from replay
-    store.init()
-    assert len(client.get(f'/api/v1/reviews/{rid}/outcomes').json()['items']) == 4
-    assert store.get('vesta', rid)['result']['outcome'] == 'no_observations'
-
-
-def test_outcome_validation_and_indeterminate_denominators(reporting_db):
-    client = reporting_db
-    rid = seed()
-    outcome(client, rid, decision='review_requested')
-    seed()
-    rows = client.get('/api/v1/analytics').json()['acceptance']
-    qa = next(x for x in rows if x['stakeholder'] == 'qa' and x['subject'] == 'report')
-    assert qa['review_requested'] == 1 and qa['not_recorded'] == 1 and qa['acceptance_rate'] is None
-    assert outcome(client, seed(status='failed')).status_code == 422
-    assert outcome(client, 'absent').status_code == 404
-    body = dict(result_version=2, stakeholder='qa', subject='report', decision='accepted', source_note='x')
-    endpoint = f'/api/v1/reviews/{rid}/outcomes'
-    assert client.post(endpoint, headers={'Idempotency-Key': uuid.uuid4().hex}, json=body).status_code == 422
-    body.update(result_version=1, source_note='  ')
-    assert client.post(endpoint, headers={'Idempotency-Key': uuid.uuid4().hex}, json=body).status_code == 422
+    assert '/api/v1/reviews/{review_id}/outcomes' not in client.get('/openapi.json').json()['paths']
+    assert 'acceptance' not in client.get('/api/v1/analytics').json()
 
 
 def test_inbox_and_outcome_tenant_isolation_and_scope(reporting_db, credentials):
     client = reporting_db
     a, b = seed(), seed(tenant='tenant_b')
     fa, fb = feedback(a), feedback(b, tenant='tenant_b')
-    outcome(client, a, headers=credentials['a'])
-    b_outcome = outcome(client, b, headers=credentials['b']).json()
     assert client.get('/api/v1/feedback', headers=credentials['read']).status_code == 403
-    assert outcome(client, a, headers=credentials['read']).status_code == 403
-    assert outcome(client, b, headers=credentials['a']).status_code == 404
-    assert client.get(f'/api/v1/reviews/{b}/outcomes', headers=credentials['a']).status_code == 404
     assert client.get('/api/v1/feedback', params={'starting_after': fb['id']}, headers=credentials['a']).status_code == 400
-    assert client.get(f'/api/v1/reviews/{a}/outcomes', params={'starting_after': b_outcome['outcome_id']}, headers=credentials['a']).status_code == 400
     assert [x['feedback']['id'] for x in client.get('/api/v1/feedback', headers=credentials['a']).json()['items']] == [fa['id']]
     read_stats = client.get('/api/v1/analytics', headers=credentials['read']).json()
     assert read_stats['reviews']['total'] == 1
-    assert read_stats['feedback'] is None and read_stats['acceptance'] is None
+    assert read_stats['feedback'] is None and 'acceptance' not in read_stats
 
 
 def test_empty_analytics_and_no_model_dependency(reporting_db, monkeypatch):

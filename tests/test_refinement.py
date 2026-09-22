@@ -50,7 +50,7 @@ def test_comments_only_copy_and_historical_storage_unchanged(client):
     assert stored["input"] == review["input"]
     from backend import presentation
     stored['result'].pop('general_copy_text', None)
-    assert presentation.review(stored)['result']['general_copy_text'].startswith('QA review:')
+    assert presentation.review(stored)['result']['general_copy_text'].startswith('General Comments:')
 
 
 def test_history_filters_pagination_feedback_and_restart_reads(client):
@@ -61,7 +61,6 @@ def test_history_filters_pagination_feedback_and_restart_reads(client):
         f"{endpoint}/{first['id']}/feedback",
         headers={"Idempotency-Key": uuid.uuid4().hex},
         json={
-            "result_version": 1,
             "rating": "down",
             "reason": "unclear_wording",
             "explanation": "Be concise.",

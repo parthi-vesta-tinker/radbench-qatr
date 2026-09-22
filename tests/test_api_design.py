@@ -128,7 +128,7 @@ def test_tenant_reads_writes_replays_and_pagination_are_isolated(client, credent
         response = client.get(path, headers=headers)
         assert response.status_code == 404
         assert response.json()["error"]["code"] == "REVIEW_NOT_FOUND"
-    payload = {"result_version": 1, "rating": "down", "reason": "other"}
+    payload = {"rating": "down", "reason": "other"}
     assert (
         client.post(
             ua + "/feedback", headers=b | {"Idempotency-Key": key}, json=payload
@@ -230,7 +230,7 @@ def test_public_visitors_share_vesta_reviews_without_credentials(client, monkeyp
         feedback = other.post(
             accepted.headers["Location"] + "/feedback",
             headers={"Idempotency-Key": uuid.uuid4().hex},
-            json={"result_version": 1, "rating": "up"},
+            json={"rating": "up"},
         )
         assert feedback.status_code == 201, feedback.text
         assert other.get("/api/v1/knowledge").status_code == 200
@@ -264,7 +264,7 @@ def test_feedback_concurrent_replay_conflict_and_cursor_page(client):
     d = finish(client, post(client))
     url = f"/api/v1/reviews/{d['id']}/feedback"
     key = uuid.uuid4().hex
-    payload = {"result_version": 1, "rating": "down", "reason": "other"}
+    payload = {"rating": "down", "reason": "other"}
 
     def save(_):
         return client.post(url, headers={"Idempotency-Key": key}, json=payload)

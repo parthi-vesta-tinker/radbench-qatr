@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
-import { X, AlertCircle, Check } from "lucide-react";
+import { X, AlertCircle, Check, Activity } from "lucide-react";
 import { api, describeError } from "./api";
+import { TooltipButton } from "./TooltipButton";
 import { StatusPill, tierOf } from "./statusPill";
 
 type Component = { status: string; message: string; code?: string; model?: string; version?: string };
@@ -35,18 +36,18 @@ export function SystemStatus({ configurationError, retryConfiguration }: { confi
     catch (error) { setProbe({ status: "error", message: describeError(error) }); }
     finally { setProbing(false); }
   }
-  const panel = useRef<HTMLDetailsElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const openRef = useRef(false);
+  openRef.current = open;
   function close(restoreFocus: boolean) {
     if (!panel.current) return;
-    panel.current.open = false;
+    setOpen(false);
     // Focus returns for deliberate dismissal only; an outside click belongs to whatever was clicked.
-    if (restoreFocus) panel.current.querySelector("summary")?.focus();
+    if (restoreFocus) panel.current.querySelector<HTMLButtonElement>(".health-trigger")?.focus();
   }
-  // The listeners stay attached and read open state from the DOM. Binding them to a React
-  // "is open" flag instead would lose any dismissal that arrives before the asynchronous
-  // toggle event lands — opening the panel and pressing Escape at once did nothing.
   useEffect(() => {
-    const isOpen = () => Boolean(panel.current?.open);
+    const isOpen = () => openRef.current;
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape" && isOpen()) close(true); };
     const onPointer = (event: PointerEvent) => {
       if (isOpen() && panel.current && !panel.current.contains(event.target as Node)) close(false);
@@ -66,9 +67,12 @@ export function SystemStatus({ configurationError, retryConfiguration }: { confi
     : `All ${entries.length} checks passed`;
   const verdictTier = attention.length ? (attention.some(([, v]) => tierOf(v.status) === "danger") ? "danger" : "attention") : "neutral";
 
-  return <details ref={panel} className="system-status">
-    <summary><span className={"status-dot " + verdictTier} aria-hidden="true"/>Health · {summaryLabel}</summary>
-    <div className="health-panel" role="dialog" aria-label="Service health">
+  return <div ref={panel} className="system-status">
+    <TooltipButton className="icon-button health-trigger" side="bottom" label={`Service health: ${summaryLabel}`}
+      aria-expanded={open} aria-controls="service-health-panel" onClick={() => setOpen(value => !value)}>
+      <Activity size={19} aria-hidden="true"/><span className={"status-dot " + (failure ? "danger" : configurationError ? "attention" : verdictTier)} aria-hidden="true"/>
+    </TooltipButton>
+    <div id="service-health-panel" className="health-panel" hidden={!open} role="dialog" aria-label="Service health">
       <div className="health-panel-heading">
         <h3>Service health</h3>
         <button type="button" className="icon-button" aria-label="Close service health" onClick={() => close(true)}><X size={16}/></button>
@@ -88,5 +92,5 @@ export function SystemStatus({ configurationError, retryConfiguration }: { confi
       {probe && <p role="status">{probe.message}{probe.code && <code>{probe.code}</code>}</p>}
       <p className="meta">OpenAI check reads model metadata only. It sends no report and does not run a paid review.</p>
     </div>
-  </details>;
+  </div>;
 }

@@ -1,6 +1,6 @@
-# Skills & knowledge contract
+# Skills contract
 
-Skills & knowledge is a tenant-scoped editorial tool inside QA Studio. It can inspect verified installed instructions and references, compare proposed text, save immutable draft revisions, restore an older revision as a new proposal, and export a saved proposal. It makes no provider call.
+Skills is a tenant-scoped editorial tool inside QA Studio. It can inspect verified installed instructions and references, compare proposed text, save immutable draft revisions, restore an older revision as a new proposal, and export a saved proposal. It makes no provider call.
 
 ## Content boundary
 

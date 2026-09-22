@@ -10,26 +10,26 @@ from .reviewer import demo_stage, openai_combined
 REVIEW_CONCURRENCY = int(os.environ.get("QA_REVIEW_CONCURRENCY", "2"))
 if not 1 <= REVIEW_CONCURRENCY <= 32:
     raise ValueError("QA_REVIEW_CONCURRENCY must be between 1 and 32")
-review_queue = Queue("qa-reviews-f3-v1", concurrency=REVIEW_CONCURRENCY)
+review_queue = Queue("qa-reviews-f3-v2", concurrency=REVIEW_CONCURRENCY)
 
 
-@DBOS.step(name="qa.resource.state.f3.v1")
+@DBOS.step(name="qa.resource.state.f3.v2")
 def state(tenant, rid, **values):
     store.update(tenant, rid, **values)
 
 
-@DBOS.step(name="qa.validate.f3.v1")
+@DBOS.step(name="qa.validate.f3.v2")
 def validate(payload):
     ReviewInput.model_validate(payload)
     return parse_sections(payload["report_text"])
 
 
-@DBOS.step(name="qa.assemble.f3.v1")
+@DBOS.step(name="qa.assemble.f3.v2")
 def format_result(outputs, report_text):
     return assemble(outputs, report_text)
 
 
-@DBOS.step(name="qa.test.checkpoint.f3.v1")
+@DBOS.step(name="qa.test.checkpoint.f3.v2")
 def test_checkpoint(rid, point):
     boundary_hook(rid, point)
 
@@ -126,19 +126,24 @@ def execute(tenant, rid, payload, config, sink, checkpoint):
         return None
 
 
-@DBOS.workflow(name="qa.review.f3.v1", max_recovery_attempts=5)
+@DBOS.workflow(name="qa.review.f3.v2", max_recovery_attempts=5)
 def run_review(tenant, rid, payload, config):
-    return execute(tenant, rid, payload, config, state, test_checkpoint)
+    def current_state(tenant, rid, **values):
+        return state(tenant, rid, input_version=config.get('input_version', 1), **values)
+    return execute(tenant, rid, payload, config, current_state, test_checkpoint)
 
 
-def workflow_id(tenant, rid):
-    return f"qa:f3:{tenant}:{rid}"
+def workflow_id(tenant, rid, generation=None):
+    if generation is None:
+        doc = store.get(tenant, rid)
+        generation = doc['input_version'] if doc else 1
+    return f"qa:f3:v2:{tenant}:{rid}:{generation}"
 
 
 def dispatch(tenant, rid):
     args = store.job(tenant, rid)
     if args:
-        with SetWorkflowID(workflow_id(tenant, rid)):
+        with SetWorkflowID(workflow_id(tenant, rid, args[1].get('input_version', 1))):
             return review_queue.enqueue(run_review, tenant, rid, *args)
 
 
@@ -146,21 +151,21 @@ PLAYGROUND_CONCURRENCY = int(os.environ.get("QA_PLAYGROUND_CONCURRENCY", "2"))
 if not 1 <= PLAYGROUND_CONCURRENCY <= 32:
     raise ValueError("QA_PLAYGROUND_CONCURRENCY must be between 1 and 32")
 # A separate queue so a playground run can never starve live report QA of its concurrency.
-playground_queue = Queue("qa-playground-f3-v1", concurrency=PLAYGROUND_CONCURRENCY)
+playground_queue = Queue("qa-playground-f3-v2", concurrency=PLAYGROUND_CONCURRENCY)
 
 
-@DBOS.step(name="qa.playground.state.f3.v1")
+@DBOS.step(name="qa.playground.state.f3.v2")
 def playground_state(tenant, run_id, *, execution_status=None, metrics=None, **values):
     # Playground logs are phases and timings. Provider metrics are deliberately not stored.
     store.update_playground(tenant, run_id, status=execution_status, **values)
 
 
-@DBOS.step(name="qa.playground.checkpoint.f3.v1")
+@DBOS.step(name="qa.playground.checkpoint.f3.v2")
 def playground_checkpoint(run_id, point):
     return None
 
 
-@DBOS.workflow(name="qa.playground.f3.v1", max_recovery_attempts=5)
+@DBOS.workflow(name="qa.playground.f3.v2", max_recovery_attempts=5)
 def run_playground(tenant, run_id, payload, config):
     return execute(tenant, run_id, payload, config, playground_state, playground_checkpoint)
 

@@ -32,11 +32,11 @@ def draft_into(tenant, workspace, document_id=SKILL, text="Workspace proposal fo
         content=doc["content"] + "\n" + text + "\n",
         change_note="Controlled composition test.",
     )
-    return knowledge.save(tenant, document_id, payload, uuid.uuid4().hex, "2026-09-18", workspace)
+    return knowledge.save(tenant, document_id, payload, uuid.uuid4().hex, "2026-09-22", workspace)
 
 
 def make_workspace(tenant="vesta", name="Terminology tightening"):
-    receipt, created = workspaces.create(tenant, workspaces.WorkspaceInput(name=name), uuid.uuid4().hex, "2026-09-18")
+    receipt, created = workspaces.create(tenant, workspaces.WorkspaceInput(name=name), uuid.uuid4().hex, "2026-09-22")
     assert created and receipt["status"] == 201
     return receipt["body"]["workspace_id"]
 

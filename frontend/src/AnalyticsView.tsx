@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { api, describeError } from './api';
 import { reasonLabel } from './feedbackLabels';
 import type { Analytics } from './types';
-import { stakeholderLabel } from './OutcomeLog';
 
 // Metric definitions stay verbatim from ANALYTICS_SPEC; only their placement changed.
 const MEASURES: [string, string, string][] = [
@@ -22,7 +21,6 @@ function SectionHeading({ title, status, tier }: { title: string; status: string
 export function AnalyticsView() {
   const [period, setPeriod] = useState('7d');
   const [source, setSource] = useState('openai');
-  const [subject, setSubject] = useState('report');
   const [refresh, setRefresh] = useState(0);
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,12 +35,10 @@ export function AnalyticsView() {
     return () => { stopped = true; };
   }, [period, source, refresh]);
 
-  const rows = data?.acceptance?.filter(row => row.subject === subject) ?? [];
-  const recorded = rows.reduce((total, row) => total + row.recorded, 0);
   const failed = data?.reviews.statuses.failed ?? 0;
 
   return <main className="history-pane operational-analytics">
-    <div className="section-heading"><div><h1>Analytics</h1><p className="meta">Report quality, critical-finding safety, and stakeholder decisions</p></div><button disabled={loading} onClick={() => setRefresh(n => n + 1)}>Refresh</button></div>
+    <div className="section-heading"><div><h1>Analytics</h1><p className="meta">Review completion, feedback, and critical-finding measures</p></div><button disabled={loading} onClick={() => setRefresh(n => n + 1)}>Refresh</button></div>
     <div className="history-filters">
       <label>Period<select value={period} onChange={e => setPeriod(e.target.value)}><option value="7d">Last 7 days</option><option value="30d">Last 30 days</option><option value="all">All time</option></select></label>
       <label>Source<select value={source} onChange={e => setSource(e.target.value)}><option value="openai">Live AI reviews</option><option value="demo">Legacy fixtures</option><option value="all">All sources</option></select></label>
@@ -51,34 +47,6 @@ export function AnalyticsView() {
     {error && <p className="error" role="alert">{error} <button onClick={() => setRefresh(n => n + 1)}>Retry analytics</button></p>}
     {data && <>
       <p className="meta">Updated {new Date(data.checked_at).toLocaleString()} · {data.tenant_id}</p>
-
-      <section aria-label="Report quality and acceptance">
-        <SectionHeading title="Are stakeholders accepting the work?" status={data.acceptance ? `${recorded} outcomes · ${rows.length} perspectives` : 'Permission required'}/>
-        <p className="meta">All matching saved records—not limited to loaded history. A completed QA run is not proof of a correct or accepted report.</p>
-        {data.acceptance ? <>
-          <div className="table-caption">
-            <p className="meta" id="acceptance-caption">Operator-recorded decisions · Latest per report and perspective</p>
-            <div className="section-filter" role="group" aria-label="Assess acceptance of">
-              {[['report', 'Report'], ['qa_comments', 'QA comments']].map(([value, label]) =>
-                <button key={value} type="button" aria-pressed={subject === value} onClick={() => setSubject(value)}>{label}</button>)}
-            </div>
-          </div>
-          <div className="history-table acceptance-table" role="region" aria-labelledby="acceptance-caption" tabIndex={0}>
-            <table aria-describedby="acceptance-caption"><thead><tr><th>Perspective</th><th>Accepted</th><th>Rejected</th><th>Review requested</th><th>Unknown</th><th>Not recorded</th><th>Acceptance</th></tr></thead><tbody>
-              {rows.map(row => <tr key={row.stakeholder}>
-                <th scope="row">{stakeholderLabel(row.stakeholder)}</th>
-                <td data-label="Accepted">{row.accepted}</td>
-                <td data-label="Rejected">{row.rejected}</td>
-                <td data-label="Review requested">{row.review_requested}</td>
-                <td data-label="Unknown">{row.unknown}</td>
-                <td data-label="Not recorded">{row.not_recorded}</td>
-                <td data-label="Acceptance">{row.acceptance_rate === null ? 'Not measured' : `${(row.acceptance_rate * 100).toFixed(1)}%`}<small className="meta">{row.accepted} / {row.accepted + row.rejected} final decisions</small></td>
-              </tr>)}
-            </tbody></table>
-          </div>
-        </> : <p className="meta">Stakeholder outcomes require feedback-read permission.</p>}
-        <p className="meta">Denominator: accepted + rejected only. Review requested, unknown and not-recorded outcomes are excluded and shown separately. Record outcomes beneath a completed report's QA comments.</p>
-      </section>
 
       <section aria-label="Review totals">
         <SectionHeading title="Are reviews completing?" status={`${data.reviews.total} submitted${failed ? ` · ${failed} failed` : ''}`} tier={failed ? 'danger' : ''}/>
@@ -121,7 +89,7 @@ export function AnalyticsView() {
         </details>
       </section>
 
-      <p className="analytics-boundary">Operational counts and operator-recorded outcomes—not clinical accuracy, verified stakeholder signatures, or delivery confirmation.</p>
+      <p className="analytics-boundary">Operational counts do not establish clinical accuracy or delivery confirmation.</p>
     </>}
   </main>;
 }

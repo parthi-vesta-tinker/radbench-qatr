@@ -41,7 +41,7 @@ class ReviewInput(BaseModel):
     def fingerprint(self) -> str:
         return hashlib.sha256(
             json.dumps(
-                self.model_dump(),
+                {"report_text": self.report_text},
                 sort_keys=True,
                 ensure_ascii=False,
                 separators=(",", ":"),
@@ -49,9 +49,12 @@ class ReviewInput(BaseModel):
         ).hexdigest()
 
 
+class ReviewReplacement(ReviewInput):
+    expected_input_version: int = Field(ge=1)
+
+
 class FeedbackInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    result_version: int = Field(ge=1)
     rating: Literal["up", "down"]
     target: Literal["result", "observation", "missed_flag"] = "result"
     observation_id: str | None = None
@@ -269,7 +272,7 @@ def assemble(stage_results: dict, report_text: str) -> dict:
 
     copy_text = ""
     if general or critical:
-        copy_text = f"QA review:\n\nGeneral Comments:\n{lines(general)}\n\nCritical Findings missed flag: {missed_label}\n\nCritical Findings comments:\n{lines(critical)}"
+        copy_text = f"General Comments:\n{lines(general)}\n\nCritical Findings missed flag: {missed_label}\n\nCritical Findings comments:\n{lines(critical)}"
     return dict(
         result_version=1,
         outcome="observations" if general or critical else "no_observations",
@@ -280,10 +283,10 @@ def assemble(stage_results: dict, report_text: str) -> dict:
         general_comments=general,
         critical_comments=critical,
         copy_text=copy_text,
-        general_copy_text=f"QA review:\n\nGeneral Comments:\n{lines(general)}"
+        general_copy_text=f"General Comments:\n{lines(general)}"
         if general
         else "",
-        critical_copy_text=f"QA review:\n\nCritical Findings missed flag: {missed_label}\n\nCritical Findings comments:\n{lines(critical)}"
+        critical_copy_text=f"Critical Findings missed flag: {missed_label}\n\nCritical Findings comments:\n{lines(critical)}"
         if critical
         else "",
         _candidate_mapping=[
@@ -349,7 +352,7 @@ class ReviewResource(BaseModel):
     object: Literal["qa_review"]
     tenant_id: str
     api_version: str
-    created_at: str
+    created_at: str = Field(description="Latest accepted submission timestamp for this review.")
     completed_at: str | None = None
     input_version: int
     input_hash: str
@@ -367,7 +370,6 @@ class FeedbackResource(FeedbackInput):
     tenant_id: str
     api_version: str
     review_id: str
-    input_hash: str
     created_at: str
 
 
@@ -434,55 +436,7 @@ class AnalyticsResource(BaseModel):
     source: Literal["openai", "demo", "all"]
     reviews: ReviewCounts
     feedback: FeedbackCounts | None
-    acceptance: list[AcceptanceCounts] | None = None
     critical_evaluation: CriticalEvaluationReadiness
-
-
-class OutcomeInput(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    result_version: int = Field(ge=1)
-    stakeholder: Literal["qa", "radiologist", "facility"]
-    subject: Literal["report", "qa_comments"]
-    decision: Literal["accepted", "rejected", "review_requested", "unknown"]
-    source_note: str = Field(min_length=1, max_length=2000)
-
-    @field_validator("source_note")
-    @classmethod
-    def meaningful_source(cls, value):
-        if not value.strip():
-            raise ValueError("Record the source of this decision.")
-        return value.strip()
-
-
-class OutcomeResource(OutcomeInput):
-    outcome_id: str
-    review_id: str
-    created_at: str
-    recording_method: Literal["operator_recorded"] = "operator_recorded"
-
-
-class OutcomeList(BaseModel):
-    object: Literal["list"] = "list"
-    items: list[OutcomeResource]
-    has_more: bool
-    next_cursor: str | None
-    url: str
-
-
-class AcceptanceCounts(BaseModel):
-    stakeholder: Literal["qa", "radiologist", "facility"]
-    subject: Literal["report", "qa_comments"]
-    eligible: int
-    recorded: int
-    accepted: int
-    rejected: int
-    review_requested: int
-    unknown: int
-    not_recorded: int
-    acceptance_rate: float | None
-
-
-AnalyticsResource.model_rebuild()
 
 
 class APIErrorDetail(BaseModel):
@@ -520,7 +474,7 @@ class ConfigResource(BaseModel):
 
 class ReviewSummary(BaseModel):
     id: str
-    created_at: str
+    created_at: str = Field(description="Latest accepted submission timestamp for this review.")
     execution_status: str
     preview: str
     outcome: str | None

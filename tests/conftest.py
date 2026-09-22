@@ -13,7 +13,7 @@ from backend.main import app
 @pytest.fixture(scope="session")
 def client():
     with TestClient(
-        app, headers={"QA-Version": "2026-09-18"}, client=("127.0.0.1", 50000)
+        app, headers={"QA-Version": "2026-09-22"}, client=("127.0.0.1", 50000)
     ) as c:
         yield c
 

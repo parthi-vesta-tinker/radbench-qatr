@@ -4,6 +4,7 @@
 !.env.example
 .qa-*/
 *.sqlite
+*.sqlite.bak
 *.sqlite-*
 *.db
 *.db-*

@@ -58,7 +58,6 @@ export function Feedback({
     return () => node.removeEventListener("close", sync);
   }, [setOpen]);
   const pending = useRef<{ payload: string; key: string } | null>(null);
-  const result = review.result!;
   async function save(rating: "up" | "down") {
     if (disabled || saving) return;
     if (rating === "down" && !reason) {
@@ -66,7 +65,6 @@ export function Feedback({
       return;
     }
     const payload: FeedbackPayload = {
-      result_version: result.result_version,
       rating,
       target: "result",
     };
@@ -204,7 +202,7 @@ export function Feedback({
         {historyError && <p className="error" role="alert">{historyError} <button type="button" onClick={() => setHistoryAttempt(n => n + 1)}>Retry feedback history</button></p>}
         <ol>{entries.map(entry => <li key={entry.id}>
           <div className="saved-feedback-heading"><strong>{entry.rating === "up" ? "Useful" : "Needs improvement"}</strong><time dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleString()}</time></div>
-          <p className="meta">Result v{entry.result_version} · {entry.observation_id ? `Comment ${entry.observation_id.replace('obs-', '')}` : entry.target === 'result' ? 'Whole review' : 'Historical flag feedback'}{entry.reason ? ` · ${entry.reason.replaceAll('_', ' ')}` : ''}</p>
+          <p className="meta">{entry.observation_id ? `Comment ${entry.observation_id.replace('obs-', '')}` : entry.target === 'result' ? 'Whole review' : 'Historical flag feedback'}{entry.reason ? ` · ${entry.reason.replaceAll('_', ' ')}` : ''}</p>
           {entry.explanation && <p>{entry.explanation}</p>}
           {entry.suggested_comment && <p><strong>Suggested wording:</strong> {entry.suggested_comment}</p>}
         </li>)}</ol>

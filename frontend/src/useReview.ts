@@ -8,7 +8,7 @@ export function useReview() {
   const [config, setConfig] = useState<Config | null>(null);
   const [configurationError, setConfigurationError] = useState("");
   const [attempt, setAttempt] = useState(0);
-  const [drafts, setDrafts] = useState<Draft[]>(() => [makeDraft()]);
+  const [drafts, setDrafts] = useState<Draft[]>(() => sessionStorage.getItem(ACTIVE) ? [] : [makeDraft()]);
   const [selected, setSelected] = useState(() => sessionStorage.getItem(ACTIVE) || "");
   const selectedRef = useRef(selected); selectedRef.current = selected;
   const [review, setReview] = useState<Review | null>(null);
@@ -17,9 +17,14 @@ export function useReview() {
   const [rows, setRows] = useState<ReviewSummary[]>([]);
   const [listError, setListError] = useState("");
   const [revision, setRevision] = useState(0);
-  const [deleted, setDeleted] = useState<Draft | null>(null);
   // Local edits to an already submitted report. Never mutates the accepted review.
-  const [editedText, setEditedText] = useState<string | null>(null);
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  const editedText = edits[selected] ?? null;
+  const setEditedText = (text: string | null) => setEdits(old => {
+    const next = {...old}; if (text === null) delete next[selected]; else next[selected] = text; return next;
+  });
+  const [replacements, setReplacements] = useState<Record<string, {text:string; key:string; version:number; busy:boolean; error?:string}>>({});
+  const replacement = replacements[selected];
   const submittingIds = useRef(new Set<string>());
   const draft = selected ? drafts.find(d => d.id === selected) : drafts[0];
   const active = draft ? null : selected;
@@ -28,10 +33,10 @@ export function useReview() {
   const report = draft?.text ?? editedText ?? submittedText;
   const edited = !draft && editedText !== null && editedText !== submittedText;
   useEffect(() => {
-    const warn = (event: BeforeUnloadEvent) => { if (drafts.some(d => d.text.trim())) { event.preventDefault(); event.returnValue = ""; } };
+    const warn = (event: BeforeUnloadEvent) => { if (drafts.some(d => d.text.trim()) || Object.keys(edits).length) { event.preventDefault(); event.returnValue = ""; } };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [drafts]);
+  }, [drafts, edits]);
   const retryConfiguration = () => setAttempt(n => n + 1);
   useEffect(() => {
     let stopped = false; setConfig(null); setConfigurationError("");
@@ -56,7 +61,7 @@ export function useReview() {
     void poll(); return () => { stopped = true; clearTimeout(timer); };
   }, [revision]);
   useEffect(() => {
-    setReview(null); setDisconnected(false); setError(""); setEditedText(null);
+    setReview(old => old?.id === active ? old : null); setDisconnected(false); setError("");
     if (!active) return;
     let stopped = false; let timer: ReturnType<typeof setTimeout>;
     async function poll() {
@@ -71,17 +76,17 @@ export function useReview() {
       }
     }
     void poll(); return () => { stopped = true; clearTimeout(timer); };
-  }, [active]);
+  }, [active, revision]);
   function select(id: string) {
     selectedRef.current = id; setSelected(id); setError("");
     if (id.startsWith("draft-")) sessionStorage.removeItem(ACTIVE);
     else sessionStorage.setItem(ACTIVE, id);
   }
-  function newReview(text = "") {
-    // Reuse an empty draft rather than accumulating placeholders.
-    const existing = !text && drafts.find(d => !d.text && !d.key && !d.submitting);
-    const next = existing || makeDraft(text);
-    if (!existing) setDrafts(old => [...old, next]);
+  function newReview() {
+    // One unfinished review per tab, including an uncertain submission awaiting retry.
+    const existing = drafts[0];
+    const next = existing || makeDraft();
+    if (!existing) setDrafts([next]);
     select(next.id);
   }
   function editReport(text: string) {
@@ -90,23 +95,10 @@ export function useReview() {
       setDrafts(old => old.map(d => d.id === draft.id ? {...d, text, error: ""} : d));
       return;
     }
-    // A submitted report stays readable and editable; reviewing again creates a new review.
-    if (visibleReview) setEditedText(text);
+    // A submitted report stays editable; reviewing again replaces its latest saved state.
+    if (visibleReview && !replacement?.key && !["queued", "running"].includes(visibleReview.execution_status)) setEditedText(text === submittedText ? null : text);
   }
 
-  function deleteDraft(id: string) {
-    const item = drafts.find(d => d.id === id);
-    if (!item || item.key || item.submitting) return;
-    setDeleted(item);
-    const remaining = drafts.filter(d => d.id !== id);
-    if (!remaining.length && !rows.length) remaining.push(makeDraft());
-    setDrafts(remaining);
-    if (draft?.id === id) select(remaining[0]?.id || rows[0].id);
-  }
-  function undoDelete() {
-    if (!deleted) return;
-    setDrafts(old => [...old, deleted]); select(deleted.id); setDeleted(null);
-  }
   async function submit(target?: Draft) {
     const item = target ?? draft;
     if (!item || item.submitting || submittingIds.current.has(item.id) || !item.text.trim() || !config?.ready) return;
@@ -125,19 +117,39 @@ export function useReview() {
       setDrafts(old => old.map(d => d.id === id ? {...d, submitting: false, key: definitive ? undefined : key, error: describeError(e)} : d));
     } finally { submittingIds.current.delete(id); }
   }
-  function reviewAgain() {
-    if (!edited || !config?.ready) return;
-    const next = makeDraft(editedText!);
-    setDrafts(old => [...old, next]);
-    select(next.id);
-    setEditedText(null);
-    void submit(next);
+  const canReviewAgain = Boolean(visibleReview && (edited || ['failed','needs_input'].includes(visibleReview.execution_status) || replacement));
+  async function reviewAgain() {
+    if (!visibleReview || !canReviewAgain || !config?.ready || !report.trim() || submittingIds.current.has(selected)) return;
+    const id = selected;
+    const item = replacement?.key ? replacement : {text: report, key: crypto.randomUUID(), version: visibleReview.input_version, busy:false};
+    submittingIds.current.add(id);
+    setReplacements(old => ({...old, [id]: {...item, busy:true, error:''}}));
+    try {
+      const data = await api.replace(id, item.text, item.version, item.key);
+      setEdits(old => {const next = {...old}; delete next[id]; return next;});
+      setReplacements(old => {const next = {...old}; delete next[id]; return next;});
+      if (selectedRef.current === id) setReview(data);
+      setRevision(n => n + 1);
+    } catch(e) {
+      const definitive = e instanceof ApiError && e.status >= 400 && e.status < 500;
+      setReplacements(old => ({...old, [id]: {...item, key:definitive ? '' : item.key, busy:false, error:describeError(e)}}));
+    } finally {submittingIds.current.delete(id);}
   }
+  const currentRows = visibleReview ? [{
+    ...rows.find(row => row.id === visibleReview.id),
+    id:visibleReview.id, created_at:visibleReview.created_at,
+    execution_status:visibleReview.execution_status,
+    preview:visibleReview.input.report_text.replace(/\s+/g,' ').slice(0,140),
+    outcome:visibleReview.result?.outcome ?? null,
+    general_count:visibleReview.result?.general_comments.length ?? 0,
+    critical_count:visibleReview.result?.critical_comments.length ?? 0,
+    feedback_count:rows.find(row => row.id === visibleReview.id)?.feedback_count ?? null,
+    mode:String(visibleReview.provenance.mode),
+  }, ...rows.filter(row => row.id !== visibleReview.id)].sort((a,b) => b.created_at.localeCompare(a.created_at)) : rows;
   return {config, configurationError, retryConfiguration,
-    report, review: visibleReview, draft, drafts, rows, listError,
+    report, review: visibleReview, draft, drafts, rows:currentRows, listError,
     selected: draft?.id || selected, openReview: select, newReview, editReport, submit,
-    edited, reviewAgain,
-    deleteDraft, deleted, undoDelete, dismissDelete: () => setDeleted(null),
-    busy: Boolean(draft?.submitting), locked: Boolean(draft?.key), stale: false,
-    disconnected, error: draft?.error || error, inputError: "", restore: () => {}};
+    edited, reviewAgain, canReviewAgain,
+    busy: Boolean(draft?.submitting || replacement?.busy || (visibleReview && ["queued", "running"].includes(visibleReview.execution_status))), locked: Boolean(draft?.key || replacement?.key), stale: edited,
+    disconnected, error: draft?.error || replacement?.error || error, inputError: "", restore: () => setEditedText(null)};
 }

@@ -79,7 +79,7 @@ def test_tenant_binding_draft_isolation_and_captured_release(client, monkeypatch
     assert detail.document.kind == "catalog"
     payload = knowledge.DraftInput(expected_revision=0, source_sha256=detail.document.source_sha256,
         package_sha256=detail.package_sha256, content="DRAFT MUST NEVER ENTER PROMPT", change_note="Test isolation")
-    knowledge.save("vesta", key, payload, uuid.uuid4().hex, "2026-09-18")
+    knowledge.save("vesta", key, payload, uuid.uuid4().hex, "2026-09-22")
     assert runtime_config("vesta") == cfg
     with pytest.raises(Exception) as exc: knowledge.detail("other", key)
     assert exc.value.code == "KNOWLEDGE_NOT_FOUND"
@@ -88,7 +88,7 @@ def test_tenant_binding_draft_isolation_and_captured_release(client, monkeypatch
     rid = receipt["body"]["id"]
     tenants.write_text(json.dumps({"vesta":{"skill_release":content.GENERIC_PROFILE},"other":{}}))
     assert runtime_config("vesta")["skill_release"] == generic_release
-    assert store.job("vesta", rid)[1] == cfg
+    assert store.job("vesta", rid)[1] == dict(cfg, input_version=1)
     with store.db() as conn:
         assert conn.execute("SELECT active_release FROM tenants WHERE id='vesta'").fetchone()[0] == vesta_release
 

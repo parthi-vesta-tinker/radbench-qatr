@@ -19,6 +19,10 @@ class IdempotencyConflict(Exception):
     pass
 
 
+class ReviewConflict(Exception):
+    pass
+
+
 class InvalidCursor(Exception):
     pass
 
@@ -55,7 +59,7 @@ def db():
         conn.close()
 
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 
 def init():
@@ -70,6 +74,8 @@ def init():
         conn.execute("BEGIN IMMEDIATE")
         version = conn.execute("PRAGMA user_version").fetchone()[0]
         exists = conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchone()
+        if version == 6:
+            raise RuntimeError("Schema 6 requires an explicit upgrade. Stop the application, finish pending work with the prior build, then run scripts/upgrade_review_storage.py --data-dir <QA_DATA_DIR>. Existing records are preserved.")
         if version != SCHEMA_VERSION and (version != 0 or exists):
             raise RuntimeError("Incompatible database schema. Choose a fresh QA_DATA_DIR for application and DBOS storage; existing records are preserved.")
         if version == 0:
@@ -134,21 +140,34 @@ def remember(conn, tenant, operation, key, payload, version, response):
     )
 
 
-def reserve(tenant, key, request, config, version=presentation.API_VERSION):
+def reserve(tenant, key, request, config, version=presentation.API_VERSION, replace_id=None):
     payload = request.model_dump()
+    operation = f"PUT /api/v1/reviews/{replace_id}" if replace_id else CREATE_REVIEW
     with db() as conn:
         conn.execute("BEGIN IMMEDIATE")
-        saved = replay_in(conn, tenant, CREATE_REVIEW, key, payload, version)
+        saved = replay_in(conn, tenant, operation, key, payload, version)
         if saved:
             return saved, False
-        rid = new_id("qr")
+        previous = None
+        if replace_id:
+            previous = conn.execute("SELECT * FROM review_records WHERE tenant_id=? AND id=?", (tenant, replace_id)).fetchone()
+            if previous is None:
+                raise KeyError("Review not found")
+            if previous["execution_status"] in ("queued", "running"):
+                raise ReviewConflict("Wait for this review to finish before replacing it.")
+            if request.expected_input_version != previous["input_version"]:
+                raise ReviewConflict("This review changed in another session. Reload it before submitting.")
+        rid = replace_id or new_id("qr")
+        generation = previous["input_version"] + 1 if previous else 1
+        config = dict(config, input_version=generation)
+        report_input = {"report_text": request.report_text}
         doc = dict(
             tenant_id=tenant,
             review_id=rid,
             created_at=now(),
-            input_version=1,
+            input_version=generation,
             input_hash=request.fingerprint(),
-            input=payload,
+            input=report_input,
             execution_status="queued",
             result=None,
             error=None,
@@ -164,7 +183,7 @@ def reserve(tenant, key, request, config, version=presentation.API_VERSION):
             }
             | dict(
                 source_kind="manual_paste",
-                source_version=1,
+                source_version=generation,
                 authorship_status="unknown",
                 signature_status="unknown",
                 upstream_qa=None,
@@ -175,17 +194,29 @@ def reserve(tenant, key, request, config, version=presentation.API_VERSION):
         captured = canonical(config)
         conn.execute("INSERT INTO review_snapshots(tenant_id,id,sha256,config) VALUES(?,?,?,?)",
                      (tenant, snapshot_id, digest(captured), captured))
-        conn.execute(
-            "INSERT INTO review_records(tenant_id,id,snapshot_id,report_text,input_hash,created_at,execution_status,steps,provenance,api_version) VALUES(?,?,?,?,?,?,?,?,?,?)",
-            (tenant, rid, snapshot_id, payload["report_text"], doc["input_hash"], doc["created_at"],
-             "queued", canonical(doc["steps"]), canonical(doc["provenance"]), version),
-        )
+        if previous:
+            # Replace the current projection atomically, retaining review-level feedback.
+            # Outcomes are invalidated: old acceptance never applies to corrected text.
+            for table in ("outcomes", "observations", "review_results", "model_attempts"):
+                conn.execute(f"DELETE FROM {table} WHERE tenant_id=? AND review_id=?", (tenant, rid))
+            conn.execute("""UPDATE review_records SET snapshot_id=?,report_text=?,input_hash=?,created_at=?,
+                         completed_at=NULL,input_version=?,execution_status='queued',steps=?,provenance=?,error=NULL,api_version=?
+                         WHERE tenant_id=? AND id=?""",
+                         (snapshot_id, request.report_text, doc["input_hash"], doc["created_at"], generation,
+                          canonical(doc["steps"]), canonical(doc["provenance"]), version, tenant, rid))
+            conn.execute("DELETE FROM review_snapshots WHERE tenant_id=? AND id=?", (tenant, previous["snapshot_id"]))
+        else:
+            conn.execute(
+                "INSERT INTO review_records(tenant_id,id,snapshot_id,report_text,input_hash,created_at,execution_status,steps,provenance,api_version) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (tenant, rid, snapshot_id, request.report_text, doc["input_hash"], doc["created_at"],
+                 "queued", canonical(doc["steps"]), canonical(doc["provenance"]), version),
+            )
         saved = receipt(
             202,
             presentation.review(doc, version),
             {"Location": "/api/v1/reviews/" + rid, "Retry-After": "1"},
         )
-        remember(conn, tenant, CREATE_REVIEW, key, payload, version, saved)
+        remember(conn, tenant, operation, key, payload, version, saved)
         return saved, True
 
 
@@ -223,6 +254,7 @@ def update(
     tenant,
     rid,
     *,
+    input_version=None,
     step=None,
     step_status=None,
     execution_status=None,
@@ -238,6 +270,10 @@ def update(
         if row is None:
             raise KeyError("Review not found in workflow tenant")
         doc = json.loads(row["document"])
+        if input_version is not None and doc["input_version"] != input_version:
+            return  # A superseded worker can never overwrite the current review.
+        if result is not None:
+            result = dict(result, result_version=doc["input_version"])
         if doc["execution_status"] in ("completed", "failed", "needs_input"):
             if result is not None and canonical(result) != canonical(doc["result"]):
                 raise ValueError("A terminal review cannot be replaced")
@@ -299,11 +335,18 @@ def save_feedback(tenant, rid, key, data, version=presentation.API_VERSION):
         if row is None:
             raise KeyError("Review not found")
         review = json.loads(row["document"])
+        target_comment = None
+        if data.target == 'observation':
+            target_comment = next((o['comment'] for group in ('general_comments', 'critical_comments')
+                                   for o in (review.get('result') or {}).get(group, [])
+                                   if o['observation_id'] == data.observation_id), None)
+            if target_comment is None:
+                raise ReviewConflict('The comment is no longer available. Reload this review.')
         doc = dict(
+            target_comment=target_comment,
             tenant_id=tenant,
             feedback_id=new_id("qf"),
             review_id=rid,
-            input_hash=review["input_hash"],
             created_at=now(),
             **payload,
         )
@@ -352,13 +395,13 @@ def list_reviews(
         terms, values = ["r.tenant_id=?"], [tenant]
         if starting_after:
             row = conn.execute(
-                "SELECT rowid FROM reviews WHERE tenant_id=? AND id=?",
+                "SELECT json_extract(document, '$.created_at'),id FROM reviews WHERE tenant_id=? AND id=?",
                 (tenant, starting_after),
             ).fetchone()
             if not row:
                 raise InvalidCursor()
-            terms.append("r.rowid<?")
-            values.append(row[0])
+            terms.append("(json_extract(r.document, '$.created_at'),r.id)<(?,?)")
+            values.extend([row[0], row[1]])
         if query:
             terms.append(
                 "(instr(lower(json_extract(r.document, '$.input.report_text')), lower(?))>0 OR instr(r.id, ?)>0)"
@@ -383,7 +426,7 @@ def list_reviews(
             + (count_sql if include_feedback else "NULL")
             + " AS feedback_count FROM reviews r WHERE "
             + " AND ".join(terms)
-            + " ORDER BY r.rowid DESC LIMIT ?",
+            + " ORDER BY json_extract(r.document, '$.created_at') DESC,r.id DESC LIMIT ?",
             [*values, limit + 1],
         ).fetchall()
         items = []

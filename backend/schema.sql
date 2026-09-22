@@ -1,4 +1,4 @@
--- Foundation schema 6. Fresh bootstrap only: never migrate or overwrite old data.
+-- Foundation schema 7. Fresh bootstrap only: never migrate or overwrite old data.
 CREATE TABLE tenants (id TEXT PRIMARY KEY, active_release TEXT);
 CREATE TABLE review_snapshots (
  tenant_id TEXT NOT NULL REFERENCES tenants(id), id TEXT NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE review_snapshots (
 CREATE TABLE review_records (
  tenant_id TEXT NOT NULL REFERENCES tenants(id), id TEXT NOT NULL,
  snapshot_id TEXT NOT NULL, report_text TEXT NOT NULL, input_hash TEXT NOT NULL,
- created_at TEXT NOT NULL, completed_at TEXT,
+ created_at TEXT NOT NULL, completed_at TEXT, input_version INTEGER NOT NULL DEFAULT 1,
  execution_status TEXT NOT NULL CHECK(execution_status IN ('queued','running','completed','needs_input','failed')),
  steps TEXT NOT NULL CHECK(json_valid(steps)), provenance TEXT NOT NULL CHECK(json_valid(provenance)),
  error TEXT CHECK(error IS NULL OR json_valid(error)), api_version TEXT NOT NULL,
@@ -33,14 +33,12 @@ CREATE TABLE observations (
 );
 CREATE TABLE feedback (
  tenant_id TEXT NOT NULL, id TEXT NOT NULL, review_id TEXT NOT NULL,
- document TEXT NOT NULL CHECK(json_valid(document)), schema_version INTEGER NOT NULL CHECK(schema_version=6),
- result_version INTEGER GENERATED ALWAYS AS (json_extract(document,'$.result_version')) STORED NOT NULL,
- observation_id TEXT GENERATED ALWAYS AS (json_extract(document,'$.observation_id')) STORED,
+ document TEXT NOT NULL CHECK(json_valid(document)), schema_version INTEGER NOT NULL CHECK(schema_version=7),
  PRIMARY KEY(tenant_id,id), UNIQUE(id),
- FOREIGN KEY(tenant_id,review_id,result_version) REFERENCES review_results(tenant_id,review_id,result_version),
- FOREIGN KEY(tenant_id,review_id,result_version,observation_id) REFERENCES observations(tenant_id,review_id,result_version,id)
+ FOREIGN KEY(tenant_id,review_id) REFERENCES review_records(tenant_id,id)
 );
 CREATE INDEX feedback_review_order ON feedback(tenant_id,review_id);
+-- Retired compatibility storage only. No outcome API or analytics reads remain.
 CREATE TABLE outcomes (
  tenant_id TEXT NOT NULL, id TEXT NOT NULL, review_id TEXT NOT NULL,
  document TEXT NOT NULL CHECK(json_valid(document)),
@@ -112,7 +110,7 @@ SELECT r.rowid AS rowid, r.tenant_id, r.id,
  json_object('report_text',r.report_text) AS request, s.config,
  json_object(
   'tenant_id',r.tenant_id,'review_id',r.id,'created_at',r.created_at,
-  'completed_at',r.completed_at,'input_version',1,'input_hash',r.input_hash,
+  'completed_at',r.completed_at,'input_version',r.input_version,'input_hash',r.input_hash,
   'input',json_object('report_text',r.report_text),'execution_status',r.execution_status,
   'steps',json(r.steps),'provenance',json(r.provenance),'error',json(r.error),
   'result',json(CASE WHEN x.review_id IS NULL THEN NULL ELSE
@@ -132,11 +130,6 @@ CREATE TRIGGER result_immutable BEFORE UPDATE ON review_results
 BEGIN SELECT RAISE(ABORT,'Completed result is immutable'); END;
 CREATE TRIGGER observation_immutable BEFORE UPDATE ON observations
 BEGIN SELECT RAISE(ABORT,'Completed observation is immutable'); END;
-CREATE TRIGGER review_input_immutable BEFORE UPDATE OF report_text,input_hash,snapshot_id,tenant_id,id,created_at ON review_records
-BEGIN SELECT RAISE(ABORT,'Accepted input is immutable'); END;
-CREATE TRIGGER review_terminal_immutable BEFORE UPDATE ON review_records
-WHEN OLD.execution_status IN ('completed','failed','needs_input')
-BEGIN SELECT RAISE(ABORT,'Terminal review is immutable'); END;
 CREATE TABLE model_attempts (
  tenant_id TEXT NOT NULL, review_id TEXT NOT NULL, attempt_id TEXT NOT NULL UNIQUE,
  outcome TEXT NOT NULL CHECK(outcome IN ('claimed','response','unknown')),

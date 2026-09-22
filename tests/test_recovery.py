@@ -34,7 +34,7 @@ class Server:
             base_url=f"http://127.0.0.1:{self.port}",
             trust_env=False,
             timeout=2,
-            headers={"QA-Version": "2026-09-18"},
+            headers={"QA-Version": "2026-09-22"},
         )
         self.process = None
         self.log = (root / "server.log").open("a")
@@ -121,7 +121,7 @@ def test_restart_preserves_completed_steps_result_and_feedback(tmp_path):
         # Completed side-effect checkpoint reused; interrupted checkpoint executes again.
         assert events.count(rid + " after_combined_review") == 1
         assert events.count(rid + " after_output_validation") == 2
-        data = {"result_version": 1, "rating": "down", "reason": "other"}
+        data = {"rating": "down", "reason": "other"}
         key = str(uuid.uuid4())
         feedback = server.client.post(
             f"/api/v1/reviews/{rid}/feedback",

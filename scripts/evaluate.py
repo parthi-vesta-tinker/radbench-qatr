@@ -27,7 +27,7 @@ def main():
     args = parser.parse_args()
     cases = json.loads(args.cases.read_text())["cases"]
     rows = []
-    headers = {"QA-Version": "2026-09-18"}
+    headers = {"QA-Version": "2026-09-22"}
     token = os.environ.get("QA_API_KEY", "")
     if token:
         headers["Authorization"] = "Bearer " + token

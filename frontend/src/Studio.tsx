@@ -1,12 +1,4 @@
-import { Check, Minus, AlertCircle } from "lucide-react";
 import type { Review } from "./types";
-const stages = [
-  ["input_validation", "Input validation"],
-  ["combined_review", "Combined report review"],
-  ["output_validation", "Output validation"],
-  ["comment_assembly", "Comment assembly"],
-];
-
 // Guidance is advice for the reader, not tracked progress: no state is stored per step.
 function guidance(review: Review | null, stale: boolean): string[] {
   if (stale)
@@ -55,43 +47,6 @@ export function Studio({
 }) {
   return (
     <aside className="studio" aria-label="Review Studio">
-      <section className="studio-section">
-        <h3>Review steps</h3>
-        <ol className="steps">
-          {stages.map(([id, label]) => {
-            const status =
-              review?.steps.find((s) => s.step_id === id)?.status ?? "pending";
-            return (
-              <li key={id}>
-                <span className={"step-icon " + status}>
-                  {status === "completed" ? (
-                    <Check />
-                  ) : status === "failed" || status === "needs_input" ? (
-                    <AlertCircle />
-                  ) : (
-                    <Minus />
-                  )}
-                </span>
-                <span>
-                  {label}
-                  <small>
-                    {status === "running"
-                      ? "In progress"
-                      : status === "needs_input"
-                        ? "Needs input"
-                        : status === "failed"
-                          ? "Failed"
-                          : status === "skipped"
-                            ? "Not run"
-                            : ""}
-                  </small>
-                </span>
-                <span className="sr-only">{status}</span>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
       <section className="studio-section">
         <h3>Guidance: Next steps</h3>
         <ol className="guidance">
