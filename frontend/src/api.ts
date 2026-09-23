@@ -1,4 +1,4 @@
-import type { Review, ReviewInput, Config, FeedbackPayload, FeedbackRecord, ReviewSummary, Page, FeedbackInboxItem, Analytics } from "./types";
+import type { Review, ReviewInput, Config, FeedbackPayload, FeedbackRecord, ReviewSummary, ReviewComments, Page, FeedbackInboxItem, Analytics } from "./types";
 import type { KnowledgeCatalog, KnowledgeDetail, KnowledgeDraft, KnowledgeDraftInput } from './types';
 import type { PlaygroundCatalog, PlaygroundRun, PlaygroundRunInput } from './types';
 export class ApiError extends Error {
@@ -55,6 +55,7 @@ export const api = {
   analytics: (query: string) => request<Analytics>("/api/v1/analytics?" + query),
   history: (query: string) => request<Page<ReviewSummary>>("/api/v1/reviews?" + query),
   feedbackHistory: (id: string, cursor?: string) => request<Page<FeedbackRecord>>(`/api/v1/reviews/${encodeURIComponent(id)}/feedback?limit=20${cursor ? "&starting_after=" + encodeURIComponent(cursor) : ""}`),
+  comments: (id: string) => request<ReviewComments>(`/api/v1/reviews/${encodeURIComponent(id)}/comments`),
   status: () => request<{status: string; checked_at: string; components: Record<string, {status:string;message:string;code?:string}>;readiness_scope:string}>("/api/v1/status"),
   checkOpenAI: () => request<{status:string;message:string;code?:string}>("/api/v1/diagnostics/openai", {method:"POST"}),
   config: () => request<Config>("/api/v1/config"),

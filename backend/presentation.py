@@ -5,6 +5,7 @@ from .contracts import (
     FeedbackResource,
     ReviewResult,
     ResultObservation,
+    ReviewComments,
     StepState,
 )
 
@@ -44,6 +45,7 @@ def review(record, version=API_VERSION):
     )
     value["input"] = {"report_text": record["input"]["report_text"]}
     value["provenance"] = pick(record["provenance"], PROVENANCE)
+    value["submitted_by"] = record["provenance"].get("submitted_by")
     value["steps"] = [pick(s, StepState.model_fields) for s in record["steps"]]
     for step in value["steps"]:
         if step.get("metrics"):
@@ -91,6 +93,24 @@ def review(record, version=API_VERSION):
         value["result"] = result
     value = ReviewResource.model_validate(value).model_dump(exclude_unset=True)
     return value
+
+
+def comments(record):
+    """A narrow history projection: comments only, never the raw report text."""
+    result = record.get("result") or {}
+    return ReviewComments(
+        review_id=record["review_id"],
+        execution_status=record["execution_status"],
+        result_version=result.get("result_version"),
+        general_comments=[
+            pick(item, ResultObservation.model_fields)
+            for item in result.get("general_comments", [])
+        ],
+        critical_comments=[
+            pick(item, ResultObservation.model_fields)
+            for item in result.get("critical_comments", [])
+        ],
+    ).model_dump()
 
 
 def feedback(record, version=API_VERSION):

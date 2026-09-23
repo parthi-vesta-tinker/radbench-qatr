@@ -1,4 +1,5 @@
 from typing import Literal
+from datetime import datetime, timezone
 from .contracts import ReviewList
 import asyncio
 from contextlib import asynccontextmanager, suppress
@@ -22,6 +23,7 @@ from .contracts import (
     ReviewResource,
     FeedbackResource,
     FeedbackList,
+    ReviewComments,
     APIErrorEnvelope,
     ConfigResource,
     FeedbackInbox,
@@ -380,7 +382,9 @@ def accept_review(request, payload, idempotency_key, p, version, replace_id=None
         except ReviewProblem as exc:
             return error(request, 422, exc.code, exc.message)
     try:
-        saved, created = store.reserve(p.tenant_id, idempotency_key, payload, cfg, version, replace_id)
+        saved, created = store.reserve(
+            p.tenant_id, idempotency_key, payload, cfg, version, replace_id, p.actor_name
+        )
     except KeyError:
         return error(request, 404, "REVIEW_NOT_FOUND", "Review not found.")
     except store.ReviewConflict as exc:
@@ -411,6 +415,8 @@ def list_reviews(
     outcome: Literal["observations", "no_observations"] | None = None,
     critical: bool | None = None,
     has_feedback: bool | None = None,
+    submitted_after: datetime | None = None,
+    submitted_before: datetime | None = None,
 ):
     can_read_feedback = "feedback:read" in p.scopes
     if has_feedback is not None and not can_read_feedback:
@@ -419,6 +425,16 @@ def list_reviews(
             403,
             "INSUFFICIENT_SCOPE",
             "Feedback filtering requires feedback:read.",
+        )
+    if any(value is not None and value.tzinfo is None for value in (submitted_after, submitted_before)):
+        return error(
+            request, 422, "INVALID_SUBMISSION_TIME", "Submission time filters must include a timezone."
+        )
+    after_value = submitted_after.astimezone(timezone.utc).isoformat() if submitted_after else None
+    before_value = submitted_before.astimezone(timezone.utc).isoformat() if submitted_before else None
+    if after_value and before_value and after_value >= before_value:
+        return error(
+            request, 422, "INVALID_SUBMISSION_RANGE", "submitted_after must be before submitted_before."
         )
     try:
         items, more = store.list_reviews(
@@ -431,6 +447,8 @@ def list_reviews(
             critical,
             has_feedback,
             can_read_feedback,
+            after_value,
+            before_value,
         )
     except store.InvalidCursor:
         return error(
@@ -458,6 +476,14 @@ def get_review(request: Request, review_id: str, p: Read, version: Version):
     if doc is None:
         return error(request, 404, "REVIEW_NOT_FOUND", "Review not found.")
     return presentation.review(doc, version)
+
+
+@app.get("/api/v1/reviews/{review_id}/comments", response_model=ReviewComments)
+def get_comments(request: Request, review_id: str, p: Read, version: Version):
+    doc = store.get(p.tenant_id, review_id)
+    if doc is None:
+        return error(request, 404, "REVIEW_NOT_FOUND", "Review not found.")
+    return presentation.comments(doc)
 
 
 @app.post(

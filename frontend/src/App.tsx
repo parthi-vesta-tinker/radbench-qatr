@@ -1,6 +1,6 @@
 import { ReviewJourney, ReviewContext } from "./ReviewJourney";
 import { useEffect, useState } from "react";
-import { FileText, History, Plus, MessageSquare, ChartNoAxesColumn, BookOpen, FlaskConical, Moon, Sun, X, Share2, Settings } from "lucide-react";
+import { FileText, History, Plus, MessageSquare, ChartNoAxesColumn, BookOpen, FlaskConical, Moon, Sun, X, Share2, Settings, RefreshCw } from "lucide-react";
 import { useReview } from "./useReview";
 import { ReviewOutput } from "./ReviewOutput";
 import { SystemStatus } from "./SystemStatus";
@@ -34,12 +34,15 @@ export default function App() {
   const active = qa.rows.filter(r => ["queued", "running"].includes(r.execution_status));
   const recent = qa.rows.filter(r => !["queued", "running"].includes(r.execution_status));
   const [pasted, setPasted] = useState(false);
+  const [historyRefresh, setHistoryRefresh] = useState(0);
+  const refreshWorkspace = () => { qa.refresh(); setHistoryRefresh(value => value + 1); };
   return <>
     <header className="app-header" inert={modal}>
       <div className="brand"><img src="/brand/vestaicon.jpeg" alt="" width="36" height="36"/><div className="brand-titles"><span>Vesta</span><strong>Radiology Report Review</strong></div></div>
       <div className="header-controls" role="group" aria-label="Application controls">
         <TooltipButton className="icon-button" side="bottom" label="Share — coming soon" aria-disabled="true"><Share2 size={19}/></TooltipButton>
         <TooltipButton className="icon-button" side="bottom" label="Settings — coming soon" aria-disabled="true"><Settings size={19}/></TooltipButton>
+        <TooltipButton className="icon-button" side="bottom" label="Refresh current data" onClick={refreshWorkspace}><RefreshCw size={19}/></TooltipButton>
         <SystemStatus configurationError={qa.configurationError} retryConfiguration={qa.retryConfiguration}/>
         <TooltipButton className="icon-button" side="bottom" label={`Switch to ${theme === "light" ? "dark" : "light"} theme`} onClick={() => setTheme(theme === "light" ? "dark" : "light")}>{theme === "light" ? <Moon size={19}/> : <Sun size={19}/>}</TooltipButton>
       </div>
@@ -72,7 +75,7 @@ export default function App() {
         </div>
       </aside>
       <div className="work-content" inert={modal}>
-      {view === "history" && <ReviewHistory busy={false} openReview={open}/>}
+      {view === "history" && <ReviewHistory busy={false} openReview={open} refreshToken={historyRefresh}/>}
       {view === "feedback" && <FeedbackInbox openReview={open}/>}
       {view === "analytics" && <AnalyticsView/>}
       {skillsVisited && <SkillsKnowledge active={view === "skills"}/>}

@@ -137,7 +137,8 @@ export function useReview() {
   }
   const currentRows = visibleReview ? [{
     ...rows.find(row => row.id === visibleReview.id),
-    id:visibleReview.id, created_at:visibleReview.created_at,
+    id:visibleReview.id, display_id: visibleReview.id.slice(-5).toUpperCase(), created_at:visibleReview.created_at,
+    submitted_by: visibleReview.submitted_by ?? rows.find(row => row.id === visibleReview.id)?.submitted_by ?? null,
     execution_status:visibleReview.execution_status,
     preview:visibleReview.input.report_text.replace(/\s+/g,' ').slice(0,140),
     outcome:visibleReview.result?.outcome ?? null,
@@ -148,7 +149,7 @@ export function useReview() {
   }, ...rows.filter(row => row.id !== visibleReview.id)].sort((a,b) => b.created_at.localeCompare(a.created_at)) : rows;
   return {config, configurationError, retryConfiguration,
     report, review: visibleReview, draft, drafts, rows:currentRows, listError,
-    selected: draft?.id || selected, openReview: select, newReview, editReport, submit,
+    selected: draft?.id || selected, openReview: select, newReview, editReport, submit, refresh: () => setRevision(n => n + 1),
     edited, reviewAgain, canReviewAgain,
     busy: Boolean(draft?.submitting || replacement?.busy || (visibleReview && ["queued", "running"].includes(visibleReview.execution_status))), locked: Boolean(draft?.key || replacement?.key), stale: edited,
     disconnected, error: draft?.error || replacement?.error || error, inputError: "", restore: () => setEditedText(null)};

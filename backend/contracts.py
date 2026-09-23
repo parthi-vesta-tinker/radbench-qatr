@@ -362,6 +362,9 @@ class ReviewResource(BaseModel):
     error: ReviewError | None
     steps: list[StepState]
     provenance: dict
+    # The submitting person is determined by server configuration/credentials.
+    # It is never accepted from the report-review request body.
+    submitted_by: str | None = None
 
 
 class FeedbackResource(FeedbackInput):
@@ -474,7 +477,9 @@ class ConfigResource(BaseModel):
 
 class ReviewSummary(BaseModel):
     id: str
+    display_id: str = Field(description="Short stable display identifier for this review.")
     created_at: str = Field(description="Latest accepted submission timestamp for this review.")
+    submitted_by: str | None = None
     execution_status: str
     preview: str
     outcome: str | None
@@ -482,6 +487,16 @@ class ReviewSummary(BaseModel):
     critical_count: int
     feedback_count: int | None
     mode: str
+
+
+class ReviewComments(BaseModel):
+    """The copy-ready observations for one review, without returning its report text."""
+
+    review_id: str
+    execution_status: Literal["queued", "running", "completed", "needs_input", "failed"]
+    result_version: int | None = None
+    general_comments: list[ResultObservation] = []
+    critical_comments: list[ResultObservation] = []
 
 
 class ReviewList(BaseModel):

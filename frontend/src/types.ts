@@ -3,7 +3,7 @@ export type {
   ReviewInput, ResultObservation as Observation, ReviewResult as Result,
   StepState as Step, ReviewResource as Review, ConfigResource as Config,
   FeedbackInput as FeedbackPayload, FeedbackResource as FeedbackRecord,
-  ReviewSummary, FeedbackInboxItem, AnalyticsResource as Analytics,
+  ReviewSummary, ReviewComments, FeedbackInboxItem, AnalyticsResource as Analytics,
   Document as KnowledgeDocument, Draft as KnowledgeDraft, Catalog as KnowledgeCatalog,
   Detail as KnowledgeDetail, DraftInput as KnowledgeDraftInput,
   PlaygroundCatalog, PlaygroundRun, PlaygroundRunInput, PlaygroundSample,
