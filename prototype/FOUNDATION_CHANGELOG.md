@@ -1,5 +1,17 @@
 # Foundation implementation decisions and releases
 
+## Service health presentation redesign — 2026-09-22
+
+Apply the supplied Service Health Redesign Spec: timestamped header refresh, actionable
+check disclosure, compact name/status rows, and an inline OpenAI check icon. Remove routine
+row descriptions and diagnostic disclaimers. Explicit probe results update the OpenAI pill
+and summary, while failures retain actionable detail. No backend or API behavior changed.
+Verification: production build, 22 component tests and 5 diagnostics/header browser tests
+passed. Browser fixtures cover explicit-only probes, failure/retry, refresh timestamp and
+probe reset, keyboard expansion and 1280/390/320px light/dark layouts. Screenshot inspection
+caught inherited button sizing, which was corrected and verified against the rebuilt UI.
+No real OpenAI requests or clinical evaluation.
+
 ## Combined release verification before commit — 2026-09-22
 
 Full backend suite: 135 passed. Direct component suite: 22 passed. Full browser suite:

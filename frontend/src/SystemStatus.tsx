@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { X, AlertCircle, Check, Activity } from "lucide-react";
+import { X, AlertCircle, Check, Activity, RefreshCw, ChevronDown, ListChecks, CheckCircle2 } from "lucide-react";
 import { api, describeError } from "./api";
 import { TooltipButton } from "./TooltipButton";
 import { StatusPill, tierOf } from "./statusPill";
@@ -8,12 +8,6 @@ type Component = { status: string; message: string; code?: string; model?: strin
 type Health = { status: string; checked_at: string; components: Record<string, Component>; readiness_scope: string };
 
 const LABELS: Record<string, string> = {api:"API backend", database:"Database", dbos:"DBOS", skills:"QA skills", openai:"OpenAI"};
-function Rows({ entries }: { entries: [string, Component][] }) {
-  return <dl>{entries.map(([name, value]) => <div key={name}>
-    <dt>{LABELS[name] ?? name} <StatusPill status={value.status}/></dt>
-    <dd>{value.message}{value.code && <code>{value.code}</code>}</dd>
-  </div>)}</dl>;
-}
 
 export function SystemStatus({ configurationError, retryConfiguration }: { configurationError: string; retryConfiguration: () => void }) {
   const [health, setHealth] = useState<Health | null>(null);
@@ -57,9 +51,8 @@ export function SystemStatus({ configurationError, retryConfiguration }: { confi
     return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); };
   }, []);
 
-  const entries = health ? Object.entries(health.components) : [];
+  const entries = health ? Object.entries(health.components).map(([name, value]): [string, Component] => [name, name === "openai" && probe ? probe : value]) : [];
   const attention = entries.filter(([, value]) => tierOf(value.status) !== "neutral");
-  const passing = entries.filter(([, value]) => tierOf(value.status) === "neutral");
   const summaryLabel = checking ? "Checking…" : failure ? "Unavailable" : configurationError ? "Needs attention"
     : !health ? "Not checked" : health.status === "ready" && !attention.length ? "Local checks passed" : "Needs attention";
   const verdict = !health ? null : attention.length
@@ -74,23 +67,34 @@ export function SystemStatus({ configurationError, retryConfiguration }: { confi
     </TooltipButton>
     <div id="service-health-panel" className="health-panel" hidden={!open} role="dialog" aria-label="Service health">
       <div className="health-panel-heading">
-        <h3>Service health</h3>
-        <button type="button" className="icon-button" aria-label="Close service health" onClick={() => close(true)}><X size={16}/></button>
+        <div className="health-heading-copy">
+          <h3>Service health</h3>
+          <p className={"health-verdict " + verdictTier} role="status">{verdictTier === "neutral" && !failure ? <Check size={14}/> : <AlertCircle size={14}/>}{checking ? "Checking…" : failure ? "Unavailable" : configurationError ? "Needs attention" : verdict ?? "Not checked"}</p>
+        </div>
+        <div className="health-refresh">
+          <TooltipButton className="icon-button primary" side="left" label="Refresh status" disabled={checking || probing}
+            onClick={() => { setProbe(null); setRefresh(n => n + 1); retryConfiguration(); }}>
+            <RefreshCw size={17} className={checking ? "journey-spinner" : undefined}/>
+          </TooltipButton>
+          <span className="meta">{health ? <>Last checked<br/><time dateTime={health.checked_at}>{new Date(health.checked_at).toLocaleTimeString()}</time></> : "Not checked"}</span>
+        </div>
+        <TooltipButton className="icon-button health-close" side="left" label="Close service health" onClick={() => close(true)}><X size={16}/></TooltipButton>
       </div>
-      {verdict && <p className={"health-verdict " + verdictTier}>{verdictTier === "neutral" ? <Check size={15}/> : <AlertCircle size={15}/>}{verdict}</p>}
-      <p className="meta">{health ? `Last checked ${new Date(health.checked_at).toLocaleTimeString()} · ` : ""}Local checks do not verify model inference.</p>
       {configurationError && <p className="error">Configuration needs attention.</p>}
-      {failure && <p className="error" role="status">{failure}</p>}
-      {attention.length > 0 && <Rows entries={attention}/>}
-      {passing.length > 0 && (attention.length > 0
-        ? <details className="disclosure disclosure-aside health-passing"><summary>{passing.length} passing {passing.length === 1 ? "check" : "checks"}</summary><Rows entries={passing}/></details>
-        : <details className="disclosure disclosure-aside health-passing"><summary>View all {passing.length} checks</summary><Rows entries={passing}/></details>)}
-      <div className="status-actions">
-        <button type="button" disabled={checking || probing} onClick={() => { setProbe(null); setRefresh(n => n + 1); retryConfiguration(); }}>Refresh status</button>
-        <button type="button" disabled={probing || checking || health?.components.openai?.status !== "configured"} onClick={() => void checkOpenAI()}>{probing ? "Checking OpenAI…" : "Check OpenAI connection"}</button>
-      </div>
-      {probe && <p role="status">{probe.message}{probe.code && <code>{probe.code}</code>}</p>}
-      <p className="meta">OpenAI check reads model metadata only. It sends no report and does not run a paid review.</p>
+      {failure && <p className="error" role="alert">{failure}</p>}
+      {entries.length > 0 && <details className="health-checks">
+        <summary><ListChecks size={16}/><span>View all {entries.length} checks</span><ChevronDown size={16} className="health-chevron"/></summary>
+        <dl className="health-check-list">{entries.map(([name, value]) => <div className="health-check-row" key={name}>
+          <dt>{LABELS[name] ?? name}</dt>
+          <dd><StatusPill status={name === "openai" && probing ? "checking" : value.status}/>
+            {name === "openai" && <TooltipButton className="icon-button" side="left" label={probing ? "Checking OpenAI connection" : "Check OpenAI connection"}
+              disabled={probing || checking || health?.components.openai?.status !== "configured"} onClick={() => void checkOpenAI()}>
+              {probing ? <RefreshCw size={16} className="journey-spinner"/> : <CheckCircle2 size={16}/>}
+            </TooltipButton>}
+          </dd>
+        </div>)}</dl>
+        {probe && <p className="health-probe-result meta" role="status">{tierOf(probe.status) === "neutral" ? "OpenAI connection checked." : <>{probe.message}{probe.code && <> · <code>{probe.code}</code></>}</>}</p>}
+      </details>}
     </div>
   </div>;
 }

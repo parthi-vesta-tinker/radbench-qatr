@@ -1194,3 +1194,31 @@ button.primary:hover:not(:disabled) {background:var(--muted);border-color:var(--
 
 .input-pane > .section-heading:has(+ .review-context) {margin-bottom:6px;}
 .review-context {margin:0 0 16px;min-height:20px;font-size:13px;line-height:20px;}
+
+/* Service health: one summary, a timestamped refresh, and an optional check list. */
+.health-panel {padding:18px;border-radius:10px;}
+.health-panel-heading {align-items:flex-start;gap:10px;margin:0;}
+.health-heading-copy {flex:1;min-width:0;padding-top:3px;}
+.health-panel-heading h3 {font-size:16px;line-height:22px;font-weight:600;}
+.health-verdict {font-size:12px;line-height:18px;font-weight:400;margin:8px 0 0;gap:5px;}
+.health-verdict svg {flex-shrink:0;}
+.health-refresh {display:flex;flex-direction:column;align-items:center;gap:6px;}
+.health-panel .health-refresh .icon-button {width:34px;height:34px;min-width:34px;min-height:34px;border-radius:6px;background:var(--text);color:var(--surface);}
+.health-panel .health-refresh .icon-button:hover:not(:disabled) {background:var(--muted);color:var(--surface);}
+.health-refresh > .meta {font-size:10px;line-height:15px;text-align:center;white-space:nowrap;}
+.health-panel .health-close {width:26px;height:26px;min-width:26px;min-height:26px;color:var(--muted);}
+.health-checks {margin-top:16px;border-top:1px solid var(--line);padding-top:12px;}
+.system-status .health-checks > summary {padding:9px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:500;gap:8px;cursor:pointer;background:var(--soft);}
+.system-status .health-checks > summary::before {display:none;}
+.health-checks > summary::-webkit-details-marker {display:none;}
+.health-checks > summary:hover {background:var(--selected);border-color:var(--control);}
+.health-chevron {margin-left:auto;}
+.health-checks[open] .health-chevron {transform:rotate(180deg);}
+.system-status .health-check-list {margin:10px 0 0;}
+.system-status .health-check-row {margin:0;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;border-bottom:1px solid var(--line);padding:8px 0;}
+.system-status .health-check-row:last-child {border-bottom:0;}
+.system-status .health-check-row dt {font-size:13px;font-weight:500;margin:0;}
+.system-status .health-check-row dd {display:flex;align-items:center;gap:6px;margin:0;font-size:12px;}
+.health-check-row:not(:last-child) dd {padding-right:34px;}
+.health-panel .health-check-row .icon-button {width:28px;height:28px;min-width:28px;min-height:28px;}
+.health-probe-result {margin:8px 0 0;font-size:12px;line-height:18px;overflow-wrap:anywhere;}

@@ -52,3 +52,14 @@ boundary and distinct notice. Analytics counts and clinical-boundary wording are
 The four-stage journey is compact and shares one row with the Review button at desktop and mobile widths. One status message lives below the journey; no duplicate input hint or output status is shown. Copy actions omit the UI-only QA review prefix. Light/dark palettes are monochrome, with amber reserved for progress warning/blocker states.
 
 Contextual review feedback sits directly below the New review/Report review title, above the paste field. The compact journey beside Review uses Input, Validate, AI review and Output. Show the feedback once only.
+
+## Service health presentation
+
+The popup pairs a concise summary with a prominent top-right refresh icon and its Last
+checked timestamp. A bordered, keyboard-operable View all N checks disclosure reveals
+consistent name/status rows for API backend, Database, DBOS, QA skills and OpenAI.
+The OpenAI row has a tooltip-labelled check icon; only explicit activation probes the
+connection. Its result updates the row status and summary. Refresh clears that result.
+Routine descriptions and model-metadata/no-report disclaimers are omitted from the UI;
+connection errors retain actionable messages and codes. Keep monochrome styling,
+light/dark appearance, narrow-screen fit, Escape/outside-click dismissal and focus return.

@@ -244,8 +244,8 @@
     },
     {
       "path": "frontend/src/SystemStatus.tsx",
-      "bytes": 6175,
-      "sha256": "8cbf81bdf224999d2937b9d4cad2fcb7c8e06261d213455b4b35733bf4c32720"
+      "bytes": 6615,
+      "sha256": "980f8ce2c45e5fca441856d3913eb59ffcec2b9db6be46c126b78147f92b0201"
     },
     {
       "path": "frontend/src/TooltipButton.tsx",
@@ -279,8 +279,8 @@
     },
     {
       "path": "frontend/src/style.css",
-      "bytes": 50875,
-      "sha256": "6f74c2aa1135797c5cde86ddeae0d4e9ecd15ccbecdeac4f4787be5b43bddf83"
+      "bytes": 53217,
+      "sha256": "f9d49a199a5e89db46fe5cae19b4b7dbc6ee4b041e2e3af60d60182dceb41bd3"
     },
     {
       "path": "frontend/src/types.ts",
@@ -299,8 +299,8 @@
     },
     {
       "path": "frontend/tests/diagnostics.spec.ts",
-      "bytes": 2240,
-      "sha256": "1f133f638ecd40e0813cd0836b893d5303e532500fb9995127b1c520b63db5ae"
+      "bytes": 5626,
+      "sha256": "898df2c563d319b837721fac430213851519cad25c213acb0a81fe91d10b4303"
     },
     {
       "path": "frontend/tests/f3.spec.ts",
@@ -369,8 +369,8 @@
     },
     {
       "path": "prototype/BLUEPRINT.html",
-      "bytes": 104885,
-      "sha256": "5bea0414c9da20fc44f7f2239f240f564c7e974850389711ab7c3ed1bfd7fa97"
+      "bytes": 106876,
+      "sha256": "61e1c7d5332a36c60ed18eac65f0dee26aa6b9056c10a4acf105397dbdb927f4"
     },
     {
       "path": "prototype/DBOS_VALIDATION.md",
@@ -379,8 +379,8 @@
     },
     {
       "path": "prototype/FOUNDATION_CHANGELOG.md",
-      "bytes": 25775,
-      "sha256": "a8e4cb42e6808840dd9e7ac175a76dc6897c4d5d8b40efadf55876e315020add"
+      "bytes": 26603,
+      "sha256": "a67eac2237849cb67e0ddff1667b5412503353eb1bb139ebabed0bec6f426bb2"
     },
     {
       "path": "prototype/FOUNDATION_PLAN.md",
@@ -389,8 +389,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 15213,
-      "sha256": "6ca26b02cc39b72e92553c0c1b56724e4ab8041a2305b2e49ba5f1a39f9bc25d"
+      "bytes": 15499,
+      "sha256": "7556ca5f09d73b54a4bb0d22c1433966074a5d26f1f883a73436a4df3f0748d5"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",
@@ -419,8 +419,8 @@
     },
     {
       "path": "prototype/WORKSPACE_SPEC.md",
-      "bytes": 8086,
-      "sha256": "20f2de3afb6d5b610359246799fec4e85b32e4022f5fcebd90212cda26c961ad"
+      "bytes": 8807,
+      "sha256": "d7b3ca7a1a545cbbfb9410b0e4f10c1968d8bf33a05bb1f940ba989a6fc8ce22"
     },
     {
       "path": "prototype/assets/ui-research/after-analytics-desktop.png",
