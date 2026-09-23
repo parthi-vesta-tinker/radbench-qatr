@@ -1261,8 +1261,11 @@ button.primary:hover:not(:disabled) {background:var(--muted);border-color:var(--
 .history-feedback-list p { margin:4px 0; line-height:1.45; }
 .reports-content { min-height:0; overflow:hidden; }
 .reports-content .scope-nav { min-height:0; overflow-y:auto; overscroll-behavior:contain; }
-.report-row b { display:block; font:700 11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.02em; }
-.report-row small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.scope-nav .report-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; min-width:0; padding:7px 8px; }
+.rail-preview { display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden; white-space:nowrap; }
+.rail-id { flex:none; font:700 11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.02em; }
+.rail-summary { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.rail-time { flex:none; color:var(--muted); font-size:11px; white-space:nowrap; }
 @media (max-width:650px) {
   .review-history-table table { min-width:0; }
   .review-history-table thead { display:none; }
