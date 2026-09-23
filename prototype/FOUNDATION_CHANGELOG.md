@@ -1,5 +1,23 @@
 # Foundation implementation decisions and releases
 
+## Review history and prior-review input handling — 2026-09-23
+
+Review History now supports text/status/result/feedback filters, the last 24 hours, 3 days,
+7 days or a custom submitted-time range, compact display IDs, submitter, last submitted time,
+comments and feedback dialogs, and 20-item cursor pages. Re-review replaces the same current
+record and timestamp. The reports rail is scrollable and displays each entry on one line with a
+timestamp.
+
+Input validation accepts an earlier Findings/Impression pair only when it is clearly preceded by
+History or Comparison context; the final pair is supplied to the model as the current pair. Two
+unmarked reports, mismatched labels and addendum-separated pairs remain blocked before any model
+request. The one contextual input message now gives a plain warning icon and actionable wording
+for missing or unscoped repeated sections. Local setup documents `npm run demo`, `npm run live`,
+and the optional local operator name used in Review History.
+
+Verification: 18 focused backend tests, 24 DOM tests, production build, generated API/TypeScript
+checks and documentation checks passed. Demo startup used no provider call.
+
 ## Copy alignment and PACS comments — 2026-09-22
 
 Align all three copy buttons with their headings using consistent sizing at desktop and
