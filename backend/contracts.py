@@ -136,6 +136,7 @@ HEADING = re.compile(
     r"(?im)^[ \t]*(history|clinical history|indication|technique|comparison|addend(?:um|a)|findings?|impressions?|conclusions?)[ \t]*(?::|$)"
 )
 INLINE_REQUIRED = re.compile(r"(?i)(?<!\w)(findings?|impressions?|conclusions?)[ \t]*:")
+HISTORICAL_CONTEXTS = frozenset({"history", "comparison"})
 
 
 def section_index(text: str) -> list[dict]:
@@ -199,32 +200,83 @@ def section_index(text: str) -> list[dict]:
     return result
 
 
-def parse_sections(text: str) -> dict[str, str]:
-    sections = {}
-    for s in section_index(text):
-        kind = s["kind"]
-        if kind in ("findings", "impression"):
-            if kind in sections:
-                raise ReviewProblem(
-                    "AMBIGUOUS_SECTIONS",
-                    "Please provide one current report with one Findings section and one Impression section.",
-                    needs_input=True,
-                )
-            value = text[s["start"] : s["end"]].strip()
-            if not re.search(r"[A-Za-z]{2}", value):
-                raise ReviewProblem(
-                    "INCOMPLETE_REPORT",
-                    f"Please include substantive text in the {kind} section.",
-                    needs_input=True,
-                )
-            sections[kind] = value
-    if any(k not in sections for k in ("findings", "impression")):
+def current_report_sections(text: str) -> dict[str, dict]:
+    """Return the current Findings/Impression pair from a pasted report.
+
+    RamSoft copies can include a prior review beneath an explicit History or
+    Comparison heading. In that shape, the final pair is the current report.
+    A second unmarked report remains unsafe to attribute, so it still fails
+    closed rather than guessing which study to review.
+    """
+    indexed = section_index(text)
+    grouped = {
+        kind: [section for section in indexed if section["kind"] == kind]
+        for kind in ("findings", "impression")
+    }
+    findings, impressions = grouped["findings"], grouped["impression"]
+    if not findings or not impressions:
         raise ReviewProblem(
             "MISSING_SECTIONS",
             "Please include identifiable Findings and Impression sections with substantive text.",
             needs_input=True,
         )
-    return sections
+    if len(findings) != len(impressions):
+        raise ReviewProblem(
+            "AMBIGUOUS_SECTIONS",
+            "Findings and Impression labels do not form one clear current report. Keep the current pair once, or place the earlier report under History or Comparison before the current sections.",
+            needs_input=True,
+        )
+    current = {"findings": findings[-1], "impression": impressions[-1]}
+    if current["findings"]["start"] >= current["impression"]["start"]:
+        raise ReviewProblem(
+            "AMBIGUOUS_SECTIONS",
+            "The current Findings section must appear before the current Impression section.",
+            needs_input=True,
+        )
+    if len(findings) > 1:
+        first_prior_label = min(
+            *(section["start"] for section in findings[:-1]),
+            *(section["start"] for section in impressions[:-1]),
+        )
+        prior_context = [
+            section
+            for section in indexed
+            if section["kind"] in HISTORICAL_CONTEXTS
+            and section["start"] < first_prior_label
+        ]
+        if not prior_context:
+            raise ReviewProblem(
+                "AMBIGUOUS_SECTIONS",
+                "More than one Findings or Impression section was found. Place the earlier review under a History or Comparison heading before the current Findings and Impression sections.",
+                needs_input=True,
+            )
+        if any(
+            section["kind"] == "addendum"
+            and first_prior_label < section["start"] < current["findings"]["start"]
+            for section in indexed
+        ):
+            raise ReviewProblem(
+                "AMBIGUOUS_SECTIONS",
+                "An addendum appears between repeated Findings or Impression sections. Keep one current report, or move the earlier report into a separate History or Comparison block.",
+                needs_input=True,
+            )
+    for kind, section in current.items():
+        value = text[section["start"] : section["end"]].strip()
+        if not re.search(r"[A-Za-z]{2}", value):
+            raise ReviewProblem(
+                "INCOMPLETE_REPORT",
+                f"Please include substantive text in the current {kind} section.",
+                needs_input=True,
+            )
+    return current
+
+
+def parse_sections(text: str) -> dict[str, str]:
+    current = current_report_sections(text)
+    return {
+        kind: text[section["start"] : section["end"]].strip()
+        for kind, section in current.items()
+    }
 
 
 def assemble(stage_results: dict, report_text: str) -> dict:
