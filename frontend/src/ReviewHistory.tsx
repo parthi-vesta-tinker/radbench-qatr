@@ -87,17 +87,21 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
 
   function reset() { setAfter(''); setRows([]); setCursor(null); }
   function applyFilters(change: () => void) { reset(); change(); }
+  function openRangeDialog() {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const source = quickRange === 'custom' && submittedAfter && submittedBefore
+      ? { from: new Date(submittedAfter), to: new Date(submittedBefore) }
+      : { from: weekAgo, to: now };
+    const from = localDateTime(source.from);
+    const to = localDateTime(source.to);
+    setFromDate(from.date); setFromTime(from.time);
+    setToDate(to.date); setToTime(to.time);
+    rangeDialog.current?.showModal();
+  }
   function chooseRange(next: QuickRange) {
     if (next === 'custom') {
-      if (!fromDate || !toDate) {
-        const now = new Date();
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const from = localDateTime(weekAgo);
-        const to = localDateTime(now);
-        setFromDate(from.date); setFromTime(from.time);
-        setToDate(to.date); setToTime(to.time);
-      }
-      rangeDialog.current?.showModal();
+      openRangeDialog();
       return;
     }
     applyFilters(() => {
@@ -135,7 +139,7 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
       <label>Status<select value={status} onChange={event => applyFilters(() => setStatus(event.target.value))}><option value="">All statuses</option><option value="completed">Completed</option><option value="running">Running</option><option value="queued">Queued</option><option value="needs_input">Input needed</option><option value="failed">Failed</option></select></label>
       <label>Result<select value={result} onChange={event => applyFilters(() => setResult(event.target.value))}><option value="">All results</option><option value="critical">Critical comments</option><option value="observations">With comments</option><option value="no_observations">No comments</option></select></label>
       <label>Feedback<select value={feedback} onChange={event => applyFilters(() => setFeedback(event.target.value))}><option value="">Any feedback status</option><option value="true">Feedback recorded</option><option value="false">No feedback yet</option></select></label>
-      <div className="history-date-filter"><label>Date &amp; time<select aria-label="Date and time range" value={quickRange} onChange={event => chooseRange(event.target.value as QuickRange)}><option value="all">Any time</option><option value="24h">Last 24 hours</option><option value="3d">Last 3 days</option><option value="7d">Last 7 days</option><option value="custom">Custom range</option></select></label>{quickRange === 'custom' && <button className="history-edit-range" type="button" onClick={() => rangeDialog.current?.showModal()}>Edit range</button>}</div>
+      <div className="history-date-filter"><label>Date &amp; time<select aria-label="Date and time range" value={quickRange} onChange={event => chooseRange(event.target.value as QuickRange)}><option value="all">Any time</option><option value="24h">Last 24 hours</option><option value="3d">Last 3 days</option><option value="7d">Last 7 days</option><option value="custom">Custom range</option></select></label>{quickRange === 'custom' && <button className="history-edit-range" type="button" onClick={openRangeDialog}>Edit range</button>}</div>
     </form>
     <dialog className="history-range-dialog" ref={rangeDialog} aria-labelledby="history-range-title">
       <div className="history-range-heading"><div><h2 id="history-range-title">Custom date &amp; time</h2><p className="meta">Filter reviews by the time they were submitted. Times are local.</p></div><button type="button" aria-label="Close custom range" onClick={() => rangeDialog.current?.close()}>Close</button></div>

@@ -331,6 +331,25 @@ test('custom date and time range opens a popup and applies only after confirmati
   assert.equal(params.get('submitted_before'),new Date('2020-01-01T18:45').toISOString());
   await click('Edit range');
   assert.equal(dialog.open,true);
+  assert.equal((document.querySelector('[aria-label="From date"]') as HTMLInputElement).value,'2019-12-31');
+  assert.equal((document.querySelector('[aria-label="From time"]') as HTMLInputElement).value,'09:30');
+  assert.equal((document.querySelector('[aria-label="To date"]') as HTMLInputElement).value,'2020-01-01');
+  assert.equal((document.querySelector('[aria-label="To time"]') as HTMLInputElement).value,'18:45');
+  await act(async()=>{
+    const to=document.querySelector('[aria-label="To date"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(to,'2020-06-15');
+    to.dispatchEvent(new window.Event('input',{bubbles:true}));
+  });
+  await click('Cancel');
+  assert.equal(dialog.open,false);
+  const queriesBeforeReopen=queries.length;
+  await click('Edit range');
+  assert.equal(dialog.open,true);
+  assert.equal(queries.length,queriesBeforeReopen);
+  assert.equal((document.querySelector('[aria-label="From date"]') as HTMLInputElement).value,'2019-12-31');
+  assert.equal((document.querySelector('[aria-label="From time"]') as HTMLInputElement).value,'09:30');
+  assert.equal((document.querySelector('[aria-label="To date"]') as HTMLInputElement).value,'2020-01-01');
+  assert.equal((document.querySelector('[aria-label="To time"]') as HTMLInputElement).value,'18:45');
   await click('Cancel');
   assert.equal(dialog.open,false);
 });
