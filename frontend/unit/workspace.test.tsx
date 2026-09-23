@@ -260,6 +260,22 @@ test('demo mode blocks samples it cannot serve and the playground never enters h
   assert.equal(requests.length,0);
 });
 
+test('review history filters by submission time and opens comments without opening the report',async()=>{
+  const row={id:'qr-history-abcde',display_id:'ABCDE',created_at:new Date().toISOString(),submitted_by:null,execution_status:'completed',preview:'Findings: controlled history report. Impression: controlled.',outcome:'observations',general_count:1,critical_count:0,feedback_count:0,mode:'demo'};
+  const queries:string[]=[];
+  api.history=async query=>{queries.push(query);return {items:[row],has_more:false,next_cursor:null};};
+  api.comments=async id=>({review_id:id,execution_status:'completed',result_version:1,general_comments:[{observation_id:'obs-1',finding_type:'suggestion',report_section:'findings',comment:'Controlled PACS comment.'}],critical_comments:[]});
+  await mount();await click('Review history');
+  assert.match(document.querySelector('.history-pane')!.textContent!,/ABCDE/);
+  assert.match(document.querySelector('.history-pane')!.textContent!,/Not recorded/);
+  await choose('Submitted','24h');
+  assert.ok(new URLSearchParams(queries.at(-1)).has('submitted_after'));
+  await click('1 PACS · 0 critical');
+  assert.match(document.querySelector('.history-modal')!.textContent!,/Controlled PACS comment/);
+  assert.equal(document.querySelector('#report-text')?.getAttribute('value'),null);
+  await click('Close history dialog');
+});
+
 test('panel preferences preserve drafts and unsaved Skills content',async()=>{
   window.happyDOM.setWindowSize({width:1536,height:1024});
   await mount();await paste('Keep the report');await click('Skills');

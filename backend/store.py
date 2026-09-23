@@ -140,7 +140,7 @@ def remember(conn, tenant, operation, key, payload, version, response):
     )
 
 
-def reserve(tenant, key, request, config, version=presentation.API_VERSION, replace_id=None):
+def reserve(tenant, key, request, config, version=presentation.API_VERSION, replace_id=None, submitted_by=None):
     payload = request.model_dump()
     operation = f"PUT /api/v1/reviews/{replace_id}" if replace_id else CREATE_REVIEW
     with db() as conn:
@@ -187,6 +187,7 @@ def reserve(tenant, key, request, config, version=presentation.API_VERSION, repl
                 authorship_status="unknown",
                 signature_status="unknown",
                 upstream_qa=None,
+                submitted_by=submitted_by,
             ),
         )
         snapshot_id = new_id("qs")
@@ -389,6 +390,8 @@ def list_reviews(
     critical=None,
     has_feedback=None,
     include_feedback=False,
+    submitted_after=None,
+    submitted_before=None,
 ):
     """Newest-first bounded summaries; source fetched only when opening a review."""
     with db() as conn:
@@ -421,6 +424,12 @@ def list_reviews(
         count_sql = "(SELECT count(*) FROM feedback f WHERE f.tenant_id=r.tenant_id AND f.review_id=r.id)"
         if has_feedback is not None:
             terms.append(count_sql + (">0" if has_feedback else "=0"))
+        if submitted_after:
+            terms.append("julianday(json_extract(r.document, '$.created_at')) >= julianday(?)")
+            values.append(submitted_after)
+        if submitted_before:
+            terms.append("julianday(json_extract(r.document, '$.created_at')) < julianday(?)")
+            values.append(submitted_before)
         rows = conn.execute(
             "SELECT r.document, "
             + (count_sql if include_feedback else "NULL")
@@ -436,7 +445,9 @@ def list_reviews(
             items.append(
                 dict(
                     id=doc["review_id"],
+                    display_id=doc["review_id"][-5:].upper(),
                     created_at=doc["created_at"],
+                    submitted_by=doc.get("provenance", {}).get("submitted_by"),
                     execution_status=doc["execution_status"],
                     preview=" ".join(doc["input"]["report_text"].split())[:140],
                     outcome=result.get("outcome"),

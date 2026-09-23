@@ -1,0 +1,3 @@
+# The QA skills and framework are hash-pinned artifacts. Preserve their bytes on every OS.
+qa-skills/clinical-content/** -text
+qa-skills/framework/** -text

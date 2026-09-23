@@ -23,6 +23,7 @@ class AccessError(Exception):
 class Principal:
     tenant_id: str
     scopes: frozenset[str]
+    actor_name: str | None = None
 
 
 def tenants():
@@ -66,6 +67,13 @@ def key_grants():
             or row.get("tenant_id") not in known
         ):
             raise ValueError("Invalid API key grant.")
+        if set(row) - {"key_sha256", "tenant_id", "scopes", "actor_name"}:
+            raise ValueError("Unknown API key grant field.")
+        actor_name = row.get("actor_name")
+        if actor_name is not None and (
+            not isinstance(actor_name, str) or not actor_name.strip() or len(actor_name) > 120
+        ):
+            raise ValueError("Invalid API key actor name.")
         if not isinstance(row.get("scopes"), list) or not set(row["scopes"]) <= SCOPES:
             raise ValueError("Invalid API key scopes.")
         seen.add(digest)
@@ -99,7 +107,8 @@ def principal(
             raise AccessError(
                 401, "AUTH_MODE_MISMATCH", "Bearer credentials require api_key mode."
             )
-        p = Principal("vesta", SCOPES)
+        actor_name = os.environ.get("QA_LOCAL_OPERATOR_NAME", "").strip() or None
+        p = Principal("vesta", SCOPES, actor_name)
     else:
         if not credentials or credentials.scheme.lower() != "bearer":
             raise AccessError(
@@ -112,7 +121,11 @@ def principal(
         )
         if row is None:
             raise AccessError(401, "INVALID_API_KEY", "Provide a valid bearer API key.")
-        p = Principal(row["tenant_id"], frozenset(row["scopes"]))
+        p = Principal(
+            row["tenant_id"],
+            frozenset(row["scopes"]),
+            (row.get("actor_name") or "").strip() or None,
+        )
     request.state.tenant_id = p.tenant_id
     return p
 

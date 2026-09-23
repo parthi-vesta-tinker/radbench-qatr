@@ -1,10 +1,32 @@
 """Portable local-launch setup behavior; no server or provider calls."""
 import os
 import subprocess
+import sys
 
 import pytest
 
 from scripts import run_local
+
+
+def test_demo_mode_never_prompts_for_an_api_key(monkeypatch, capsys):
+    """The convenient demo command must remain a provider-free local flow."""
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
+    monkeypatch.setattr(run_local, "ensure_frontend", lambda: None)
+    monkeypatch.setattr(sys, "argv", ["run_local.py", "--mode", "demo", "--port", "9123"])
+    monkeypatch.setattr(
+        "getpass.getpass", lambda *_args, **_kwargs: pytest.fail("demo mode requested an API key")
+    )
+    calls = []
+    monkeypatch.setattr("uvicorn.run", lambda *args, **kwargs: calls.append((args, kwargs)))
+
+    run_local.main()
+
+    assert os.environ["QA_MODE"] == "demo"
+    assert calls == [
+        (("backend.main:app",), {"host": "127.0.0.1", "port": 9123, "access_log": False})
+    ]
+    assert "Demo mode: controlled local examples; no OpenAI request" in capsys.readouterr().out
 
 
 def test_missing_frontend_builds_with_windows_npm_launcher(monkeypatch, tmp_path):
