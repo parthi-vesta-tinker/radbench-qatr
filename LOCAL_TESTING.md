@@ -21,26 +21,18 @@ The launcher also builds `frontend/dist` when it is missing.
 
 ## Controlled local use
 
-Create local configuration once:
-
-```sh
-copy .env.example .env
-```
-
 Run canned demo behavior without a provider call:
 
 ```sh
-npm run demo
+QA_MODE=demo uv run uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-The launcher builds the frontend when it is missing or stale, starts the combined local app, and uses `QA_MODE=demo`. It does not prompt for or call OpenAI. `.env.example` uses a fresh `.qa-data-local` folder so it does not reuse an older database. Set optional `QA_LOCAL_OPERATOR_NAME` there to display a local submitter in Review History.
-
-Use schema-7 storage. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are never automatically migrated or deleted.
+Use schema-7 storage. The default is `.qa-data-foundation-v5`. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are never automatically migrated or deleted.
 
 ## Live provider session
 
 ```sh
-npm run live
+uv run python scripts/run_local.py --model gpt-6-astra
 ```
 
 The launcher prompts for `OPENAI_API_KEY` without storing it. Rotate any key exposed in chat before use.

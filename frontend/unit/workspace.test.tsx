@@ -8,7 +8,6 @@ import { api, ApiError } from '../src/api';
 import type { Review } from '../src/types';
 import type { Analytics, KnowledgeCatalog, KnowledgeDetail, KnowledgeDraftInput } from '../src/types';
 import type { PlaygroundCatalog, PlaygroundRun } from '../src/types';
-import { assessReportText, precheck } from '../src/ReportReadiness';
 const window = new Window({url:'http://localhost:8000'});
 Object.assign(globalThis, {window, document:window.document, HTMLElement:window.HTMLElement,
   InputEvent:window.InputEvent, sessionStorage:window.sessionStorage, localStorage:window.localStorage, IS_REACT_ACT_ENVIRONMENT:true});
@@ -54,12 +53,6 @@ beforeEach(()=>{
   api.create=async(input,key)=>{requests.push({text:input.report_text,key});const r=review('qr-'+requests.length,input.report_text);results.set(r.id,r);return r;};
 });
 afterEach(async()=>{await act(async()=>root.unmount());});
-test('input precheck explains missing and historical repeated report sections before review',()=>{
-  assert.match(precheck(assessReportText('Findings: lungs clear.'),false).message,/add an identifiable Impression section/);
-  assert.equal(precheck(assessReportText('Findings: old. Impression: old. Findings: current. Impression: current.'),false).level,'warning');
-  const historical='History:\nPrior report\nFindings: old. Impression: old. Findings: current. Impression: current.';
-  assert.match(precheck(assessReportText(historical),false).message,/prior-review labels detected/);
-});
 test('Current review is the only unfinished entry and New review preserves its text',async()=>{
   await mount();await paste('first input');await click('New review');await click('New review');
   assert.equal(text(),'first input');

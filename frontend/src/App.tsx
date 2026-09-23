@@ -14,15 +14,6 @@ import { TooltipButton } from "./TooltipButton";
 import { usePanels } from "./usePanels";
 import { PanelIcon } from "./PanelIcon";
 import { FeatureNotice } from "./FeatureNotice";
-import { assessReportText, precheck } from "./ReportReadiness";
-
-function railTime(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.valueOf())
-    ? value
-    : date.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-}
-
 export default function App() {
   const qa = useReview();
   const panels = usePanels();
@@ -40,10 +31,9 @@ export default function App() {
   const open = (id: string) => { qa.openReview(id); setView("current"); panels.close(); };
   const showCurrent = () => { if (qa.drafts[0]) qa.openReview(qa.drafts[0].id); setView("current"); panels.close(); };
   const create = () => { qa.newReview(); setView("current"); panels.close(); };
-  const active = qa.rows.filter(r => ["queued", "running"].includes(r.execution_status)).slice(0, 20);
-  const recent = qa.rows.filter(r => !["queued", "running"].includes(r.execution_status)).slice(0, 20);
+  const active = qa.rows.filter(r => ["queued", "running"].includes(r.execution_status));
+  const recent = qa.rows.filter(r => !["queued", "running"].includes(r.execution_status));
   const [pasted, setPasted] = useState(false);
-  const reportPrecheck = precheck(assessReportText(qa.report), pasted);
   const [historyRefresh, setHistoryRefresh] = useState(0);
   const refreshWorkspace = () => { qa.refresh(); setHistoryRefresh(value => value + 1); };
   return <>
@@ -78,7 +68,7 @@ export default function App() {
         <div id="reports-content" className="reports-content" hidden={reportsCollapsed}>
         <nav className="scope-nav" aria-label="Report reviews">
           <button className={view === "current" ? "selected" : ""} onClick={showCurrent}><FileText size={17}/>Current review</button>
-          {[["Active", active], ["Recent", recent]] .map(([title, items]) => <section key={title as string}><p className="report-group-label">{title as string}</p>{(items as typeof qa.rows).map(r => <button className={"report-row " + (qa.selected === r.id && view === "current" ? "selected" : "")} key={r.id} onClick={() => open(r.id)} title={`${r.execution_status.replaceAll("_", " ")} · ${r.preview}`}><span className="rail-preview">{r.preview}</span><time className="rail-time" dateTime={r.created_at}>{railTime(r.created_at)}</time></button>)}</section>)}
+          {[["Active", active], ["Recent", recent]] .map(([title, items]) => <section key={title as string}><p className="report-group-label">{title as string}</p>{(items as typeof qa.rows).map(r => <button className={"report-row " + (qa.selected === r.id && view === "current" ? "selected" : "")} key={r.id} onClick={() => open(r.id)}><span>{r.preview.slice(0, 52)}<small>{r.execution_status.replaceAll("_", " ")} · {r.mode === "demo" ? "Legacy fixture" : "AI"}</small></span></button>)}</section>)}
         </nav>
         {qa.listError && <p className="error" role="status">Report list unavailable. Reconnecting…</p>}
         <p className="scope-footer">Unsubmitted text stays in this tab.<br/>Submitted reviews are saved.</p>
@@ -93,7 +83,7 @@ export default function App() {
       <main className="review-workspace" hidden={view !== "current"}>
         <div className="input-pane">
           <div className="section-heading"><h1>{qa.draft ? "New review" : "Report review"}</h1></div>
-          <ReviewContext review={qa.review} hasText={Boolean(qa.report.trim())} edited={qa.edited} disconnected={qa.disconnected} pasted={pasted} uncertain={qa.locked && !qa.busy} restore={qa.restore} error={qa.error} precheck={reportPrecheck}/>
+          <ReviewContext review={qa.review} hasText={Boolean(qa.report.trim())} edited={qa.edited} disconnected={qa.disconnected} pasted={pasted} uncertain={qa.locked && !qa.busy} restore={qa.restore} error={qa.error}/>
           <form className="input-section" onSubmit={e => {e.preventDefault(); if (qa.draft) void qa.submit(); else qa.reviewAgain();}}>
             <textarea id="report-text" aria-label="Report text" value={qa.report} readOnly={qa.locked || qa.busy} onPaste={() => setPasted(true)} onChange={e => {if (e.nativeEvent instanceof InputEvent && e.nativeEvent.inputType !== "insertFromPaste") setPasted(false); qa.editReport(e.target.value);}} maxLength={40000} rows={7} spellCheck={false} aria-describedby="input-help" placeholder="Paste your report, including Findings and Impression."/>
             <div className="input-actions"><ReviewJourney review={qa.review} edited={qa.edited} busy={qa.busy} disconnected={qa.disconnected}/>

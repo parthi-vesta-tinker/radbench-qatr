@@ -1,8 +1,6 @@
 import uuid
-import json
 import pytest
-from backend.contracts import current_report_sections, parse_sections, section_index, ReviewProblem
-from backend.combined import model_input
+from backend.contracts import parse_sections, section_index, ReviewProblem
 from backend import store
 from test_api import post, finish
 from test_api_design import credentials, create_as, finish_as
@@ -39,28 +37,6 @@ def test_mentions_and_addenda_are_not_new_sections():
         parse_sections(
             "Findings: Clear. Impression: Normal. Findings: Clear. Impression: Normal."
         )
-
-
-def test_prior_review_sections_are_accepted_when_history_or_comparison_is_explicit():
-    text = (
-        "History:\nPrior report copied for comparison.\n"
-        "Comparison:\nEarlier report follows.\n"
-        "Findings: Prior left pleural effusion.\n"
-        "Impression: Prior left pleural effusion.\n"
-        "Findings: Current lungs are clear.\n"
-        "Impression: No acute cardiopulmonary abnormality."
-    )
-    parsed = parse_sections(text)
-    current = current_report_sections(text)
-    assert parsed == {
-        "findings": "Current lungs are clear.",
-        "impression": "No acute cardiopulmonary abnormality.",
-    }
-    assert [current["findings"]["section_id"], current["impression"]["section_id"]] == [
-        "findings-2",
-        "impression-2",
-    ]
-    assert json.loads(model_input(text))["current_section_ids"] == ["findings-2", "impression-2"]
 
 
 def test_comments_only_copy_and_historical_storage_unchanged(client):

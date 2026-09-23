@@ -12,19 +12,10 @@ Install Python 3.11+, `uv`, and Node.js 22 LTS, then:
 
 ```sh
 uv sync --locked
-copy .env.example .env
-npm run demo
+uv run python scripts/run_local.py --model gpt-5.6-sol
 ```
 
-`npm run demo` builds the browser app when needed, starts FastAPI and DBOS, and runs controlled local examples without an OpenAI API key. Open the address printed in the terminal, normally `http://127.0.0.1:8000`.
-
-For a real provider review, run:
-
-```sh
-npm run live
-```
-
-It builds the browser app when needed and prompts for the OpenAI API key only for that process; it does not save the key. Set the optional `QA_LOCAL_OPERATOR_NAME` in `.env` when you want Review History to show who submitted local reviews. See [the live provider session instructions](LOCAL_TESTING.md#live-provider-session). Controlled tests and demo mode make no paid provider call.
+The launcher builds a missing frontend and prompts for an API key without saving it. See [the live provider session instructions](LOCAL_TESTING.md#live-provider-session). Controlled tests and the demo path make no paid provider call.
 
 ## Current architecture
 
