@@ -4,6 +4,16 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
 
 ## Implemented
 
+- **Review History and prior-review input:** history supports practical filters, quick submitted
+  time ranges, compact IDs, operator, latest submission time, comments and feedback dialogs, and
+  20-item pages. Re-review replaces the same current record. Explicit History/Comparison context
+  permits a prior Findings/Impression pair while unmarked duplicate reports remain blocked before
+  a provider request. New Review gives one actionable pre-check message with a warning icon.
+  The reports rail is single-line and scrollable. `npm run demo` and `npm run live` are documented,
+  including optional local operator configuration. Verification: 18 focused backend tests, 24 DOM
+  tests, production build, generated-contract checks and documentation checks passed; no provider
+  call was made.
+
 - **Copy presentation:** aligned buttons, PACS comments naming, unnumbered comments and clipboard text, no success message. Build, 21 backend and 22 component tests plus responsive clipboard browser checks passed.
 
 - **Service health redesign:** compact summary and timestamped refresh, actionable disclosure, consistent check rows and inline OpenAI probe. Build, 22 component tests and 5 diagnostics/header browser tests passed; responsive screenshots checked. No API change or real provider calls.
