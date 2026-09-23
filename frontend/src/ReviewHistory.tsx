@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api, describeError } from './api';
 import type { FeedbackRecord, ReviewComments, ReviewSummary } from './types';
 import { StatusPill } from './statusPill';
@@ -17,6 +17,11 @@ function rangeStart(range: Exclude<QuickRange, 'all' | 'custom'>) {
 function displayTime(value: string) {
   const date = new Date(value);
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleString();
+}
+
+function localDateTime(value: Date) {
+  const pad = (part: number) => String(part).padStart(2, '0');
+  return { date: `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`, time: `${pad(value.getHours())}:${pad(value.getMinutes())}` };
 }
 
 function CommentDialog({ modal, close }: { modal: Exclude<Modal, null>; close: () => void }) {
@@ -48,6 +53,11 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
   const [quickRange, setQuickRange] = useState<QuickRange>('all');
   const [submittedAfter, setSubmittedAfter] = useState('');
   const [submittedBefore, setSubmittedBefore] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [fromTime, setFromTime] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [toTime, setToTime] = useState('');
+  const rangeDialog = useRef<HTMLDialogElement>(null);
   const [rows, setRows] = useState<ReviewSummary[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [after, setAfter] = useState('');
@@ -77,12 +87,40 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
 
   function reset() { setAfter(''); setRows([]); setCursor(null); }
   function applyFilters(change: () => void) { reset(); change(); }
+  function openRangeDialog() {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const source = quickRange === 'custom' && submittedAfter && submittedBefore
+      ? { from: new Date(submittedAfter), to: new Date(submittedBefore) }
+      : { from: weekAgo, to: now };
+    const from = localDateTime(source.from);
+    const to = localDateTime(source.to);
+    setFromDate(from.date); setFromTime(from.time);
+    setToDate(to.date); setToTime(to.time);
+    rangeDialog.current?.showModal();
+  }
   function chooseRange(next: QuickRange) {
+    if (next === 'custom') {
+      openRangeDialog();
+      return;
+    }
     applyFilters(() => {
       setQuickRange(next);
       if (next === 'all') { setSubmittedAfter(''); setSubmittedBefore(''); }
-      else if (next !== 'custom') { setSubmittedAfter(rangeStart(next)); setSubmittedBefore(''); }
+      else { setSubmittedAfter(rangeStart(next)); setSubmittedBefore(''); }
     });
+  }
+  const customStart = new Date(`${fromDate}T${fromTime}`).getTime();
+  const customEnd = new Date(`${toDate}T${toTime}`).getTime();
+  const validCustomRange = Number.isFinite(customStart) && Number.isFinite(customEnd) && customStart < customEnd;
+  function applyCustomRange() {
+    if (!validCustomRange) return;
+    applyFilters(() => {
+      setQuickRange('custom');
+      setSubmittedAfter(new Date(customStart).toISOString());
+      setSubmittedBefore(new Date(customEnd).toISOString());
+    });
+    rangeDialog.current?.close();
   }
   async function openComments(row: ReviewSummary) {
     try { setModal({ kind: 'comments', row, data: await api.comments(row.id) }); }
@@ -95,15 +133,20 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
 
   return <main className="history-pane">
     <div className="section-heading"><div><h1>Review history</h1><p className="meta">Latest submitted reviews, comments, and recorded feedback.</p></div></div>
-    <form className="history-filters" onSubmit={event => { event.preventDefault(); applyFilters(() => { setQuery(search.trim()); setRefresh(value => value + 1); }); }}>
+    <form className="history-filters review-history-filters" onSubmit={event => { event.preventDefault(); applyFilters(() => { setQuery(search.trim()); setRefresh(value => value + 1); }); }}>
       <label>Search reports<input type="search" value={search} maxLength={200} onChange={event => setSearch(event.target.value)} placeholder="Report text or review ID" /></label>
       <button type="submit">Search</button>
       <label>Status<select value={status} onChange={event => applyFilters(() => setStatus(event.target.value))}><option value="">All statuses</option><option value="completed">Completed</option><option value="running">Running</option><option value="queued">Queued</option><option value="needs_input">Input needed</option><option value="failed">Failed</option></select></label>
       <label>Result<select value={result} onChange={event => applyFilters(() => setResult(event.target.value))}><option value="">All results</option><option value="critical">Critical comments</option><option value="observations">With comments</option><option value="no_observations">No comments</option></select></label>
       <label>Feedback<select value={feedback} onChange={event => applyFilters(() => setFeedback(event.target.value))}><option value="">Any feedback status</option><option value="true">Feedback recorded</option><option value="false">No feedback yet</option></select></label>
-      <label>Submitted<select aria-label="Submitted time range" value={quickRange} onChange={event => chooseRange(event.target.value as QuickRange)}><option value="all">Any time</option><option value="24h">Last 24 hours</option><option value="3d">Last 3 days</option><option value="7d">Last 7 days</option><option value="custom">Custom range</option></select></label>
-      {quickRange === 'custom' && <span className="history-custom-range"><label>From<input aria-label="Submitted after" type="datetime-local" value={submittedAfter ? submittedAfter.slice(0, 16) : ''} onChange={event => applyFilters(() => setSubmittedAfter(event.target.value ? new Date(event.target.value).toISOString() : ''))} /></label><label>To<input aria-label="Submitted before" type="datetime-local" value={submittedBefore ? submittedBefore.slice(0, 16) : ''} onChange={event => applyFilters(() => setSubmittedBefore(event.target.value ? new Date(event.target.value).toISOString() : ''))} /></label></span>}
+      <div className="history-date-filter"><label>Date &amp; time<select aria-label="Date and time range" value={quickRange} onChange={event => chooseRange(event.target.value as QuickRange)}><option value="all">Any time</option><option value="24h">Last 24 hours</option><option value="3d">Last 3 days</option><option value="7d">Last 7 days</option><option value="custom">Custom range</option></select></label>{quickRange === 'custom' && <button className="history-edit-range" type="button" onClick={openRangeDialog}>Edit range</button>}</div>
     </form>
+    <dialog className="history-range-dialog" ref={rangeDialog} aria-labelledby="history-range-title">
+      <div className="history-range-heading"><div><h2 id="history-range-title">Custom date &amp; time</h2><p className="meta">Filter reviews by the time they were submitted. Times are local.</p></div><button type="button" aria-label="Close custom range" onClick={() => rangeDialog.current?.close()}>Close</button></div>
+      <div className="history-range-fields"><fieldset><legend>From</legend><label>Date<input aria-label="From date" type="date" value={fromDate} onChange={event => setFromDate(event.target.value)} /></label><label>Time<input aria-label="From time" type="time" step="60" value={fromTime} onChange={event => setFromTime(event.target.value)} /></label></fieldset><fieldset><legend>To</legend><label>Date<input aria-label="To date" type="date" value={toDate} onChange={event => setToDate(event.target.value)} /></label><label>Time<input aria-label="To time" type="time" step="60" value={toTime} onChange={event => setToTime(event.target.value)} /></label></fieldset></div>
+      {!validCustomRange && <p className="error" role="alert">Enter a From date and time before the To date and time.</p>}
+      <div className="history-range-actions"><button type="button" onClick={() => rangeDialog.current?.close()}>Cancel</button><button className="primary" type="button" disabled={!validCustomRange} onClick={applyCustomRange}>Apply range</button></div>
+    </dialog>
     {error && <p className="error" role="alert">{error} <button onClick={() => setRefresh(value => value + 1)}>Retry history</button></p>}
     <div className="history-table review-history-table" role="region" aria-label="Saved reviews" tabIndex={0}><table><thead><tr><th>Review</th><th>Description</th><th>Submitted by</th><th>Last submitted</th><th>Status</th><th>Comments</th><th>Feedback</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}>
       <td data-label="Review"><button className="report-link review-short-id" disabled={busy || loading} onClick={() => openReview(row.id)}>{row.display_id}</button><span className="meta">{row.mode === 'demo' ? 'Demo' : 'AI'}</span></td>
