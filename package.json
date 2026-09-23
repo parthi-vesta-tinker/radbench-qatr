@@ -1,0 +1,12 @@
+{
+  "name": "vesta-report-qa-local",
+  "private": true,
+  "scripts": {
+    "start": "uv run python scripts/run_local.py",
+    "demo": "uv run python scripts/run_local.py --mode demo",
+    "live": "uv run python scripts/run_local.py --mode openai",
+    "test:backend": "uv run pytest -q",
+    "test:ui": "npm --prefix frontend run test:dom",
+    "build": "npm --prefix frontend run build"
+  }
+}

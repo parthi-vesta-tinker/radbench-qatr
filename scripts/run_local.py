@@ -73,24 +73,28 @@ def main():
 
     load_dotenv(ROOT / ".env")
     parser = argparse.ArgumentParser(
-        description="Build and run Vesta QA locally with real OpenAI reviews."
+        description="Build and run Vesta QA locally in demo or live OpenAI mode.",
+        allow_abbrev=False,
     )
+    parser.add_argument("--mode", choices=("demo", "openai"), default="openai")
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL") or "gpt-6-astra")
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
     ensure_frontend()
-    os.environ["QA_MODE"] = "openai"
-    os.environ["OPENAI_MODEL"] = args.model
-    if not os.environ.get("OPENAI_API_KEY"):
-        key = getpass.getpass(
-            "OpenAI API key (hidden; used only for this process): "
-        ).strip()
-        if not key:
-            raise SystemExit("An API key is required for real AI review.")
-        os.environ["OPENAI_API_KEY"] = key
-    print(
-        f"Open http://127.0.0.1:{args.port} - Live OpenAI: {args.model}", flush=True
-    )
+    os.environ["QA_MODE"] = args.mode
+    if args.mode == "openai":
+        os.environ["OPENAI_MODEL"] = args.model
+        if not os.environ.get("OPENAI_API_KEY"):
+            key = getpass.getpass(
+                "OpenAI API key (hidden; used only for this process): "
+            ).strip()
+            if not key:
+                raise SystemExit("An API key is required for real AI review.")
+            os.environ["OPENAI_API_KEY"] = key
+        label = f"Live OpenAI: {args.model}"
+    else:
+        label = "Demo mode: controlled local examples; no OpenAI request"
+    print(f"Open http://127.0.0.1:{args.port} - {label}", flush=True)
     print(f"Component status: http://127.0.0.1:{args.port}/api/v1/status", flush=True)
     print("Stop with Ctrl+C. Reports and feedback persist locally in QA_DATA_DIR.")
     import uvicorn
