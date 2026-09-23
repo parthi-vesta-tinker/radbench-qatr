@@ -268,12 +268,52 @@ test('review history filters by submission time and opens comments without openi
   await mount();await click('Review history');
   assert.match(document.querySelector('.history-pane')!.textContent!,/ABCDE/);
   assert.match(document.querySelector('.history-pane')!.textContent!,/Not recorded/);
-  await choose('Submitted','24h');
+  await choose('Date & time','24h');
   assert.ok(new URLSearchParams(queries.at(-1)).has('submitted_after'));
   await click('1 PACS · 0 critical');
   assert.match(document.querySelector('.history-modal')!.textContent!,/Controlled PACS comment/);
   assert.equal(document.querySelector('#report-text')?.getAttribute('value'),null);
   await click('Close history dialog');
+});
+
+test('custom date and time range opens a popup and applies only after confirmation',async()=>{
+  const queries:string[]=[];
+  api.history=async query=>{queries.push(query);return {items:[],has_more:false,next_cursor:null};};
+  await mount();await click('Review history');
+  await choose('Date & time','custom');
+  const dialog=document.querySelector('.history-range-dialog') as HTMLDialogElement;
+  assert.equal(dialog.open,true);
+  assert.equal(document.querySelector('.review-history-filters .history-custom-range'),null);
+  assert.equal(dialog.querySelectorAll('input[type="time"]').length,2);
+  const initialQueries=queries.length;
+  await act(async()=>{
+    const to=document.querySelector('[aria-label="To date"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(to,'2020-01-01');
+    to.dispatchEvent(new window.Event('input',{bubbles:true}));
+  });
+  assert.equal(queries.length,initialQueries);
+  assert.equal(button('Apply range').disabled,true);
+  await act(async()=>{
+    const from=document.querySelector('[aria-label="From date"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(from,'2019-12-31');
+    from.dispatchEvent(new window.Event('input',{bubbles:true}));
+    const fromClock=document.querySelector('[aria-label="From time"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(fromClock,'09:30');
+    fromClock.dispatchEvent(new window.Event('input',{bubbles:true}));
+    const toClock=document.querySelector('[aria-label="To time"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(toClock,'18:45');
+    toClock.dispatchEvent(new window.Event('input',{bubbles:true}));
+  });
+  assert.equal(button('Apply range').disabled,false);
+  await click('Apply range');
+  assert.equal(dialog.open,false);
+  const params=new URLSearchParams(queries.at(-1));
+  assert.equal(params.get('submitted_after'),new Date('2019-12-31T09:30').toISOString());
+  assert.equal(params.get('submitted_before'),new Date('2020-01-01T18:45').toISOString());
+  await click('Edit range');
+  assert.equal(dialog.open,true);
+  await click('Cancel');
+  assert.equal(dialog.open,false);
 });
 
 test('panel preferences preserve drafts and unsaved Skills content',async()=>{

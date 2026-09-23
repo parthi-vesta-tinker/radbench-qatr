@@ -1108,6 +1108,29 @@ textarea::placeholder {color:var(--muted);}
 .history-pane button,.history-pane input,.history-pane select {font-size:14px;}
 .history-pane button:not(.linklike):not(.report-link) {min-height:36px;}
 .history-pane .history-filters {gap:12px;margin:0 0 24px;padding:16px;background:var(--soft);border:1px solid var(--line);border-radius:8px;}
+.history-pane .review-history-filters {display:grid;grid-template-columns:minmax(190px,2fr) auto repeat(3,minmax(125px,1fr)) minmax(165px,1.2fr);align-items:end;}
+.review-history-filters > label {min-width:0;}
+.review-history-filters .history-date-filter {min-width:0;}
+.review-history-filters .history-date-filter > label {display:grid;gap:6px;min-width:0;font-size:13px;font-weight:500;}
+.history-date-filter .history-edit-range {margin-top:6px;padding:0;border:0;background:transparent;color:var(--text);text-decoration:underline;font-size:12px;min-height:22px;}
+.history-range-dialog {width:min(540px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:24px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);box-shadow:0 20px 60px rgb(0 0 0 / 20%);}
+.history-range-dialog::backdrop {background:rgb(0 0 0 / 45%);}
+.history-range-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;}
+.history-range-heading h2 {margin:0 0 4px;}
+.history-range-heading p {margin:0;}
+.history-range-fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+.history-range-fields fieldset {min-width:0;margin:0;padding:14px;border:1px solid var(--line);border-radius:8px;}
+.history-range-fields legend {padding:0 4px;font-size:13px;font-weight:600;}
+.history-range-fields label {display:grid;gap:5px;margin:4px 0 12px;font-size:13px;font-weight:500;}
+.history-range-fields label:last-child {margin-bottom:0;}
+.history-range-fields input {width:100%;min-width:0;min-height:38px;padding:6px 8px;border:1px solid var(--control-border);border-radius:4px;background:var(--surface);color:var(--text);font:inherit;}
+.history-range-actions {display:flex;justify-content:flex-end;gap:10px;margin-top:24px;}
+@media(max-width:1000px) and (min-width:651px) {
+ .history-pane .review-history-filters {grid-template-columns:repeat(3,minmax(0,1fr));}
+ .review-history-filters > label:first-child {grid-column:span 2;}
+ .review-history-filters > button {grid-column:3;}
+ .review-history-filters .history-date-filter {grid-column:1 / -1;}
+}
 .history-filters label {min-width:0;flex:1 1 150px;font-size:13px;font-weight:500;}
 .history-filters label:first-child:has(input) {flex-basis:240px;}
 .history-filters input,.history-filters select {width:100%;min-width:0;min-height:38px;background:var(--surface);border-color:var(--control-border);font-weight:400;}
@@ -1135,6 +1158,9 @@ textarea::placeholder {color:var(--muted);}
 @media(max-width:650px) {
  .history-pane > .section-heading {gap:12px;margin-bottom:20px;}
  .history-pane .history-filters {padding:12px;gap:12px;}
+ .history-pane .review-history-filters {display:grid;grid-template-columns:minmax(0,1fr);}
+ .history-range-dialog {padding:16px;}
+ .history-range-fields {grid-template-columns:minmax(0,1fr);gap:12px;}
  .history-filters label,.history-filters label:first-child:has(input) {flex-basis:100%;}
  .history-pane button:not(.linklike):not(.report-link),.history-filters input,.history-filters select {min-height:44px;}
  .review-history-table table,.review-history-table tbody,.review-history-table tr,.review-history-table td {display:block;}
@@ -1232,8 +1258,6 @@ button.primary:hover:not(:disabled) {background:var(--muted);border-color:var(--
 
 /* Review History: dense, black-and-white operational list. */
 .history-pane .history-filters { align-items:end; }
-.history-custom-range { display:flex; gap:8px; flex-wrap:wrap; }
-.history-custom-range label { min-width:150px; }
 .review-history-table { overflow-x:auto; }
 .review-history-table table { min-width:940px; width:100%; table-layout:fixed; }
 .review-history-table th:nth-child(1) { width:78px; }
