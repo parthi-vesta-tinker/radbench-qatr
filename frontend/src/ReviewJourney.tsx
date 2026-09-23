@@ -1,5 +1,6 @@
 import { Check, AlertTriangle, CircleX, LoaderCircle } from 'lucide-react';
 import type {Review} from './types';
+import type { Precheck } from './ReportReadiness';
 
 type JourneyProps = {review:Review|null; edited:boolean; busy:boolean; disconnected:boolean};
 export function ReviewJourney({review, edited, busy, disconnected}: JourneyProps) {
@@ -25,15 +26,16 @@ export function ReviewJourney({review, edited, busy, disconnected}: JourneyProps
   </nav>;
 }
 
-export function ReviewContext({review, hasText, edited, disconnected, pasted, uncertain, restore, error}: {
-  review:Review|null; hasText:boolean; edited:boolean; disconnected:boolean; pasted:boolean; uncertain:boolean; restore:()=>void; error:string;
+export function ReviewContext({review, hasText, edited, disconnected, pasted, uncertain, restore, error, precheck}: {
+  review:Review|null; hasText:boolean; edited:boolean; disconnected:boolean; pasted:boolean; uncertain:boolean; restore:()=>void; error:string; precheck:Precheck;
 }) {
   const issue = !edited && (review?.execution_status === 'failed' || review?.execution_status === 'needs_input');
   const completed = !edited && review?.execution_status === 'completed';
   const activeStep = review?.steps.find(s => ['running','failed','needs_input'].includes(s.status));
   const detail = error || (uncertain ? 'Submission not confirmed. Retry to check its status.' : disconnected ? 'Connection lost. Reconnecting to confirm progress.' : issue ? review?.error?.message :
-    edited ? 'Changes haven’t been reviewed. Comments below refer to the previous text.' : !review ? (hasText ? pasted ? 'Report pasted. Ready for review.' : 'Ready for review.' : 'Paste a report to begin.') :
+    edited ? 'Changes haven’t been reviewed. Comments below refer to the previous text.' : !review ? precheck.message :
     completed ? 'Output ready.' : activeStep?.step_id === 'output_validation' ? 'Validating output.' :
     activeStep?.step_id === 'comment_assembly' ? 'Assembling comments.' : review.execution_status === 'queued' ? 'Waiting to validate input.' : 'Review in progress.');
-  return <p className="meta review-context" id="input-help" role={issue || error ? "alert" : "status"}>{detail}{edited && <> <button className="linklike" type="button" onClick={restore}>Restore reviewed text</button></>}</p>;
+  const warning = Boolean(error || issue || precheck.level === 'warning');
+  return <p className={`meta review-context${warning ? ' warning' : ''}`} id="input-help" role={warning ? "alert" : "status"}>{warning && <AlertTriangle aria-hidden="true"/>}{detail}{edited && <> <button className="linklike" type="button" onClick={restore}>Restore reviewed text</button></>}</p>;
 }
