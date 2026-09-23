@@ -108,7 +108,7 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
   }
   const customStart = new Date(`${fromDate}T${fromTime}`).getTime();
   const customEnd = new Date(`${toDate}T${toTime}`).getTime();
-  const validCustomRange = Number.isFinite(customStart) && Number.isFinite(customEnd) && customStart <= customEnd;
+  const validCustomRange = Number.isFinite(customStart) && Number.isFinite(customEnd) && customStart < customEnd;
   function applyCustomRange() {
     if (!validCustomRange) return;
     applyFilters(() => {

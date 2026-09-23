@@ -305,6 +305,25 @@ test('custom date and time range opens a popup and applies only after confirmati
     toClock.dispatchEvent(new window.Event('input',{bubbles:true}));
   });
   assert.equal(button('Apply range').disabled,false);
+  await act(async()=>{
+    const to=document.querySelector('[aria-label="To date"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(to,'2019-12-31');
+    to.dispatchEvent(new window.Event('input',{bubbles:true}));
+    const toClock=document.querySelector('[aria-label="To time"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(toClock,'09:30');
+    toClock.dispatchEvent(new window.Event('input',{bubbles:true}));
+  });
+  assert.equal(button('Apply range').disabled,true);
+  assert.match(dialog.textContent!,/before the To date and time/);
+  await act(async()=>{
+    const to=document.querySelector('[aria-label="To date"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(to,'2020-01-01');
+    to.dispatchEvent(new window.Event('input',{bubbles:true}));
+    const toClock=document.querySelector('[aria-label="To time"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(toClock,'18:45');
+    toClock.dispatchEvent(new window.Event('input',{bubbles:true}));
+  });
+  assert.equal(button('Apply range').disabled,false);
   await click('Apply range');
   assert.equal(dialog.open,false);
   const params=new URLSearchParams(queries.at(-1));
