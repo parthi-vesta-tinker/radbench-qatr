@@ -265,14 +265,14 @@ def assemble(stage_results: dict, report_text: str) -> dict:
 
     def lines(items):
         return (
-            "\n".join(f"{i}. {x['comment']}" for i, x in enumerate(items, 1))
+            "\n\n".join(x["comment"] for x in items)
             if items
             else "None."
         )
 
     copy_text = ""
     if general or critical:
-        copy_text = f"General Comments:\n{lines(general)}\n\nCritical Findings missed flag: {missed_label}\n\nCritical Findings comments:\n{lines(critical)}"
+        copy_text = f"PACS comments:\n{lines(general)}\n\nCritical Findings missed flag: {missed_label}\n\nCritical Findings comments:\n{lines(critical)}"
     return dict(
         result_version=1,
         outcome="observations" if general or critical else "no_observations",
@@ -283,7 +283,7 @@ def assemble(stage_results: dict, report_text: str) -> dict:
         general_comments=general,
         critical_comments=critical,
         copy_text=copy_text,
-        general_copy_text=f"General Comments:\n{lines(general)}"
+        general_copy_text=f"PACS comments:\n{lines(general)}"
         if general
         else "",
         critical_copy_text=f"Critical Findings missed flag: {missed_label}\n\nCritical Findings comments:\n{lines(critical)}"

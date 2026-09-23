@@ -49,8 +49,13 @@ def test_comments_only_copy_and_historical_storage_unchanged(client):
     assert "missed flag" in stored["result"]["copy_text"]
     assert stored["input"] == review["input"]
     from backend import presentation
-    stored['result'].pop('general_copy_text', None)
-    assert presentation.review(stored)['result']['general_copy_text'].startswith('General Comments:')
+    stored['result']['general_copy_text'] = 'QA review:\n\nGeneral Comments:\n1. Old formatting'
+    projected = presentation.review(stored)['result']
+    for field in ('general_copy_text', 'comments_copy_text', 'critical_comments_copy_text'):
+        assert 'QA review' not in projected[field]
+        assert all(not line.split('. ', 1)[0].isdigit() for line in projected[field].splitlines() if '. ' in line)
+    assert projected['general_copy_text'] == 'PACS comments:\n' + '\n\n'.join(x['comment'] for x in stored['result']['general_comments'])
+    assert presentation.review(stored)['result']['general_copy_text'].startswith('PACS comments:')
 
 
 def test_history_filters_pagination_feedback_and_restart_reads(client):

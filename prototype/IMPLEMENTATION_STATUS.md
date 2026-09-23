@@ -4,6 +4,8 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
 
 ## Implemented
 
+- **Copy presentation:** aligned buttons, PACS comments naming, unnumbered comments and clipboard text, no success message. Build, 21 backend and 22 component tests plus responsive clipboard browser checks passed.
+
 - **Service health redesign:** compact summary and timestamped refresh, actionable disclosure, consistent check rows and inline OpenAI probe. Build, 22 component tests and 5 diagnostics/header browser tests passed; responsive screenshots checked. No API change or real provider calls.
 
 - **Combined pre-commit verification:** 135 backend and 22 component tests passed. Browser suite: 15 passed; one stale feedback-location selector corrected, then all 3 panel checks passed. Build, generated contracts, docs and bundle checks passed.

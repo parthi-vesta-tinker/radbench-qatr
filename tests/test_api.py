@@ -57,11 +57,11 @@ def test_report_only_results(client, sample, missed, critical, status, outcome):
     if outcome == "no_observations":
         assert not r["copy_text"]
     else:
-        assert r["copy_text"].startswith("General Comments:")
+        assert r["copy_text"].startswith("PACS comments:")
         label = "Cannot determine" if missed is None else "Yes" if missed else "No"
         assert "Critical Findings missed flag: " + label in r["copy_text"]
         assert (
-            r["copy_text"].index("General Comments:")
+            r["copy_text"].index("PACS comments:")
             < r["copy_text"].index("Critical Findings missed flag:")
             < r["copy_text"].index("Critical Findings comments:")
         )

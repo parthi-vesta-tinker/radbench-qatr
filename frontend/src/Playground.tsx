@@ -160,7 +160,7 @@ export function Playground({ active, openSkills }: { active: boolean; openSkills
           <h3>Results</h3>
           {run.error && <p className="error" role="alert">{String((run.error as {message?: string}).message ?? 'The run did not finish.')} [{String((run.error as {code?: string}).code ?? '')}]</p>}
           {run.status === 'completed' && result && <>
-            <h4>General comments</h4>
+            <h4>PACS comments</h4>
             {result.general_comments?.length
               ? <ol className="playground-comments">{result.general_comments.map(c => <li key={c.observation_id}>{c.comment}</li>)}</ol>
               : <p className="meta">None.</p>}

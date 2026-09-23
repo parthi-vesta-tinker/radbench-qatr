@@ -69,8 +69,8 @@
     },
     {
       "path": "backend/contracts.py",
-      "bytes": 15009,
-      "sha256": "7d3483309d8190bfd03d43bdc1129937df166f723778a80644c98784540af0ee"
+      "bytes": 14978,
+      "sha256": "71f6d9d0b07fb2dc05badd58a174bf7cb86151c505bf50b7ac8a30f48e89ee85"
     },
     {
       "path": "backend/diagnostics.py",
@@ -99,8 +99,8 @@
     },
     {
       "path": "backend/presentation.py",
-      "bytes": 3355,
-      "sha256": "de8a2ff5e44930a6a017c6a4985362a2d7f2372c0b6677e3ed0c250b4a35a2e4"
+      "bytes": 3324,
+      "sha256": "e50d68901dc4c87c19e998cfce9bc35b58a2f70f39d613aa58e0ea9e6949c927"
     },
     {
       "path": "backend/records.py",
@@ -214,8 +214,8 @@
     },
     {
       "path": "frontend/src/Playground.tsx",
-      "bytes": 8805,
-      "sha256": "165cc9ee3567ea036a6d798ead44be4b386f33c3381827cb0d2682a2720af34f"
+      "bytes": 8802,
+      "sha256": "c9f3346b7f2457a498c45a687ed21421cd316e92c470653f1832631445f6e709"
     },
     {
       "path": "frontend/src/ReviewHistory.tsx",
@@ -229,8 +229,8 @@
     },
     {
       "path": "frontend/src/ReviewOutput.tsx",
-      "bytes": 4176,
-      "sha256": "5a16de080ea8b8286210a5ddaf7ef7fd92fb765d51de53a794d2994ea968c461"
+      "bytes": 4377,
+      "sha256": "64c766d894bb88fbda57e4eb65468f0910f6e230d07366e0cbf65b6fd611a5cb"
     },
     {
       "path": "frontend/src/SkillsKnowledge.tsx",
@@ -279,8 +279,8 @@
     },
     {
       "path": "frontend/src/style.css",
-      "bytes": 53217,
-      "sha256": "f9d49a199a5e89db46fe5cae19b4b7dbc6ee4b041e2e3af60d60182dceb41bd3"
+      "bytes": 53739,
+      "sha256": "64624917df12f54e90fc74546ddf9e2928dfff2da9730ed17d2abf90c6890789"
     },
     {
       "path": "frontend/src/types.ts",
@@ -304,8 +304,8 @@
     },
     {
       "path": "frontend/tests/f3.spec.ts",
-      "bytes": 1725,
-      "sha256": "70a0bad5ee017e4d0f255291683212cf8a9a17da7ae5d1b9fd68523cd23ad4be"
+      "bytes": 2994,
+      "sha256": "5f01fa8e4b7ac65086ddd3824cb40f64e85c43c99445e0843bf400e239e93618"
     },
     {
       "path": "frontend/tests/header.spec.ts",
@@ -369,8 +369,8 @@
     },
     {
       "path": "prototype/BLUEPRINT.html",
-      "bytes": 106876,
-      "sha256": "61e1c7d5332a36c60ed18eac65f0dee26aa6b9056c10a4acf105397dbdb927f4"
+      "bytes": 108325,
+      "sha256": "8be84eef1b7a26274b591e1ab891837060c36458640a7bc2372c165712c4b17e"
     },
     {
       "path": "prototype/DBOS_VALIDATION.md",
@@ -379,8 +379,8 @@
     },
     {
       "path": "prototype/FOUNDATION_CHANGELOG.md",
-      "bytes": 26603,
-      "sha256": "a67eac2237849cb67e0ddff1667b5412503353eb1bb139ebabed0bec6f426bb2"
+      "bytes": 27441,
+      "sha256": "44bbe9584b1661efbb41b467b8862b54977cd75bf293d36a1bd68336d90d7a4d"
     },
     {
       "path": "prototype/FOUNDATION_PLAN.md",
@@ -389,8 +389,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 15499,
-      "sha256": "7556ca5f09d73b54a4bb0d22c1433966074a5d26f1f883a73436a4df3f0748d5"
+      "bytes": 15714,
+      "sha256": "b3288573a18278b3ab6f0d88494ca7b9b5ad28ab01a2d5242497e828cd097d75"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",
@@ -419,8 +419,8 @@
     },
     {
       "path": "prototype/WORKSPACE_SPEC.md",
-      "bytes": 8807,
-      "sha256": "d7b3ca7a1a545cbbfb9410b0e4f10c1968d8bf33a05bb1f940ba989a6fc8ce22"
+      "bytes": 9099,
+      "sha256": "a6d2c79fb6081cc16c23e58e00750a20c7f77984f5c666fb096382cf26222ef5"
     },
     {
       "path": "prototype/assets/ui-research/after-analytics-desktop.png",
@@ -854,8 +854,8 @@
     },
     {
       "path": "tests/test_api.py",
-      "bytes": 5807,
-      "sha256": "70db6d74a89cd54cd59a2625d00086007c642c52b62e77bf1eb17578cc3db073"
+      "bytes": 5801,
+      "sha256": "6333f1932231539feee6c21a8d9f896193bf2ef236bc0940844e9e70af92ea3c"
     },
     {
       "path": "tests/test_api_design.py",
@@ -914,8 +914,8 @@
     },
     {
       "path": "tests/test_refinement.py",
-      "bytes": 4844,
-      "sha256": "ef693f4ecc80364be64d7506f5c38c000a9c9b21b385bc5322248f13f891a7e1"
+      "bytes": 5337,
+      "sha256": "4c5febe119a6129cca523bd39d054697e24fb367533966fe43944fec25e72597"
     },
     {
       "path": "tests/test_reporting.py",

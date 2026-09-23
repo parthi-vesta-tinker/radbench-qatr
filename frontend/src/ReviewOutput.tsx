@@ -25,7 +25,7 @@ export function ReviewOutput({
     if (!result || stale || disconnected || !text) return;
     try {
       await navigator.clipboard.writeText(text);
-      setCopyStatus("Copied.");
+      setCopyStatus("");
       setFallback("");
     } catch {
       setFallback(text);
@@ -39,11 +39,13 @@ export function ReviewOutput({
         {result?.outcome === "observations" && (
           <button
             type="button"
+            aria-label="Copy all comments"
+            className="copy-action"
             disabled={stale || disconnected || !result.comments_copy_text}
             onClick={() => void copy(result.comments_copy_text ?? "")}
           >
             <Copy size={16} />
-            Copy all comments
+            Copy all
           </button>
         )}
       </div>
@@ -64,32 +66,32 @@ export function ReviewOutput({
           ) : (
             <div className="comment-document">
               <div className="comment-section">
-                <div className="group-heading"><h3>General comments</h3><button type="button" disabled={stale || disconnected || !result.general_copy_text} onClick={() => void copy(result.general_copy_text ?? "")}><Copy size={14} />Copy general</button></div>
+                <div className="group-heading"><h3>PACS comments</h3><button type="button" className="copy-action" disabled={stale || disconnected || !result.general_copy_text} aria-label="Copy PACS comments" onClick={() => void copy(result.general_copy_text ?? "")}><Copy size={16} />Copy</button></div>
                 {result.general_comments.length ? (
-                  <ol>
+                  <ul className="comment-list" role="list">
                     {result.general_comments.map((o) => (
                       <li key={o.observation_id}>{o.comment}</li>
                     ))}
-                  </ol>
+                  </ul>
                 ) : (
                   <p className="meta">No comments.</p>
                 )}
               </div>
               <div className="comment-section">
-                <div className="group-heading"><h3>Critical findings</h3><button type="button" disabled={stale || disconnected || !result.critical_comments_copy_text} onClick={() => void copy(result.critical_comments_copy_text ?? "")}><Copy size={14} />Copy critical</button></div>
+                <div className="group-heading"><h3>Critical findings</h3><button type="button" className="copy-action" disabled={stale || disconnected || !result.critical_comments_copy_text} aria-label="Copy critical" onClick={() => void copy(result.critical_comments_copy_text ?? "")}><Copy size={16} />Copy</button></div>
                 {result.critical_comments.length ? (
-                  <ol>
+                  <ul className="comment-list" role="list">
                     {result.critical_comments.map((o) => (
                       <li key={o.observation_id}>{o.comment}</li>
                     ))}
-                  </ol>
+                  </ul>
                 ) : (
                   <p className="meta">No comments.</p>
                 )}
               </div>
             </div>
           )}
-          {result.outcome === "observations" && (
+          {copyStatus && (
             <p className="meta copy-note">
               <span role="status">{copyStatus}</span>
             </p>

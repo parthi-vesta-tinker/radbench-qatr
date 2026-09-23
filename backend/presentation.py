@@ -72,14 +72,14 @@ def review(record, version=API_VERSION):
         # Historical receipts and legacy copy fields remain unchanged.
         def lines(items):
             return (
-                "\n".join(f"{i}. {x['comment']}" for i, x in enumerate(items, 1))
+                "\n\n".join(x["comment"] for x in items)
                 or "None."
             )
 
         general, critical = result["general_comments"], result["critical_comments"]
-        result["general_copy_text"] = (f"General Comments:\n{lines(general)}" if general else "")
+        result["general_copy_text"] = (f"PACS comments:\n{lines(general)}" if general else "")
         result["comments_copy_text"] = (
-            f"General Comments:\n{lines(general)}\n\nCritical Findings comments:\n{lines(critical)}"
+            f"PACS comments:\n{lines(general)}\n\nCritical Findings comments:\n{lines(critical)}"
             if general or critical
             else ""
         )

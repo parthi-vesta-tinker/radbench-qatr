@@ -1,5 +1,17 @@
 # Foundation implementation decisions and releases
 
+## Copy alignment and PACS comments — 2026-09-22
+
+Align all three copy buttons with their headings using consistent sizing at desktop and
+phone widths. Rename General comments to PACS comments in the workspace, playground and
+copy formatting; omit display/copy numbering. Successful copy no longer emits a message.
+Clipboard failure still exposes a manual fallback. Historical UI copy projection regenerates
+text from observations, excluding old QA review prefixes and numbering without changing stored
+results or replay receipts. Internal general_comments field names remain compatible.
+Verification: production build, 21 affected backend tests, 22 component tests and the
+clipboard/reload browser scenario passed, including all three copy actions and alignment at
+1536/390/320px. Mobile screenshot inspected. No real-provider calls.
+
 ## Service health presentation redesign — 2026-09-22
 
 Apply the supplied Service Health Redesign Spec: timestamped header refresh, actionable

@@ -1222,3 +1222,9 @@ button.primary:hover:not(:disabled) {background:var(--muted);border-color:var(--
 .health-check-row:not(:last-child) dd {padding-right:34px;}
 .health-panel .health-check-row .icon-button {width:28px;height:28px;min-width:28px;min-height:28px;}
 .health-probe-result {margin:8px 0 0;font-size:12px;line-height:18px;overflow-wrap:anywhere;}
+
+.output > .section-heading,.output .group-heading {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;}
+.output > .section-heading h2,.output .group-heading h3 {margin:0;}
+.output button.copy-action {display:inline-flex;align-items:center;justify-content:center;gap:6px;width:92px;min-height:34px;padding:6px 10px;font-size:12px;line-height:20px;white-space:nowrap;}
+.output .comment-list {list-style:none;padding:0;margin:0;line-height:1.7;}
+.output .comment-list li+li {margin-top:12px;}
