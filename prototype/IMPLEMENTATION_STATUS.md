@@ -8,8 +8,13 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
   includes needs-input records while retaining the stored backend status. Results offers Any
   comments, General comments and Critical comments, with server-side filtering for the two comment
   groups. Feedback offers Any feedback and No feedback. The Date & time filter is unchanged.
-  Verification: 5 focused backend tests, 24 DOM tests, production build,
+  Verification: 5 focused backend tests, 25 DOM tests, production build,
   generated-contract checks and documentation checks passed.
+
+- **Review History table presentation:** column labels now use Review ID, Report description and
+  Submitted time. Completed and Failed use the same neutral, equal-size History-table label;
+  progress and system-status severity presentation is unchanged. Verification: 25 DOM tests and
+  production build passed. No API, storage or provider behavior changed.
 
 - **Review History and prior-review input:** history supports practical filters, quick submitted
   time ranges, compact IDs, operator, latest submission time, comments and feedback dialogs, and

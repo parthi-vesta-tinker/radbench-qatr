@@ -268,6 +268,9 @@ test('review history filters by submission time and opens comments without openi
   await mount();await click('Review history');
   assert.match(document.querySelector('.history-pane')!.textContent!,/ABCDE/);
   assert.match(document.querySelector('.history-pane')!.textContent!,/Not recorded/);
+  const headers=[...document.querySelectorAll('.review-history-table th')].map(header=>header.textContent);
+  assert.deepEqual(headers,['Review ID','Report description','Submitted by','Submitted time','Status','Comments','Feedback']);
+  assert.equal(document.querySelector('.history-status')?.textContent,'Completed');
   await choose('Submitted','24h');
   assert.ok(new URLSearchParams(queries.at(-1)).has('submitted_after'));
   await choose('Results','general');
@@ -297,6 +300,15 @@ test('review history presents needs-input rows as failed',async()=>{
   const table=document.querySelector('.review-history-table')!;
   assert.match(table.textContent!,/Failed/);
   assert.doesNotMatch(table.textContent!,/Needs input/);
+});
+
+test('review history uses one neutral status label style',async()=>{
+  const base={created_at:new Date().toISOString(),submitted_by:null,preview:'Findings: controlled history report. Impression: controlled.',outcome:null,general_count:0,critical_count:0,feedback_count:null,mode:'demo' as const};
+  api.history=async()=>({items:[{...base,id:'qr-complete',display_id:'COMPLETE',execution_status:'completed'},{...base,id:'qr-failed',display_id:'FAILED',execution_status:'failed'}],has_more:false,next_cursor:null});
+  await mount();await click('Review history');
+  const statuses=[...document.querySelectorAll('.history-status')];
+  assert.deepEqual(statuses.map(status=>status.textContent),['Completed','Failed']);
+  assert.ok(statuses.every(status=>status.className==='history-status'));
 });
 
 test('panel preferences preserve drafts and unsaved Skills content',async()=>{
