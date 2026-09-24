@@ -43,8 +43,8 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
-  const [result, setResult] = useState('');
-  const [feedback, setFeedback] = useState('');
+  const [result, setResult] = useState('any');
+  const [feedback, setFeedback] = useState('any');
   const [quickRange, setQuickRange] = useState<QuickRange>('all');
   const [submittedAfter, setSubmittedAfter] = useState('');
   const [submittedBefore, setSubmittedBefore] = useState('');
@@ -61,9 +61,10 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
     setLoading(true); setError('');
     const params = new URLSearchParams({ limit: '20' });
     if (query) params.set('q', query);
-    if (status) params.set('status', status);
-    if (result) params.set('comment_type', result);
-    if (feedback) params.set('has_feedback', feedback);
+    if (status === 'failed') params.set('status_group', 'failed_or_needs_input');
+    else if (status) params.set('status', status);
+    if (result !== 'any') params.set('comment_type', result);
+    if (feedback !== 'any') params.set('has_feedback', feedback);
     if (submittedAfter) params.set('submitted_after', submittedAfter);
     if (submittedBefore) params.set('submitted_before', submittedBefore);
     if (after) params.set('starting_after', after);
@@ -98,8 +99,8 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
       <label>Search reports<input type="search" value={search} maxLength={200} onChange={event => setSearch(event.target.value)} placeholder="Report text or review ID" /></label>
       <button type="submit">Search</button>
       <label>Status<select value={status} onChange={event => applyFilters(() => setStatus(event.target.value))}><option value="">All statuses</option><option value="completed">Completed</option><option value="failed">Failed</option></select></label>
-      <label>Results<select value={result} onChange={event => applyFilters(() => setResult(event.target.value))}><option value="">All results</option><option value="any">Any comments</option><option value="general">General comments</option><option value="critical">Critical comments</option></select></label>
-      <label>Feedback<select value={feedback} onChange={event => applyFilters(() => setFeedback(event.target.value))}><option value="">Feedback</option><option value="true">Any feedback</option><option value="false">No feedback</option></select></label>
+      <label>Results<select value={result} onChange={event => applyFilters(() => setResult(event.target.value))}><option value="any">Any comments</option><option value="general">General comments</option><option value="critical">Critical comments</option></select></label>
+      <label>Feedback<select value={feedback} onChange={event => applyFilters(() => setFeedback(event.target.value))}><option value="any">Any feedback</option><option value="false">No feedback</option></select></label>
       <label>Submitted<select aria-label="Submitted time range" value={quickRange} onChange={event => chooseRange(event.target.value as QuickRange)}><option value="all">Any time</option><option value="24h">Last 24 hours</option><option value="3d">Last 3 days</option><option value="7d">Last 7 days</option><option value="custom">Custom range</option></select></label>
       {quickRange === 'custom' && <span className="history-custom-range"><label>From<input aria-label="Submitted after" type="datetime-local" value={submittedAfter ? submittedAfter.slice(0, 16) : ''} onChange={event => applyFilters(() => setSubmittedAfter(event.target.value ? new Date(event.target.value).toISOString() : ''))} /></label><label>To<input aria-label="Submitted before" type="datetime-local" value={submittedBefore ? submittedBefore.slice(0, 16) : ''} onChange={event => applyFilters(() => setSubmittedBefore(event.target.value ? new Date(event.target.value).toISOString() : ''))} /></label></span>}
     </form>

@@ -272,8 +272,14 @@ test('review history filters by submission time and opens comments without openi
   assert.ok(new URLSearchParams(queries.at(-1)).has('submitted_after'));
   await choose('Results','general');
   assert.equal(new URLSearchParams(queries.at(-1)).get('comment_type'),'general');
+  await choose('Results','any');
+  assert.equal(new URLSearchParams(queries.at(-1)).has('comment_type'),false);
   await choose('Feedback','false');
   assert.equal(new URLSearchParams(queries.at(-1)).get('has_feedback'),'false');
+  await choose('Feedback','any');
+  assert.equal(new URLSearchParams(queries.at(-1)).has('has_feedback'),false);
+  await choose('Status','failed');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('status_group'),'failed_or_needs_input');
   const statusSelect=[...document.querySelectorAll('label')].find(label=>label.textContent?.startsWith('Status'))?.querySelector('select');
   assert.ok(statusSelect);
   const statusOptions=[...statusSelect.options].map(option=>option.value);

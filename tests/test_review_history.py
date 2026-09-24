@@ -87,11 +87,31 @@ def test_history_comment_type_filters_distinguish_general_and_critical_comments(
 
     general = create("general-only", True, False)
     critical = create("critical-only", False, True)
-    create("no-comments", False, False)
+    no_comments = create("no-comments", False, False)
 
-    assert {row["id"] for row in store.list_reviews("vesta", comment_type="any")[0]} == {general, critical}
+    assert {row["id"] for row in store.list_reviews("vesta", comment_type="any")[0]} == {general, critical, no_comments}
     assert [row["id"] for row in store.list_reviews("vesta", comment_type="general")[0]] == [general]
     assert [row["id"] for row in store.list_reviews("vesta", comment_type="critical")[0]] == [critical]
+
+
+def test_history_failed_filter_includes_needs_input(monkeypatch, tmp_path):
+    monkeypatch.setattr(store, "DATA", tmp_path)
+    store.init()
+
+    def create(key, status):
+        saved, _ = store.reserve(
+            "vesta", key, ReviewInput(report_text=f"Findings: {key}. Impression: {key}."), config()
+        )
+        review_id = saved["body"]["id"]
+        if status != "queued":
+            store.update("vesta", review_id, execution_status=status)
+        return review_id
+
+    failed = create("failed", "failed")
+    needs_input = create("needs-input", "needs_input")
+    create("queued", "queued")
+
+    assert {row["id"] for row in store.list_reviews("vesta", status_group="failed_or_needs_input")[0]} == {failed, needs_input}
 
 
 def test_comments_projection_exposes_observations_without_raw_report(monkeypatch, tmp_path):

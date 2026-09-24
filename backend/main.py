@@ -412,6 +412,7 @@ def list_reviews(
     q: Annotated[str, Query(max_length=200)] = "",
     status: Literal["queued", "running", "completed", "needs_input", "failed"]
     | None = None,
+    status_group: Literal["failed_or_needs_input"] | None = None,
     outcome: Literal["observations", "no_observations"] | None = None,
     critical: bool | None = None,
     comment_type: Literal["any", "general", "critical"] | None = None,
@@ -444,6 +445,7 @@ def list_reviews(
             starting_after,
             q.strip(),
             status,
+            status_group,
             outcome,
             critical,
             comment_type,

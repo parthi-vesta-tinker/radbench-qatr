@@ -671,6 +671,23 @@
             }
           },
           {
+            "name": "status_group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "failed_or_needs_input",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status Group"
+            }
+          },
+          {
             "name": "outcome",
             "in": "query",
             "required": false,
