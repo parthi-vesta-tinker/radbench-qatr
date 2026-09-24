@@ -33,7 +33,7 @@ Run canned demo behavior without a provider call:
 npm run demo
 ```
 
-The launcher builds the frontend when it is missing or stale, starts the combined local app, and uses `QA_MODE=demo`. It does not prompt for or call OpenAI. `.env.example` uses a fresh `.qa-data-local` folder so it does not reuse an older database. Set optional `QA_LOCAL_OPERATOR_NAME` there to display a local submitter in Review History.
+The launcher builds the frontend when it is missing or stale, starts the combined local app, and uses `RUN_MODE=demo`. It does not prompt for or call OpenAI. `.env.example` uses a fresh `.qa-data-local` folder so it does not reuse an older database. Set optional `QA_LOCAL_OPERATOR_NAME` there to display a local submitter in Review History.
 
 Use schema-8 storage. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are never automatically migrated or deleted.
 
@@ -43,22 +43,20 @@ Use schema-8 storage. To isolate a run, point `QA_DATA_DIR` at a new empty direc
 npm run live
 ```
 
-`npm run live` enables OpenAI review and JEV classification. Put the following values in
-the ignored `.env` file before starting it (replace the placeholders with your own keys):
+`npm run live` selects Live core review and requires `OPENAI_API_KEY` in the ignored
+`.env` or process environment. It does not prompt. JEV is optional and requires
+`TYPESAFE_API_KEY` when enabled. Access defaults to local; `ACCESS_MODE` controls it.
+Shell environment variables take precedence over `.env`.
 
-```dotenv
-OPENAI_API_KEY=your_openai_key
-TYPESAFE_API_KEY=your_typesafe_key
-```
-
-The launcher reads `.env` and does not prompt. It exits with a named missing-setting
-message if either key is absent. This local command overrides `QA_AUTH_MODE` to `local`
-for its process, so an existing public-mode `.env` remains unchanged. Other JEV launch
-commands require `local` or a configured `api_key` mode. Environment variables already
-set in the shell take precedence over `.env`. Rotate any key exposed in chat before use.
+Top-right Settings controls run mode, core model and optional features. `RUN_MODE=demo|live`,
+`OPENAI_MODEL` and `QA_JEV_ENABLED` supply initial defaults. Saved per-tenant settings in
+`QA_DATA_DIR/settings/` take precedence. Explicit `--run-mode`, `--model` and `--jev`
+launcher flags update saved choices at startup; subsequent UI changes apply to new runs
+without restarting. `CORE_REVIEW_MODELS` controls the model allowlist. Access mode is
+server-only, independent of run mode, and requires a restart to change.
 
 For optional JEV classification of completed reviews with critical comments in demo mode,
-run `uv run python scripts/run_local.py --mode demo --jev`. JEV uses the draft research rubric,
+run `uv run python scripts/run_local.py --run-mode demo --jev`. JEV uses the draft research rubric,
 keeps suggestions separate from report QA, and never calls the provider for a review
 without critical comments. See `evals/classification/README.md` for the local evaluation
 workflow. A key shared in chat should be rotated after testing.
@@ -81,7 +79,7 @@ For an intentionally public, unauthenticated shared workspace, stop the backend 
 and restart it from the project root:
 
 ```sh
-QA_AUTH_MODE=public uv run python scripts/run_local.py
+ACCESS_MODE=public uv run python scripts/run_local.py
 ```
 
 The launcher honours the existing model configuration and builds stale frontend assets.
@@ -94,9 +92,9 @@ shares the Vesta tenant, including its saved reports, feedback, analytics, Studi
 and review/playground actions. Live model calls use the server's configured provider account.
 Tenant selection remains server controlled; request tenant overrides are rejected.
 
-`QA_AUTH_MODE` defaults to `local`, which accepts loopback clients only. `api_key` retains
+`ACCESS_MODE` defaults to `local`, which accepts loopback clients only. `api_key` retains
 its existing credential and scope checks. To return to local-only access, stop the backend
-and restart with `QA_AUTH_MODE=local`. This changes access only; it does not reset storage.
+and restart with `ACCESS_MODE=local`. This changes access only; it does not reset storage.
 Do not disable forwarded-header handling to make remote clients appear local.
 
 ## Playground

@@ -469,6 +469,30 @@ class ClassificationResult(BaseModel):
 class ClassificationPublicInput(BaseModel):
     finding_text: str
     qa_comment: str
+    source: Literal["report_excerpts", "qa_comment"] = "qa_comment"
+
+
+class ClassificationState(BaseModel):
+    finding_text: str
+    qa_comment: str
+    report_quotes: list[str]
+
+
+class ClassificationQuestion(BaseModel):
+    type: Literal["choice"]
+    instructions: str
+    criteria: dict[str, str]
+
+
+class ClassificationAnalysis(BaseModel):
+    classification_id: str
+    model: str
+    state: ClassificationState
+    questions: dict[str, ClassificationQuestion]
+    rubric_id: str
+    rubric_version: str
+    rubric_status: str
+    rubric_hash: str
 
 
 class ClassificationResource(BaseModel):
@@ -636,8 +660,12 @@ class DemoSample(BaseModel):
     report_text: str
 
 
+from .preferences import Features
+
+
 class ConfigResource(BaseModel):
-    mode: Literal["demo", "openai"]
+    run_mode: Literal["demo", "live"]
+    features: Features = Field(default_factory=Features)
     model: str | None
     prompt_version: str
     workflow_version: str

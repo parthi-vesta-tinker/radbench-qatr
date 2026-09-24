@@ -88,7 +88,7 @@ class PlaygroundCategory(BaseModel):
 
 class PlaygroundCatalog(BaseModel):
     object: Literal["qa_playground_catalog"] = "qa_playground_catalog"
-    mode: Literal["demo", "openai"]
+    run_mode: Literal["demo", "live"]
     ready: bool
     models: list[str]
     live_model: str | None
@@ -173,6 +173,8 @@ def samples() -> list[PlaygroundSample]:
 
 
 def catalog(tenant: str) -> PlaygroundCatalog:
+    from .preferences import require_feature
+    require_feature(tenant, "playground")
     from .settings import runtime_config
 
     try:
@@ -187,7 +189,7 @@ def catalog(tenant: str) -> PlaygroundCatalog:
     mode = config["mode"]
     ready = mode == "demo" or bool(os.environ.get("OPENAI_API_KEY"))
     return PlaygroundCatalog(
-        mode=mode,
+        run_mode="live" if mode == "openai" else "demo",
         ready=ready,
         models=list(MODELS),
         live_model=config["model"],
@@ -252,6 +254,8 @@ def create_run(tenant: str, payload: PlaygroundRunInput, key: str, version: str)
         saved = store.replay_in(conn, tenant, operation, key, data, version)
         if saved:
             return saved, False
+    from .preferences import require_feature
+    require_feature(tenant, "playground")
     source, report_text, sample_id = resolve(payload)
     try:
         config = config_for(tenant, payload.model)

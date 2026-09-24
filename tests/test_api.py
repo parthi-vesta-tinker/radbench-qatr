@@ -158,7 +158,7 @@ def test_feedback_minimal_and_bindings(client):
 
 
 def test_no_live_fallback(client, monkeypatch):
-    monkeypatch.setenv("QA_MODE", "openai")
+    monkeypatch.setenv("RUN_MODE", "live")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_MODEL", raising=False)
     r = post(client)

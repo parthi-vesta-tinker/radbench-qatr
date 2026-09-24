@@ -194,6 +194,8 @@ def save(tenant, document_id, payload, key, version, workspace=packs.NO_WORKSPAC
         saved = store.replay_in(conn, tenant, operation, key, data, version)
         if saved:
             return saved, False
+    from .preferences import require_feature
+    require_feature(tenant, "skills")
     snapshot, docs = sources(tenant)
     if document_id not in docs:
         raise AccessError(404, "KNOWLEDGE_NOT_FOUND", "Knowledge document not found.")

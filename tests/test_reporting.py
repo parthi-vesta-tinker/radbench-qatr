@@ -147,7 +147,7 @@ def test_inbox_and_outcome_tenant_isolation_and_scope(reporting_db, credentials)
 
 
 def test_empty_analytics_and_no_model_dependency(reporting_db, monkeypatch):
-    monkeypatch.setenv('QA_MODE', 'openai')
+    monkeypatch.setenv('RUN_MODE', 'live')
     monkeypatch.delenv('OPENAI_API_KEY', raising=False)
     client = reporting_db
     body = client.get('/api/v1/analytics').json()

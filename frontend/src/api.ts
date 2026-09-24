@@ -1,7 +1,7 @@
-import type { Review, ReviewInput, Config, FeedbackPayload, FeedbackRecord, ReviewSummary, ReviewComments, Page, FeedbackInboxItem, Analytics } from "./types";
+import type { AppSettings, SettingsUpdate, Review, ReviewInput, Config, FeedbackPayload, FeedbackRecord, ReviewSummary, ReviewComments, Page, FeedbackInboxItem, Analytics } from "./types";
 import type { KnowledgeCatalog, KnowledgeDetail, KnowledgeDraft, KnowledgeDraftInput } from './types';
 import type { PlaygroundCatalog, PlaygroundRun, PlaygroundRunInput } from './types';
-import type { ClassificationConfig, ClassificationInput, ClassificationResource, ClassificationFeedbackInput, ClassificationFeedbackResource, ClassificationFeedbackList } from './types';
+import type { ClassificationAnalysis, ClassificationConfig, ClassificationInput, ClassificationResource, ClassificationFeedbackInput, ClassificationFeedbackResource, ClassificationFeedbackList } from './types';
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -44,6 +44,11 @@ export function describeError(error: unknown): string {
   return error instanceof Error ? error.message : "The QA service request failed.";
 }
 export const api = {
+  settings: () => request<AppSettings>('/api/v1/settings'),
+  saveSettings: (payload: SettingsUpdate) => request<AppSettings>('/api/v1/settings', {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload),
+  }),
+  classificationAnalysis: (id: string) => request<ClassificationAnalysis>('/api/v1/classifications/' + encodeURIComponent(id) + '/analysis'),
   classificationConfig: () => request<ClassificationConfig>('/api/v1/classifications/config'),
   classificationsForReview: (id: string) => request<ClassificationResource[]>('/api/v1/reviews/' + encodeURIComponent(id) + '/classifications'),
   classification: (id: string) => request<ClassificationResource>('/api/v1/classifications/' + encodeURIComponent(id)),

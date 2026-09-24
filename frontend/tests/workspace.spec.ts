@@ -119,13 +119,13 @@ test('playground runs a demo sample in isolation and never enters history or ana
   await page.goto('/');
   await page.getByRole('button',{name:'Playground',exact:true}).click();
   const pane=page.locator('.playground-pane');
-  await expect(pane.getByText('Playground — not a clinical review.')).toBeVisible();
-  await expect(pane.getByRole('heading',{name:'Critical findings'})).toBeVisible();
-  await expect(pane.getByRole('heading',{name:'Findings and impression inconsistency'})).toBeVisible();
+  await expect(pane.getByText('Playground — not a clinical review.')).toHaveCount(0);
+  await expect(pane.getByRole('heading',{name:'Critical findings',exact:false})).toBeVisible();
+  await expect(pane.getByRole('heading',{name:/Findings & impression/})).toBeVisible();
   // Only the model the server offers is selectable.
   await expect(pane.locator('#playground-model option')).toHaveText(['gpt-6-astra']);
   const run=pane.getByRole('button',{name:'Run test review'});
-  await expect(run).toBeDisabled();
+  await expect(run).toBeEnabled();
   // A demo-supported sample completes with canned output and no provider call.
   await pane.locator('.playground-sample').filter({hasText:'Runs in demo'}).first().click();
   await expect(run).toBeEnabled();

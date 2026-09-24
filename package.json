@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "start": "uv run python scripts/run_local.py",
-    "demo": "uv run python scripts/run_local.py --mode demo",
-    "live": "uv run python scripts/run_local.py --mode openai --jev --no-prompt --auth-mode local",
+    "demo": "uv run python scripts/run_local.py --run-mode demo",
+    "live": "uv run python scripts/run_local.py --run-mode live --no-prompt",
     "test:backend": "uv run pytest -q",
     "test:ui": "npm --prefix frontend run test:dom",
     "build": "npm --prefix frontend run build"

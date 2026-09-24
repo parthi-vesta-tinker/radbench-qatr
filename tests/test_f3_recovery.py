@@ -31,7 +31,7 @@ reviewer.make_model=lambda config, client: ControlledModel(Calls())
 import uvicorn
 uvicorn.run('backend.main:app',host='127.0.0.1',port=int(os.environ['QA_PORT']),access_log=False)
 ''')
-    server = Server(tmp_path, QA_MODE='openai', OPENAI_API_KEY='controlled-no-network',
+    server = Server(tmp_path, RUN_MODE='live', OPENAI_API_KEY='controlled-no-network',
         OPENAI_MODEL='controlled-sdk-test', QA_TEST_PROJECT=str(ROOT),
         QA_CALL_LOG=str(tmp_path/'calls.log'), QA_TEST_PAUSE_AT=point)
     server.command = [sys.executable,str(boot)]

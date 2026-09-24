@@ -162,7 +162,7 @@ def test_two_copy_groups_match_result_and_hide_internal_mapping(client):
 def test_context_limit_rejects_before_acceptance_without_consuming_key(
     client, monkeypatch, tmp_path
 ):
-    monkeypatch.setenv("QA_MODE", "openai")
+    monkeypatch.setenv("RUN_MODE", "live")
     monkeypatch.setenv("OPENAI_MODEL", "controlled-no-network")
     monkeypatch.setenv("OPENAI_API_KEY", "controlled-no-network")
     policy = tmp_path / "guidance.md"

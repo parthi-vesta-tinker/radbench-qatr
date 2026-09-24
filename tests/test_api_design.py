@@ -45,7 +45,7 @@ def credentials(monkeypatch, tmp_path):
             ]
         )
     )
-    monkeypatch.setenv("QA_AUTH_MODE", "api_key")
+    monkeypatch.setenv("ACCESS_MODE", "api_key")
     monkeypatch.setenv("QA_TENANTS_FILE", str(tenants))
     monkeypatch.setenv("QA_TENANT_KEYS_FILE", str(grants))
     store.init()
@@ -87,7 +87,7 @@ def test_replay_is_original_ack_even_after_configuration_changes(client, monkeyp
     a = post(client, key=key)
     finished = finish(client, a)
     assert finished["execution_status"] == "completed"
-    monkeypatch.setenv("QA_MODE", "openai")
+    monkeypatch.setenv("RUN_MODE", "live")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     b = post(client, key=key)
     assert a.status_code == b.status_code == 202 and a.content == b.content
@@ -197,9 +197,9 @@ def test_forwarded_remote_client_requires_explicit_public_mode(client, monkeypat
     from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
     if mode is None:
-        monkeypatch.delenv("QA_AUTH_MODE", raising=False)
+        monkeypatch.delenv("ACCESS_MODE", raising=False)
     else:
-        monkeypatch.setenv("QA_AUTH_MODE", mode)
+        monkeypatch.setenv("ACCESS_MODE", mode)
     proxy = ProxyHeadersMiddleware(app, trusted_hosts=["127.0.0.1"])
     remote = TestClient(proxy, client=("127.0.0.1", 1234))
     try:
@@ -216,7 +216,7 @@ def test_forwarded_remote_client_requires_explicit_public_mode(client, monkeypat
 def test_public_visitors_share_vesta_reviews_without_credentials(client, monkeypatch):
     from backend.access import validate_access_config
 
-    monkeypatch.setenv("QA_AUTH_MODE", "public")
+    monkeypatch.setenv("ACCESS_MODE", "public")
     monkeypatch.delenv("QA_TENANT_KEYS_FILE", raising=False)
     validate_access_config()
     visitor = TestClient(app, client=("203.0.113.10", 1234))
@@ -252,12 +252,12 @@ def test_public_visitors_share_vesta_reviews_without_credentials(client, monkeyp
         other.close()
 
 
-def test_unknown_auth_mode_fails_closed(monkeypatch):
-    from backend.access import auth_mode
+def test_unknown_access_mode_fails_closed(monkeypatch):
+    from backend.access import access_mode
 
-    monkeypatch.setenv("QA_AUTH_MODE", "publci")
-    with pytest.raises(ValueError, match="QA_AUTH_MODE"):
-        auth_mode()
+    monkeypatch.setenv("ACCESS_MODE", "publci")
+    with pytest.raises(ValueError, match="ACCESS_MODE"):
+        access_mode()
 
 
 def test_feedback_concurrent_replay_conflict_and_cursor_page(client):

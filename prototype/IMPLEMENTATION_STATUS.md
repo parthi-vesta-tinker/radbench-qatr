@@ -4,6 +4,53 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 
 ## Implemented
 
+- **Compact Studio summaries (2026-09-24):** Post-review Guidance and Classification
+  Overview share accessible, independently collapsible headings with neutral backgrounds.
+  Guidance previews two steps; classification previews two finding groups. Expanded cards
+  retain certainty, communication priority and inputs. Give feedback opens accept or
+  reject/correct; rejection requires a reason and changed values save as corrections.
+  Removed the two requested explanatory sentences. Subtype is omitted because the current
+  contract has no subtype. No API/storage/provider change. Frontend build passed; automated
+  tests and browser checks were not run, following the user's earlier testing instruction.
+
+- **Classification applicability and return navigation:** completed reviews with no
+  critical comments show a neutral minus-in-circle journey marker with a not-applicable
+  explanation. Classification says “No critical findings were reported. Classification
+  is not applicable.” Back to report restores the same selected report and preserves
+  a separate unfinished draft. Failed, incomplete and edited reviews do not acquire
+  this no-critical-findings state. Verification on 24 September 2026: production build,
+  DOM suite, and **9 isolated Chromium browser regressions passed**, including both
+  1536px and 390px applicability/return flows. Screenshots inspected; no relevant
+  console/page errors or framework overlays in these flows. The browser fixture uses
+  Refresh current data to retain the in-memory draft; page reload was an incorrect
+  fixture assumption and was corrected. No provider calls or backend behavior changes.
+
+
+- **Classification workspace and progress:** QA Studio has a review-scoped Classification
+  tool with compact label summaries, collapsed input cards, saved JEV state/questions/
+  criteria, probability breakdowns and run details. New and unavailable results use
+  the two agreed minimal messages. The visible Output stage is now Results; the
+  existing asynchronous DBOS classification has its own visible stage without delaying
+  or invalidating review results. Provider request shape and recovery identities are unchanged.
+  Verification on 24 September 2026: **29 controlled backend/API tests**, **29 DOM
+  tests**, production build, generated-contract checks and documentation checks passed.
+  **7 Chromium browser regressions passed** against isolated demo storage at
+  `http://127.0.0.1:8765`: classification inspection, review replacement, result/copy
+  flow and panels. Classification UI used API fixtures; desktop 1536px and mobile
+  390px screenshots (including dark mode) were inspected, with no page/console errors
+  or framework overlay. A test-fixture timing race was fixed before the passing run.
+  Browser plugin was not available; repository Playwright tests were used. Sandboxed
+  localhost access timed out; the approved outside-sandbox test run passed. No live
+  provider calls, clinical evaluation, deployment or storage migration were performed.
+
+- **Post-review guidance (2026-09-24):** Studio now uses “Post-review Guidance”
+  with a neutral placeholder before completion and no input, running, or recovery instructions.
+  Numbered advice requires a completed result matching current text and confirmed status;
+  stale/disconnected results suppress advice. Presentation and pure content derivation are
+  separate modules. Classification enrichment and support workflow/radiologist preferences
+  are planned in the workspace contract and backlog, not implemented. No API, database,
+  or provider change. Tests and browser checks were not run at the user's request.
+
 - **Starter guide clarification:** README now separates demo and live commands, shows
   the two `.env` key names and their provider roles, explains no-prompt startup and
   alternate-port syntax, and links to the detailed local setup guide. `START_HERE.md`
@@ -16,7 +63,9 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
   `.qa-data-local` schema-7 store was backed up and explicitly upgraded to schema 8 with
   no pending work or foreign-key errors. Verification on 24 September 2026: 9 launcher
   and migration tests, documentation check, and a no-key `npm run live` check passed;
-  the latter made no provider request.
+  the latter made no provider request. A subsequent isolated live run completed one
+  synthetic OpenAI review with a critical comment and one automatic JEV classification.
+  The current `npm run live` command started with both providers and no prompt on port 8900.
 
 - **JEV critical finding classification (0.15.0):** A completed review with critical comments
   starts one separate five-field JEV classification per critical observation when JEV is configured
@@ -98,7 +147,7 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 
 - Application title Radiology Report Review, secondary Vesta brand, New review draft heading and Studio tool, and consistent responsive typography. Production build, DOM suite and four targeted header/panel browser checks passed on 2026-09-22; desktop/mobile screenshots inspected using demo fixtures.
 
-- Explicit `QA_AUTH_MODE=public` for unauthenticated remote use of the shared Vesta workspace. Local-only remains the default; API-key scopes and tenant-override rejection are preserved.
+- Explicit `ACCESS_MODE=public` for unauthenticated remote use of the shared Vesta workspace. Local-only remains the default; API-key scopes and tenant-override rejection are preserved.
 - Schema-7 application storage and separate DBOS system storage. Older schemas fail closed. The explicit backed-up schema-6 upgrade preserves terminal reviews and feedback; pending work must finish with the previous application.
 - Tenant-scoped review history, feedback, analytics, and Skills Studio draft revisions.
 - Server-controlled tenant release binding with immutable complete content snapshots. Vesta can use `vesta-qatr-0.3.0`; other tenants use the generic profile unless explicitly configured.
@@ -261,3 +310,44 @@ See [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md) for gate details and [FOUNDATION_CH
   screenshot inspected at 1536×1024. No live submissions or provider probes were performed.
 - Documentation link/inventory validation passed. This recovery does not imply clinical
   validation or production readiness; mobile recovery verification was not repeated.
+
+## Playground sample browser — 24 September 2026
+
+- Replaced the sample-card wall with grouped rows, use-case filtering and search alongside
+  a full report preview. The first sample is selected on load. Explicit Sample reports /
+  Paste report controls preserve each source independently; model and run controls stay
+  beside the report. Configuration details are collapsed. Phone layouts show all sample
+  rows and stack the preview below them.
+- Per the user's explicit request, removed the clinical disclaimer banner, repeated copy
+  restrictions and technical run IDs. Demo availability labels appear only in demo mode.
+  No installed sample text, API contract, provider execution path or isolation rule changed.
+- Production build and DOM/state suite passed. **2 focused Playwright browser tests passed**
+  on isolated demo storage: category/search filtering, empty-search recovery, selected
+  preview, demo availability gating, source-switch text preservation, navigation preservation,
+  and a demo run showing all four phases and results without copy actions.
+- Read-only checks against `http://localhost:8000` passed at 1536, 900, 390 and 320px: all six
+  samples reachable, long report previews, no horizontal overflow, light/dark presentation,
+  no obsolete banner or demo availability labels in live mode, and no browser console/page
+  errors. Desktop, phone and dark screenshots were inspected against the generated concept.
+- The in-app browser was unavailable; the Chrome connector returned BRIDGE_NOT_READY.
+  Existing Playwright Chromium was used. No live provider calls, deployments or clinical
+  evaluations were performed. Other browser engines and physical phones remain untested.
+
+
+## Settings implementation — 2026-09-24
+
+- Implemented Demo/Live run mode, approved core model selection, Playground/Skills/JEV
+  switches, and read-only access mode in the header Settings modal. Local access is default.
+- Added tenant-scoped settings endpoints and atomic revision-checked persistence outside
+  resource storage. New run snapshots capture their settings; accepted work retains its
+  existing configuration. Disabled editorial features are gated on the server.
+- Controlled backend evidence: 80 affected tests passed, followed by 32 settings,
+  launcher and API contract tests after final launcher fixes. Production frontend build
+  passed. Four Chromium checks passed using isolated storage and blank provider keys:
+  saved model/feature choices, reload persistence, server gates, preserved input, modal
+  focus/Escape, missing-key errors, revision conflicts, header and sample browser.
+- Settings screenshots inspected at phone width; overflow checks passed at 1536, 390,
+  and 320px. Earlier DOM/state run passed 26 tests; the final DOM/state run also passed after
+  a concurrent frontend import collision was resolved. Read-only verification of
+  localhost:8000 confirmed the new endpoint serves Live, local access, and enabled JEV.
+  No clinical evaluation or public deployment was performed.

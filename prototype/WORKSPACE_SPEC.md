@@ -4,7 +4,7 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 
 ## Layout and interaction
 
-- **Application bar:** the supplied Vesta logo, secondary Vesta brand label and primary Radiology Report Review title form the left identity group. Share, Settings, Health and appearance form a compact right icon group. Share and Settings are focusable `aria-disabled` provisions with coming-soon tooltips; no sharing or settings operation exists. Health opens a details popover from an icon with a status indicator and an accessible current-status label. Header actions stay grouped on a second row when narrow widths cannot accommodate the full title.
+- **Application bar:** the supplied Vesta logo, secondary Vesta brand label and primary Radiology Report Review title form the left identity group. Share, Settings, Health and appearance form a compact right icon group. Share remains a coming-soon provision. Settings opens a modal for Demo/Live run mode, approved core model choices and Playground, Skills and JEV feature switches. Access mode is shown read-only and defaults to local. Health opens a details popover from an icon with a status indicator and an accessible current-status label. Header actions stay grouped on a second row when narrow widths cannot accommodate the full title.
 - **Panel artwork:** state-specific vectors follow the supplied visual references: an expanded right panel shows a rounded outline with an inset right bar; a collapsed right panel shows an inset left bar and left-pointing chevron. Left-panel controls mirror those shapes. Mobile drawer openers use the collapsed icon. Tooltips continue to explain expand/collapse state.
 - **Feature notice:** a dismissible single-line “New: Collapsible panels” notice sits immediately below QA Studio when expanded. It has no Try it action. Dismissal is browser-local and keyed to this announcement so future notices can use a new key.
 
@@ -12,7 +12,7 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 - **Work:** New review accepts pasted text without a scope badge or permanent instruction. Contextual feedback below the input reports pasted text, unreviewed changes and submission uncertainty. Review again replaces the same saved review and clears the previous output atomically. An edit stays in the same input; before submission the earlier output is marked stale and cannot be copied. Exact text restoration restores its matching output.
 - **Typography:** system fonts, an 18px semibold application and work heading, 16px panel headings, 14px secondary sidebar headings, 13px tool labels and 15px report input. New drafts use the heading New review; the matching Studio action is also New review.
 - **Studio:** compact tools for New review, Review history, Feedbacks, Analytics, Skills, and Playground. Tool navigation preserves the current report draft and mounted editor state.
-- **Review panel:** review steps show real execution state; **Guidance: Next steps** lists the numbered actions for the current state. Guidance is advice, not tracked progress, and stores no per-step state.
+- **Review panel:** review steps show real execution state. **Post-review Guidance** provides advice only after a completed, current review; it stores no per-step progress. See the post-review guidance contract below.
 - **Feedback:** thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.
 - **Review results:** the output panel is headed **Review Results**. PACS comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.
 - **Side panels:** Report reviews and QA Studio collapse independently into 60px rails. Expand/collapse controls live in their headers. The collapsed Report reviews rail retains Current review; the Studio rail retains all six tool icons in the same order. Every rail control has a visible hover/focus tooltip and an accessible name. Escape dismisses tooltips without moving focus. The entire Studio side panel, including guidance, collapses together.
@@ -24,7 +24,7 @@ Draft report text lives only in the current tab. The latest submitted text and o
 
 ## Review states
 
-The UI journey shows Input → Validate → AI review → Output. The backend retains input validation, combined report review, output validation and comment assembly; Output represents the last two. Ticks mark completed stages, a warning marks missing input, and a blocker marks failure. The Studio has no duplicate progress list. `needs_input` explains deterministic report-section problems. Failed or incomplete work never displays successful empty comments. `MODEL_OUTCOME_UNKNOWN` tells the operator that the external outcome could not be established and that the system did not retry.
+The UI journey shows Input → Validate → AI review → Results → Classification (when enabled). The backend retains input validation, combined report review, output validation and comment assembly; Results represents the last two. Ticks mark completed stages, a warning marks missing input, and a blocker marks failure. The Studio has no duplicate progress list. `needs_input` explains deterministic report-section problems. Failed or incomplete work never displays successful empty comments. `MODEL_OUTCOME_UNKNOWN` tells the operator that the external outcome could not be established and that the system did not retry.
 
 Copy text is always server derived from the same immutable result displayed on screen. Editing a draft makes an older result stale; restoring the submitted text restores the matching display.
 
@@ -38,7 +38,7 @@ Copy text is always server derived from the same immutable result displayed on s
   clinical metrics remain distinct in the API and are omitted from this compact screen.
 - Stakeholder outcomes are removed; no outcome controls or acceptance analytics remain.
 - Skills shows verified installed content and tenant draft revisions; editing never activates a model change.
-- Playground runs the real review against curated samples or a pasted report, in isolation. It never becomes a review: no history, feedback, analytics, outcome or copy action, and its banner cannot be dismissed.
+- Playground runs the real review against curated samples or a pasted report, in isolation. It never becomes a review: no history, feedback, analytics, outcome or copy action, and retains a separate Playground title and Run test review action.
 - Health is an on-demand timestamped snapshot. Provider metadata is checked only when explicitly requested and does not perform inference.
 
 No control sends a report, edits a source report, triggers clinical escalation, or releases a content draft.
@@ -53,9 +53,9 @@ column available. Skills source editors keep monospace text; Playground keeps it
 boundary and distinct notice. Analytics uses a monochrome four-metric findings row,
 a smaller activity row, and one concise clinical-boundary sentence.
 
-The four-stage journey is compact and shares one row with the Review button at desktop and mobile widths. One status message lives below the journey; no duplicate input hint or output status is shown. Copy actions omit the UI-only QA review prefix. Light/dark palettes are monochrome, with amber reserved for progress warning/blocker states.
+The journey is compact and shares one row with the Review button at desktop and mobile widths. One status message lives below the journey; no duplicate input hint or output status is shown. Copy actions omit the UI-only QA review prefix. Light/dark palettes are monochrome, with amber reserved for progress warning/blocker states.
 
-Contextual review feedback sits directly below the New review/Report review title, above the paste field. The compact journey beside Review uses Input, Validate, AI review and Output. Show the feedback once only.
+Contextual review feedback sits directly below the New review/Report review title, above the paste field. The compact journey beside Review uses Input, Validate, AI review, Results and optional Classification. Show the feedback once only.
 
 ## Service health presentation
 
@@ -69,3 +69,113 @@ connection errors retain actionable messages and codes. Keep monochrome styling,
 light/dark appearance, narrow-screen fit, Escape/outside-click dismissal and focus return.
 
 Copy buttons share one size and align with the right edge of their headings. Display comments without numbering; copied groups use PACS comments and omit numbering and the UI-only QA review title. Successful copying adds no contextual message; clipboard failure retains a manual-copy fallback.
+
+
+## Playground sample browser
+
+The Playground uses a two-column sample browser and report preview on desktop, stacked
+on narrow screens. Sample reports and Paste report are explicit source controls; switching
+preserves the selected sample and pasted text independently. The first available sample
+is previewed on load. Samples are grouped by use case, searchable by title or report text,
+and filterable by category. Selected rows have a visible indicator and pressed state.
+Short display titles do not change installed sample content.
+
+Model selection and Run test review sit below the report. Availability labels appear only
+in demo mode. Configuration details are collapsed. At the user's explicit request on
+24 September 2026, remove the disclaimer banner and repeated clinical/copy restrictions
+from this surface. This supersedes earlier banner requirements. Isolation, absence of
+copy/feedback actions, server-controlled models, and the four execution phases are unchanged.
+Source and model selection stay locked while a run is starting or executing.
+
+
+## Classification tool
+
+QA Studio exposes **Classification** when the feature is enabled. Its workspace is
+scoped to the selected review and latest submitted input version, never the globally
+latest run. A new or edited report shows “Review this report to see classification.”
+After a completed review with no critical findings, the tool says “No critical findings
+were reported. Classification is not applicable.” Other unavailable classifications
+show “No classification available.” A small indicator covers loading; actual failures remain visible in Run details.
+
+The compact **Classification Overview** defaults to up to two finding summaries, each
+showing “Group: [grouping type]”. Its neutral heading is clickable when more content
+is available, with a chevron indicating expansion. Expanding reveals the finding group,
+Report certainty, Communication priority, inputs and feedback for each finding. The current
+classification contract has no subtype field; omit subtype until a governed contract supplies it. Inputs used is collapsed by
+default and distinguishes report excerpts plus the QA comment from comment-only
+fallback. The introductory JEV sentence and repeated expanded input are removed.
+The Classification workspace includes all five fields, raw and available calibrated
+probabilities, provider confidence, margin, review flags, saved questions/criteria,
+exact JEV state and run details. Feedback remains separate from immutable predictions. A single **Give feedback** button
+opens Accept and Reject / correct choices. Accept saves acceptance. Reject / correct opens
+editable labels and a required reason: changed labels save an `edit`, unchanged labels save
+a `reject`. Save errors preserve the form and retry receipt. Cancel makes no request.
+The overview and shared result card omit the communication-priority verification sentence
+and the “Model suggestion · Uncalibrated · Review all labels” sentence at the user's request;
+calibration and rubric details remain available in the full analysis.
+
+The journey's Classification stage reflects the existing asynchronous DBOS workflow.
+Results remain completed and usable while classification runs or fails. Missing
+classifications are never marked successful. A completed
+review with zero critical comments marks Classification as not applicable using a
+neutral minus-in-circle icon, with hover and screen-reader explanation. Opening the
+tool only reads saved data; it never dispatches a provider request. Changing review,
+replacing submitted text or beginning new work clears unrelated classifications;
+late fetches cannot attach to a different review or input version.
+
+
+The Classification page has a **Back to report** action above its title. It restores
+the selected report workspace without changing review ID, input version, report text
+or any unfinished Current review. It does not navigate to a different draft.
+
+## Post-review guidance
+
+Both Studio overview sections use a shared accessible disclosure with a neutral heading
+background and expand/collapse chevron only when more content exists. They start collapsed
+for each selected review/input version. Collapsing keeps feedback edits mounted; switching
+reviews or replacing input resets the sections. Loading/unavailable sections without additional
+content have no chevron. Expanding/collapsing does not dispatch provider requests.
+
+The Studio section is titled **Post-review Guidance**. Its heading has a subtle neutral
+background, compact padding, and softly rounded corners using theme-aware colors. Before a review,
+while queued or running, and after needs-input or failed work, show only the neutral
+placeholder “Next steps will appear after the review is complete.” Do not render
+numbered steps, input instructions, running updates, or error recovery here. The
+existing journey and contextual review feedback own those messages.
+
+Collapsed guidance shows the first two steps; clicking the heading reveals the complete
+list when longer. Numbered advice requires `execution_status=completed`, a non-null result, matching
+current report text, and confirmed status. An edited report or disconnected status
+suppresses all previous steps and shows “Next steps are available only for a completed
+review matching the current report with confirmed status.” Restoring exact submitted
+text restores matching guidance once status is confirmed. Completed work without a
+result must never fall through to successful empty guidance.
+
+Completed critical results prioritize reading critical findings, confirming designation,
+and following the applicable communication pathway before copying comments and rating
+the review. Other observations advise reading and copying comments, then rating the
+review. Completed empty results state that there are no QA comments to copy and offer
+feedback if something was missed; they do not introduce copy controls or templates.
+
+`PostReviewGuidance` owns presentation and `derivePostReviewGuidance` owns pure content
+derivation. Studio composes this section alongside the independent finding classification
+component. No additional request, persisted step state, or provider call is introduced.
+
+### Planned extensions (not implemented)
+
+- Compose separate guidance modules for review findings, per-critical-finding classification,
+  and configured support workflow/radiologist preferences. Use stable action identities and
+  finding associations when these modules are introduced; presentation remains independent.
+- Bind classification inputs to the selected review, input version, and observation. Only
+  current completed classifications may enrich advice. Pending, failed, unavailable, rejected,
+  or indeterminate suggestions must not erase critical findings or delay basic review guidance.
+  Keep human feedback distinct from immutable model predictions and define its precedence
+  before using it to select recommendations.
+- Define tenant-scoped support workflow configuration and radiologist preference ownership,
+  defaults, precedence, and versioning before adding persistence or settings. Preferences may
+  customize wording, ordering, and relevant actions but cannot hide critical observations or
+  override applicable clinical policy. Do not infer radiologist identity from report text.
+- Classification suggestions are not approved clinical policy. Unknown designation remains
+  unknown without an exact report quote. Advice never establishes that communication,
+  acknowledgement, report editing, delivery, or stakeholder outcomes occurred, and does not
+  execute these actions. Clinical content changes require the existing governed release process.

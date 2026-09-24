@@ -76,24 +76,31 @@ def main():
         description="Build and run Vesta QA locally in demo or live OpenAI mode.",
         allow_abbrev=False,
     )
-    parser.add_argument("--mode", choices=("demo", "openai"), default="openai")
-    parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL") or "gpt-6-astra")
+    parser.add_argument("--run-mode", choices=("demo", "live"), default=None)
+    parser.add_argument("--model", default=None)
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--jev", action="store_true", help="Enable live JEV classification of critical review findings")
     parser.add_argument("--no-prompt", action="store_true", help="Require API keys from .env or the process environment")
-    parser.add_argument("--auth-mode", choices=("local", "public", "api_key"), help="Override QA_AUTH_MODE for this process")
+    parser.add_argument("--access-mode", choices=("local", "public", "api_key"), help="Override ACCESS_MODE for this process")
     args = parser.parse_args()
-    if args.auth_mode:
-        os.environ["QA_AUTH_MODE"] = args.auth_mode
+    if args.access_mode:
+        os.environ["ACCESS_MODE"] = args.access_mode
     ensure_frontend()
-    os.environ["QA_MODE"] = args.mode
+    from backend.preferences import read, apply_launch_overrides
+    current = read('vesta')
+    run_mode = args.run_mode or current.run_mode
+    model = args.model or current.core_model
+    jev_enabled = args.jev or current.features.classification
+    os.environ["RUN_MODE"] = run_mode
     if args.jev:
         os.environ["QA_JEV_ENABLED"] = "true"
-        from backend.access import auth_mode
-        if auth_mode() == "public":
-            raise SystemExit("JEV classification requires QA_AUTH_MODE=local or api_key in .env.")
-    if args.mode == "openai":
-        os.environ["OPENAI_MODEL"] = args.model
+    if jev_enabled:
+        os.environ["QA_JEV_ENABLED"] = "true"
+        from backend.access import access_mode
+        if access_mode() == "public":
+            raise SystemExit("JEV classification requires ACCESS_MODE=local or api_key in .env.")
+    if run_mode == "live":
+        os.environ["OPENAI_MODEL"] = model
         if not os.environ.get("OPENAI_API_KEY"):
             if args.no_prompt:
                 raise SystemExit("Set OPENAI_API_KEY in .env or the process environment before starting live review.")
@@ -103,10 +110,10 @@ def main():
             if not key:
                 raise SystemExit("An API key is required for real AI review.")
             os.environ["OPENAI_API_KEY"] = key
-        label = f"Live OpenAI: {args.model}"
+        label = f"Live OpenAI: {model}"
     else:
         label = "Demo mode: controlled local examples; no OpenAI request"
-    if args.jev:
+    if jev_enabled:
         if not os.environ.get("TYPESAFE_API_KEY"):
             if args.no_prompt:
                 raise SystemExit("Set TYPESAFE_API_KEY in .env or the process environment before enabling JEV.")
@@ -115,10 +122,12 @@ def main():
                 raise SystemExit("A TypeSafe key is required when --jev is enabled.")
             os.environ["TYPESAFE_API_KEY"] = key
         from backend.classification import configuration as jev_configuration
-        jev_status = jev_configuration()[0]
+        jev_status = jev_configuration(accepted=True)[0]
         if not jev_status.ready:
             raise SystemExit(jev_status.reason or "JEV classification is unavailable.")
         label += " + live JEV classification"
+    apply_launch_overrides(run_mode=args.run_mode, core_model=args.model,
+                           classification=True if args.jev else None)
     print(f"Open http://127.0.0.1:{args.port} - {label}", flush=True)
     print(f"Component status: http://127.0.0.1:{args.port}/api/v1/status", flush=True)
     print("Stop with Ctrl+C. Reports and feedback persist locally in QA_DATA_DIR.")

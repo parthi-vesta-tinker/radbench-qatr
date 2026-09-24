@@ -14,11 +14,11 @@ The active public contract is `QA-Version: 2026-09-22`; omitting the header sele
 
 ## Access modes
 
-`QA_AUTH_MODE=local` is the default: unauthenticated loopback clients share the Vesta tenant.
-`QA_AUTH_MODE=public` explicitly permits unauthenticated remote clients, including proxy-forwarded
+`ACCESS_MODE=local` is the default: unauthenticated loopback clients share the Vesta tenant.
+`ACCESS_MODE=public` explicitly permits unauthenticated remote clients, including proxy-forwarded
 addresses, with all scopes in that same shared Vesta tenant. Public visitors can read existing
 reports and use review, feedback, outcomes, analytics, Studio and playground actions.
-`QA_AUTH_MODE=api_key` requires a valid bearer key and applies its tenant and scope grants.
+`ACCESS_MODE=api_key` requires a valid bearer key and applies its tenant and scope grants.
 Local and public modes reject supplied Authorization credentials rather than implying that a
 key selected another tenant. All modes reject `X-Tenant-Id`; unknown modes fail closed.
 
@@ -85,3 +85,26 @@ Operational idempotency receipts and DBOS checkpoints remain for safe replay/rec
 they are not a user-facing report-version history.
 
 Stakeholder outcome endpoints and schemas are retired; analytics no longer returns acceptance counts. All copy projections start with their content group, without the UI-only QA review prefix. Dormant outcome storage is retained for schema-7 compatibility; no application path reads it.
+
+
+### Saved classification inspection
+
+`GET /api/v1/classifications/{id}/analysis` uses the same tenant-bound review-read
+access as classification reads. It projects the selected run's saved JEV state
+(finding text, QA comment, quote text), questions, instructions, choice criteria,
+model and rubric identity/version/status/hash. It does not expose private anchor
+metadata, credentials, report-QA prompts or DBOS storage. Inspection requires no
+current provider readiness and does not call a provider. `input.source` distinguishes
+`report_excerpts` from the `qa_comment` fallback. Review provenance includes the
+captured `jev_enabled_at_acceptance` flag for truthful asynchronous progress.
+
+## Runtime settings — 2026-09-24
+
+`GET /api/v1/settings` returns tenant settings, revision, approved model choices, feature
+switches, access mode and credential-presence booleans (never credentials).
+`PUT /api/v1/settings` requires local access or `settings:write`, rejects stale revisions,
+and validates model allowlisting and required provider configuration. Public access is read-only.
+Settings persist in an atomic tenant sidecar under `QA_DATA_DIR/settings`; no schema migration.
+Config and Playground catalog expose `run_mode: demo|live`. Accepted execution snapshots
+retain their provider `mode` for recovery compatibility. Feature gates preserve idempotent
+receipt replay and existing accepted work. Skills gating affects editorial tools only.

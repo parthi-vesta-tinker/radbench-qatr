@@ -13,7 +13,7 @@ def test_demo_mode_never_prompts_for_an_api_key(monkeypatch, capsys):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_MODEL", raising=False)
     monkeypatch.setattr(run_local, "ensure_frontend", lambda: None)
-    monkeypatch.setattr(sys, "argv", ["run_local.py", "--mode", "demo", "--port", "9123"])
+    monkeypatch.setattr(sys, "argv", ["run_local.py", "--run-mode", "demo", "--port", "9123"])
     monkeypatch.setattr(
         "getpass.getpass", lambda *_args, **_kwargs: pytest.fail("demo mode requested an API key")
     )
@@ -22,7 +22,7 @@ def test_demo_mode_never_prompts_for_an_api_key(monkeypatch, capsys):
 
     run_local.main()
 
-    assert os.environ["QA_MODE"] == "demo"
+    assert os.environ["RUN_MODE"] == "demo"
     assert calls == [
         (("backend.main:app",), {"host": "127.0.0.1", "port": 9123, "access_log": False})
     ]
@@ -31,12 +31,12 @@ def test_demo_mode_never_prompts_for_an_api_key(monkeypatch, capsys):
 
 def test_live_jev_no_prompt_loads_both_keys_from_env_file(monkeypatch, tmp_path):
     (tmp_path / ".env").write_text(
-        "QA_AUTH_MODE=public\nOPENAI_API_KEY=controlled-openai\nTYPESAFE_API_KEY=controlled-jev\n"
+        "ACCESS_MODE=public\nOPENAI_API_KEY=controlled-openai\nTYPESAFE_API_KEY=controlled-jev\n"
     )
     monkeypatch.setattr(run_local, "ROOT", tmp_path)
     monkeypatch.setattr(run_local, "ensure_frontend", lambda: None)
-    monkeypatch.setattr(sys, "argv", ["run_local.py", "--mode", "openai", "--jev", "--no-prompt", "--auth-mode", "local"])
-    for name in ("OPENAI_API_KEY", "TYPESAFE_API_KEY", "QA_AUTH_MODE"):
+    monkeypatch.setattr(sys, "argv", ["run_local.py", "--run-mode", "live", "--jev", "--no-prompt", "--access-mode", "local"])
+    for name in ("OPENAI_API_KEY", "TYPESAFE_API_KEY", "ACCESS_MODE"):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setattr("getpass.getpass", lambda *_args, **_kwargs: pytest.fail("live mode prompted for a key"))
     calls = []
@@ -46,7 +46,7 @@ def test_live_jev_no_prompt_loads_both_keys_from_env_file(monkeypatch, tmp_path)
 
     assert os.environ["OPENAI_API_KEY"] == "controlled-openai"
     assert os.environ["TYPESAFE_API_KEY"] == "controlled-jev"
-    assert os.environ["QA_AUTH_MODE"] == "local"
+    assert os.environ["ACCESS_MODE"] == "local"
     assert os.environ["QA_JEV_ENABLED"] == "true"
     assert len(calls) == 1
 
@@ -54,8 +54,8 @@ def test_live_jev_no_prompt_loads_both_keys_from_env_file(monkeypatch, tmp_path)
 def test_live_no_prompt_names_missing_key(monkeypatch, tmp_path):
     monkeypatch.setattr(run_local, "ROOT", tmp_path)
     monkeypatch.setattr(run_local, "ensure_frontend", lambda: None)
-    monkeypatch.setattr(sys, "argv", ["run_local.py", "--mode", "openai", "--jev", "--no-prompt"])
-    monkeypatch.setenv("QA_AUTH_MODE", "local")
+    monkeypatch.setattr(sys, "argv", ["run_local.py", "--run-mode", "live", "--jev", "--no-prompt"])
+    monkeypatch.setenv("ACCESS_MODE", "local")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
     monkeypatch.setattr("getpass.getpass", lambda *_args, **_kwargs: pytest.fail("live mode prompted for a key"))
@@ -132,3 +132,13 @@ def test_stale_frontend_rebuilds_without_reinstalling_dependencies(monkeypatch, 
     assert calls == [["run", "build"]]
     assert output.read_text() == "rebuilt"
     assert run_local.frontend_is_current() is True
+
+
+@pytest.fixture(autouse=True)
+def restore_launcher_environment(monkeypatch):
+    # main() changes these directly; restore them before another test creates reviews.
+    for name in ('RUN_MODE', 'ACCESS_MODE', 'QA_JEV_ENABLED', 'OPENAI_MODEL'):
+        if name in os.environ:
+            monkeypatch.setenv(name, os.environ[name])
+        else:
+            monkeypatch.delenv(name, raising=False)

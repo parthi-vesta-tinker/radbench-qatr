@@ -22,8 +22,8 @@ class Server:
         self.env = (
             os.environ
             | {
-                "QA_MODE": "demo",
-                "QA_AUTH_MODE": "local",
+                "RUN_MODE": "demo",
+                "ACCESS_MODE": "local",
                 "QA_DATA_DIR": str(root / "data"),
                 "QA_POLICY_PATH": "",
                 "QA_TEST_HOOK_DIR": str(root / "hooks"),
@@ -194,7 +194,7 @@ uvicorn.run('backend.main:app', host='127.0.0.1', port=int(os.environ['QA_PORT']
 """)
     server = Server(
         tmp_path,
-        QA_MODE="openai",
+        RUN_MODE="live",
         OPENAI_API_KEY="controlled-no-network",
         OPENAI_MODEL="controlled-sdk-test",
         QA_TEST_PAUSE_AT="before_provider_claim",

@@ -1,17 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { api, ApiError, describeError } from "./api";
+import { useClassification, type ClassificationData } from "./useClassification";
+import { StudioDisclosure } from "./StudioDisclosure";
+import { LoaderCircle } from "lucide-react";
 import type { ClassificationConfig, ClassificationFeedbackInput, ClassificationLabels, ClassificationResource, Review } from "./types";
 
-const fields = ["finding_group", "certainty", "urgency", "polarity", "temporal_status"] as const;
+export const fields = ["finding_group", "certainty", "urgency", "polarity", "temporal_status"] as const;
 type Field = keyof ClassificationLabels;
-const names: Record<Field, string> = {
-  finding_group: "Finding group", certainty: "Report certainty", urgency: "Suggested communication priority",
+export const names: Record<Field, string> = {
+  finding_group: "Finding group", certainty: "Report certainty", urgency: "Communication priority",
   polarity: "Polarity", temporal_status: "Temporal status",
 };
-const format = (value: string) => value.replaceAll("_", " ").replace(/^./, char => char.toUpperCase());
+export const format = (value: string) => value.replaceAll("_", " ").replace(/^./, char => char.toUpperCase());
 
-function ResultCard({ run, config, stale }: {run: ClassificationResource; config: ClassificationConfig; stale: boolean}) {
-  const [action, setAction] = useState<"edit" | "reject" | null>(null);
+export function ResultCard({ run, config, stale }: {run: ClassificationResource; config: ClassificationConfig | null; stale: boolean}) {
+  const [action, setAction] = useState<"choose" | "reject" | null>(null);
   const [labels, setLabels] = useState<ClassificationLabels | null>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,107 +40,64 @@ function ResultCard({ run, config, stale }: {run: ClassificationResource; config
   }
 
   return <article className="jev-card">
-    <p className="jev-finding">{run.input.finding_text}</p>
-    {run.execution_status === "queued" || run.execution_status === "running" ? <p className="meta" role="status">Classifying…</p> : null}
-    {run.execution_status === "failed" ? <p className="notice" role="alert">{run.error?.message || "Classification could not finish."}</p> : null}
+    <details className="jev-inputs">
+      <summary>Inputs used</summary>
+      <p className="meta">{run.input.source === 'report_excerpts' ? 'Critical finding · Report excerpts + QA comment' : 'Critical finding · QA comment only'}</p>
+      {run.input.source === 'report_excerpts' && <><h4>Report excerpts</h4><p className="jev-finding">{run.input.finding_text}</p></>}
+      <h4>QA comment</h4><p className="jev-finding">{run.input.qa_comment}</p>
+    </details>
+    {run.execution_status === "queued" || run.execution_status === "running" ? <span className="jev-loading" role="status" aria-label="Classifying"><LoaderCircle className="journey-spinner" size={16}/></span> : null}
+    {run.execution_status === "failed" ? <p className="meta">No classification available.</p> : null}
     {result && <>
       <dl className="jev-labels">{fields.slice(0, 3).map(field => <div key={field}><dt>{names[field]}</dt><dd>{format(result.fields[field]?.label || "Unknown")}</dd></div>)}</dl>
-      {result.fields.urgency?.label !== "cannot_determine" && <p className="meta">Verify the suggested communication priority against the report and local policy.</p>}
-      <p className="meta">Model suggestion · {result.calibration_status === "uncalibrated" ? "Uncalibrated" : "Research calibration"} · Review all labels.</p>
-      <details className="jev-details"><summary>Classification details</summary>
-        <dl>{fields.slice(3).map(field => <div key={field}><dt>{names[field]}</dt><dd>{format(result.fields[field]?.label || "Unknown")}</dd></div>)}</dl>
-        {fields.map(field => <div key={field} className="jev-distribution"><strong>{names[field]}</strong>
-          <p className="meta">Raw model probability · {Math.round((result.fields[field]?.top_probability || 0) * 100)}% top · {Math.round((result.fields[field]?.margin || 0) * 100)}% margin · provider confidence {Math.round((result.fields[field]?.provider_confidence || 0) * 100)}%</p>
-          <ul>{Object.entries(result.fields[field]?.raw_probabilities || {}).map(([label, probability]) => <li key={label}>{format(label)}: {(probability * 100).toFixed(1)}%</li>)}</ul>
-          {result.fields[field]?.review_reasons?.map(text => <p className="meta" key={text}>{text}</p>)}
-        </div>)}
-        <p className="meta">Model {run.provenance.model} · Rubric {run.provenance.rubric_id} · {result.calibrator_id || "No fitted calibrator"}</p>
-      </details>
-      {canRespond && <div className="jev-actions">
-        <button type="button" disabled={busy} onClick={() => void save({action:"accept"})}>Accept labels</button>
-        <button type="button" disabled={busy} onClick={() => {setLabels(predicted); setAction("edit"); setNotice("");}}>Edit labels</button>
-        <button type="button" disabled={busy} onClick={() => {setAction("reject"); setNotice("");}}>Reject suggestion</button>
+      {canRespond && !action && <div className="jev-actions">
+        <button type="button" disabled={busy} onClick={() => {setAction("choose"); setNotice("");}}>Give feedback</button>
       </div>}
-      {canRespond && action && <div className="jev-feedback">
-        {action === "edit" && labels && fields.map(field => <label key={field}>{names[field]}
-          <select value={labels[field]} onChange={event => setLabels({...labels, [field]: event.target.value})}>
-            {(config.labels[field] || []).map(option => <option key={option} value={option}>{format(option)}</option>)}
+      {canRespond && action === "choose" && <div className="jev-actions" role="group" aria-label="Classification feedback">
+        <button type="button" disabled={busy} onClick={() => void save({action:"accept"})}>Accept</button>
+        <button type="button" disabled={busy} onClick={() => {setLabels(predicted); setAction("reject");}}>Reject / correct</button>
+        <button type="button" disabled={busy} onClick={() => setAction(null)}>Cancel</button>
+      </div>}
+      {canRespond && action === "reject" && labels && <div className="jev-feedback">
+        {fields.map(field => <label key={field}>{names[field]}
+          <select disabled={busy} value={labels[field]} onChange={event => setLabels({...labels, [field]: event.target.value})}>
+            {(config?.labels[field] || [predicted?.[field] || ""]).map(option => <option key={option} value={option}>{format(option)}</option>)}
           </select></label>)}
-        <label>Reason<input value={reason} maxLength={1000} onChange={event => setReason(event.target.value)} /></label>
-        <div className="jev-actions"><button type="button" disabled={!reason.trim() || busy} onClick={() => void save(action === "edit" ? {action, final_labels: labels, reason} : {action, reason})}>Save</button>
-          <button type="button" onClick={() => setAction(null)}>Cancel</button></div>
+        <label>Reason (required)<input required disabled={busy} value={reason} maxLength={1000} onChange={event => setReason(event.target.value)} /></label>
+        <div className="jev-actions"><button type="button" disabled={!reason.trim() || busy} onClick={() => {
+          const changed = fields.some(field => labels[field] !== predicted?.[field]);
+          void save(changed ? {action:"edit", final_labels:labels, reason:reason.trim()} : {action:"reject", reason:reason.trim()});
+        }}>Save feedback</button>
+          <button type="button" disabled={busy} onClick={() => setAction(null)}>Cancel</button></div>
       </div>}
     </>}
     {notice && <p role="status" className="meta">{notice}</p>}
   </article>;
 }
 
-export function FindingClassification({review, stale}: {review: Review; stale: boolean}) {
-  const [config, setConfig] = useState<ClassificationConfig | null>(null);
-  const [runs, setRuns] = useState<ClassificationResource[]>([]);
-  const [error, setError] = useState("");
-  const [busyId, setBusyId] = useState("");
-  const pending = useRef<Record<string, string>>({});
-  const source = `${review.id}:${review.input_version}`;
-  useEffect(() => {
-    let cancelled = false;
-    api.classificationConfig().then(value => { if (!cancelled) setConfig(value); })
-      .catch(cause => {if (!cancelled) setError(describeError(cause));});
-    return () => {cancelled = true;};
-  }, []);
-  useEffect(() => {
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout>;
-    let polls = 0;
-    setRuns([]); setError("");
-    async function poll() {
-      try {
-        const values = await api.classificationsForReview(review.id);
-        if (cancelled) return;
-        setRuns(values.filter(value => value.input_version === review.input_version));
-        const awaiting = review.result?.critical_comments.some(observation =>
-          !values.some(value => value.observation_id === observation.observation_id
-            && (value.execution_status === "completed" || value.execution_status === "failed")));
-        if (awaiting && ++polls < 60) timer = setTimeout(poll, 1000);
-      } catch (cause) { if (!cancelled) setError(describeError(cause)); }
-    }
-    void poll();
-    return () => {cancelled = true; clearTimeout(timer);};
-  }, [source, review.id, review.input_version]);
-  async function classify(observationId: string) {
-    if (!config?.ready || stale || busyId) return;
-    const key = pending.current[observationId] ||= crypto.randomUUID();
-    setBusyId(observationId); setError("");
-    try {
-      const run = await api.classify({review_id: review.id, input_version: review.input_version, observation_id: observationId}, key);
-      delete pending.current[observationId];
-      setRuns(old => [...old.filter(item => item.id !== run.id), run]);
-      let current = run;
-      while (current.execution_status === "queued" || current.execution_status === "running") {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        current = await api.classification(run.id);
-        setRuns(old => old.map(item => item.id === run.id ? current : item));
-      }
-    } catch (cause) {
-      if (cause instanceof ApiError && cause.status >= 400 && cause.status < 500) delete pending.current[observationId];
-      setError(describeError(cause));
-    } finally { setBusyId(""); }
-  }
-  return <section className="studio-section jev-section" aria-label="Finding classification">
-    <h3>Finding classification</h3>
-    <p className="meta">JEV suggests labels for critical findings in this completed review. A radiologist reviews every label.</p>
-    {!config?.ready && <p className="meta">{config?.reason || "Checking JEV availability…"}</p>}
-    {error && <p className="notice" role="alert">{error}</p>}
-    {review.result?.critical_comments.map(observation => {
-      const matching = runs.filter(run => run.observation_id === observation.observation_id);
-      const latest = matching.at(-1);
-      return <div className="jev-observation" key={observation.observation_id}>
-        <p>{observation.comment}</p>
-        {latest && config ? <ResultCard key={latest.id} run={latest} config={config} stale={stale}/> : null}
-        {(!latest || latest.execution_status === "failed") && config?.ready && <button type="button" disabled={stale || Boolean(busyId)} onClick={() => void classify(observation.observation_id)}>
-          {busyId === observation.observation_id ? "Starting…" : latest ? "Try as new request" : "Classify finding"}
-        </button>}
-      </div>;
-    })}
-  </section>;
+export function FindingClassification({review, stale, data, openAnalysis}: {
+  review: Review; stale: boolean; data?: ClassificationData; openAnalysis?: () => void;
+}) {
+  const local = useClassification(review, !data, stale);
+  const {runs, config, loading, error} = data ?? local;
+  const hasDetails = runs.some(run => run.execution_status === "completed" && run.result);
+  const preview = <>
+    {loading && !runs.length && <span className="jev-loading" role="status" aria-label="Loading classification"><LoaderCircle className="journey-spinner" size={16}/></span>}
+    {!loading && !runs.length && <p className="meta">No classification available.</p>}
+    {error && <button type="button" onClick={(data ?? local).refresh}>Retry</button>}
+    {runs.slice(0, 2).map((run, index) => <p className="classification-preview" key={run.id}>
+      {runs.length > 1 && <span>Finding {index + 1} · </span>}
+      {run.execution_status === "completed" && run.result ? <>Group: <strong>{format(run.result.fields.finding_group?.label || "Unknown")}</strong></> :
+        run.execution_status === "failed" ? "No classification available." : "Classifying…"}
+    </p>)}
+    {runs.length > 2 && <p className="meta">+{runs.length - 2} more findings</p>}
+  </>;
+  return <StudioDisclosure key={`${review.id}:${review.input_version}:${stale}`} title="Classification Overview"
+    expandable={hasDetails || runs.length > 2} preview={preview}>
+    {openAnalysis && <button type="button" className="linklike" onClick={openAnalysis}>Full analysis</button>}
+    {runs.map((run, index) => <div key={run.id} className="jev-observation">
+      {runs.length > 1 && <h4>Finding {index + 1}</h4>}
+      <ResultCard run={run} config={config} stale={stale}/>
+    </div>)}
+  </StudioDisclosure>;
 }

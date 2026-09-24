@@ -33,11 +33,13 @@ from .contracts import (
     REASONS,
     ClassificationInput,
     ClassificationResource,
+    ClassificationAnalysis,
     ClassificationConfig,
     ClassificationFeedbackInput,
     ClassificationFeedbackResource,
     ClassificationFeedbackList,
 )
+from . import preferences
 from .settings import APP_VERSION, DATA, ROOT, runtime_config
 from .workflow import dispatch, workflow_id
 from .reviewer import SAMPLES
@@ -110,12 +112,10 @@ def reconcile():
                 )
         except Exception:
             log.error("classification.reconcile_failed tenant=%s classification=%s", tenant, rid)
-    try:
-        cfg = jev_snapshot()
-    except (ClassificationProblem, ValueError, OSError, KeyError):
-        return
     for tenant, review_id, input_version, observation_id in classification_store.pending_automatic():
         try:
+            accepted = store.job(tenant, review_id)[1]
+            cfg = accepted.get('jev_config_at_acceptance') or jev_snapshot(tenant, accepted=True)
             payload = ClassificationInput(review_id=review_id, input_version=input_version,
                                           observation_id=observation_id)
             saved, created = classification_store.reserve(tenant, "", payload, cfg, automatic=True)
@@ -360,6 +360,16 @@ def config(request: Request, p: Read, version: Version):
         api_version=version,
         samples=SAMPLES if c["mode"] == "demo" else [],
     )
+
+
+@app.get("/api/v1/settings", response_model=preferences.AppSettings)
+def read_settings(p: Read, version: Version):
+    return preferences.public(p)
+
+
+@app.put("/api/v1/settings", response_model=preferences.AppSettings)
+def save_settings(payload: preferences.SettingsUpdate, p: Read, version: Version):
+    return preferences.save(p, payload)
 
 
 @app.get("/api/v1/health")
@@ -648,11 +658,13 @@ def get_analytics(
 
 @app.get("/api/v1/knowledge", response_model=knowledge.Catalog)
 def knowledge_catalog(p: SkillsRead):
+    preferences.require_feature(p.tenant_id, "skills")
     return knowledge.catalog(p.tenant_id, "skills:write" in p.scopes)
 
 
 @app.get("/api/v1/knowledge/{document_id}", response_model=knowledge.Detail)
 def knowledge_detail(document_id: str, p: SkillsRead):
+    preferences.require_feature(p.tenant_id, "skills")
     return knowledge.detail(p.tenant_id, document_id)
 
 
@@ -665,6 +677,7 @@ def save_knowledge_draft(document_id: str, payload: knowledge.DraftInput, p: Ski
 
 @app.get("/api/v1/knowledge/{document_id}/drafts/{revision}/export", response_model=knowledge.DraftExport)
 def export_knowledge_draft(document_id: str, revision: Annotated[int, PathParam(ge=1)], p: SkillsRead):
+    preferences.require_feature(p.tenant_id, "skills")
     return knowledge.export_draft(p.tenant_id, document_id, revision)
 
 
@@ -688,7 +701,7 @@ def read_playground_run(run_id: str, p: SkillsRead):
 @app.get("/api/v1/classifications/config", response_model=ClassificationConfig)
 def classification_config(request: Request, p: Read):
     try:
-        return jev_configuration()[0]
+        return jev_configuration(p.tenant_id)[0]
     except (ValueError, OSError, KeyError) as exc:
         record_failure("classification.configuration_invalid", exc, request_id=request.state.request_id)
         return error(request, 503, "JEV_CONFIGURATION_INVALID", "JEV configuration is invalid.")
@@ -702,7 +715,7 @@ def create_classification(request: Request, payload: ClassificationInput, idempo
     if saved:
         return respond(saved, True)
     try:
-        cfg = jev_snapshot()
+        cfg = jev_snapshot(p.tenant_id)
         saved, created = classification_store.reserve(p.tenant_id, idempotency_key, payload, cfg, p.actor_name)
     except ClassificationProblem as exc:
         return classification_error(request, exc)
@@ -729,6 +742,14 @@ def review_classifications(request: Request, review_id: str, p: Read):
 def read_classification(request: Request, classification_id: str, p: Read):
     value = classification_store.get(p.tenant_id, classification_id)
     return value if value else error(request, 404, "CLASSIFICATION_NOT_FOUND", "Classification not found.")
+
+
+@app.get("/api/v1/classifications/{classification_id}/analysis", response_model=ClassificationAnalysis)
+def read_classification_analysis(request: Request, classification_id: str, p: Read):
+    job = classification_store.job(p.tenant_id, classification_id)
+    if not job:
+        return error(request, 404, "CLASSIFICATION_NOT_FOUND", "Classification not found.")
+    return presentation.classification_analysis(classification_id, *job)
 
 
 @app.post("/api/v1/classifications/{classification_id}/feedback", status_code=201,

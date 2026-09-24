@@ -42,7 +42,7 @@ def provider(monkeypatch, outcome="valid"):
     monkeypatch.setattr(reviewer, "AsyncOpenAI", lambda **kwargs: AsyncOpenAI(
         **kwargs, api_key="controlled-never-transmitted",
         http_client=httpx.AsyncClient(transport=httpx.MockTransport(respond))))
-    monkeypatch.setenv("QA_MODE", "openai")
+    monkeypatch.setenv("RUN_MODE", "live")
     monkeypatch.setenv("OPENAI_API_KEY", "controlled-never-transmitted")
     monkeypatch.setenv("OPENAI_MODEL", "configured-live-model")
     return calls

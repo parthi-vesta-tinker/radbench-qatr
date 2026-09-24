@@ -12,11 +12,13 @@ APP_VERSION = "foundation-f3-0.15.0"
 def runtime_config(tenant_id="vesta") -> dict:
     from .access import tenants
 
+    from .preferences import read, allowed_models
+    preferences = read(tenant_id)
     entry = tenants()[tenant_id]
-    mode = os.environ.get("QA_MODE", "openai")
-    if mode not in ("demo", "openai"):
-        raise ValueError("QA_MODE must be demo or openai")
-    model = entry.get("model", os.environ.get("OPENAI_MODEL", "")).strip()
+    mode = 'openai' if preferences.run_mode == 'live' else 'demo'
+    model = preferences.core_model
+    if model not in allowed_models(tenant_id):
+        raise ValueError('Configured core model is not in CORE_REVIEW_MODELS.')
     path = entry.get(
         "policy_path",
         os.environ.get("QA_POLICY_PATH", "") if tenant_id == "vesta" else "",
@@ -53,6 +55,8 @@ def runtime_config(tenant_id="vesta") -> dict:
         raise ValueError("Invalid model output limit or reasoning effort")
     config = dict(
         mode=mode,
+        run_mode=preferences.run_mode,
+        features=preferences.features.model_dump(),
         model=model or None,
         prompt_version=f"qa-skills-{snapshot['content_version']}-combined-1",
         skill_release=snapshot["release_id"],
@@ -69,8 +73,8 @@ def runtime_config(tenant_id="vesta") -> dict:
         model_max_output_tokens=max_output,
         model_reasoning_effort=effort,
         workflow_version=APP_VERSION,
-        jev_enabled_at_acceptance=(os.environ.get("QA_JEV_ENABLED", "false").lower() == "true"
-                                   and os.environ.get("QA_AUTH_MODE", "local") != "public"),
+        jev_enabled_at_acceptance=(preferences.features.classification
+                                   and os.environ.get("ACCESS_MODE", "local") != "public"),
         policy_text=policy,
         policy_status="supplied_unvalidated" if policy else "provisional_no_manual",
         policy_version=hashlib.sha256(policy.encode()).hexdigest() if policy else None,
@@ -80,4 +84,10 @@ def runtime_config(tenant_id="vesta") -> dict:
     from .combined import task, CombinedOutput
     config['combined_task'] = task(config)
     config['stage_schema_sha256'] = hashlib.sha256(str(CombinedOutput.model_json_schema()).encode()).hexdigest()
+    if config['jev_enabled_at_acceptance']:
+        from .classification import snapshot, ClassificationProblem
+        try:
+            config['jev_config_at_acceptance'] = snapshot(tenant_id)
+        except ClassificationProblem:
+            pass  # Existing readiness feedback still explains missing classification configuration.
     return config

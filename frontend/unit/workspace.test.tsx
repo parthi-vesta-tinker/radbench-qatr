@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { act } from 'react';
 import App from '../src/App';
+import { useClassification } from '../src/useClassification';
+import { ReviewJourney } from '../src/ReviewJourney';
 import { FindingClassification } from '../src/FindingClassification';
 import { api, ApiError } from '../src/api';
 import type { Review } from '../src/types';
@@ -24,7 +26,7 @@ async function mount() {await act(async()=>{root.render(<App/>);});}
 const text = () => (document.querySelector('#report-text') as HTMLTextAreaElement).value;
 const analytics = (): Analytics => ({object:'qa_analytics',tenant_id:'vesta',checked_at:new Date().toISOString(),period:'24h',period_start:null,source:'all',reviews:{total:0,with_comments:0,no_comments:0,critical:0,statuses:{queued:0,running:0,completed:0,needs_input:0,failed:0}},findings:{inconsistencies:0,critical_findings:0,clinical_observations:0,other_issues:0},feedback:{total:0,reviews:0,up:0,down:0,reasons:{}},critical_evaluation:{status:'not_measured',precision:null,recall:null,false_positive_rate:null,false_alert_share:null,reason:'No adjudicated reference cohort.'}});
 const knowledgeDetail = (): KnowledgeDetail => ({document:{document_id:'skill_test',title:'Review instructions',kind:'skill',description:'Controlled editorial content.',source_path:'skills/test/SKILL.md',version:'0.2.0',source_sha256:'a'.repeat(64),stages:['critical_finding_review'],used_by:['test'],runtime_use:'model_instruction',latest_revision:0,has_changes:false,source_changed:false},package_sha256:'b'.repeat(64),installed_content:'Installed instructions.',draft:null,saved_diff:'',recent_revisions:[],history_truncated:false});
-const playgroundCatalog = (mode:'demo'|'openai'='openai'): PlaygroundCatalog => ({object:'qa_playground_catalog',mode,ready:true,models:['gpt-6-astra'],live_model:'configured-model',pack_version:'0.3.0',pack_release:'vesta-qatr-0.3.0',skills:['a','b'],boundary:'Playground output is not a clinical review.',
+const playgroundCatalog = (mode:'demo'|'live'='live'): PlaygroundCatalog => ({object:'qa_playground_catalog',run_mode:mode,ready:true,models:['gpt-6-astra'],live_model:'configured-model',pack_version:'0.3.0',pack_release:'vesta-qatr-0.3.0',skills:['a','b'],boundary:'Playground output is not a clinical review.',
   categories:[{id:'critical_finding',title:'Critical findings',description:'Reports containing a critical observation.'},{id:'inconsistency',title:'Findings and impression inconsistency',description:'Impression does not follow from findings.'}],
   samples:[{sample_id:'critical-flagged',category:'critical_finding',title:'Flagged critical',report_text:'Findings:\nAcute right pneumothorax.\nImpression:\nAcute right pneumothorax.',demo_supported:true},
            {sample_id:'critical-uncertain',category:'critical_finding',title:'Uncertain critical',report_text:'Findings:\nPossible bleed.\nImpression:\nUncertain.',demo_supported:false},
@@ -39,7 +41,7 @@ async function choosePeriod(value:Analytics['period']) { await act(async()=>{con
 beforeEach(()=>{
   sessionStorage.clear();localStorage.clear();results.clear();requests=[];
   document.body.innerHTML='<div id="root"></div>';root=createRoot(document.getElementById('root')!);
-  api.config=async()=>({tenant_id:'vesta',api_version:'2026-09-22',mode:'openai',ready:true,model:'configured-model',policy_status:'provisional_no_manual',samples:[]});
+  api.config=async()=>({tenant_id:'vesta',api_version:'2026-09-22',run_mode:'live',features:{playground:true,skills:true,classification:true},ready:true,model:'configured-model',policy_status:'provisional_no_manual',samples:[]});
   api.status=async()=>({status:'ready',checked_at:new Date().toISOString(),readiness_scope:'Local checks only',components:{api:{status:'ok',message:'API responds'},dbos:{status:'ok',message:'Checkpoint store responds'},openai:{status:'configured',message:'Inference not verified'}}});
   api.history=async()=>({items:[],has_more:false,next_cursor:null});
   api.feedbackInbox=async()=>({items:[],has_more:false,next_cursor:null});
@@ -230,11 +232,10 @@ test('revision conflict retains text for reconciliation',async()=>{
 test('playground runs a sample and shows results and phase logs without copy actions',async()=>{
   await mount();await click('Playground');
   const pane=()=>document.querySelector('.playground-pane')!;
-  assert.match(pane().textContent!,/not a clinical review/i);
+  assert.doesNotMatch(pane().textContent!,/not a clinical review/i);
   assert.match(pane().textContent!,/Critical findings/);
-  assert.match(pane().textContent!,/Findings and impression inconsistency/);
-  assert.equal(button('Run test review').disabled,true);
-  await click('Flagged criticalRuns in demo');
+  assert.match(pane().textContent!,/Findings & impression/);
+  await click('Flagged critical finding');
   assert.equal(button('Run test review').disabled,false);
   await click('Run test review');
   await act(async()=>{await new Promise(r=>setTimeout(r,1100));});
@@ -251,7 +252,7 @@ test('playground runs a sample and shows results and phase logs without copy act
 test('demo mode blocks samples it cannot serve and the playground never enters history',async()=>{
   api.playground=async()=>playgroundCatalog('demo');
   await mount();await click('Playground');
-  await click('Uncertain criticalNeeds a model');
+  await click('Uncertain critical concernModel required');
   assert.equal(button('Run test review').disabled,true);
   assert.match(document.querySelector('.playground-pane')!.textContent!,/needs a configured model/i);
   await click('Review history');
@@ -311,6 +312,29 @@ test('collapsed tooltips appear on focus and dismiss with Escape',async()=>{
   assert.equal(document.activeElement,button('Skills'));
 });
 
+
+test('playground filters samples and preserves pasted text across source switches',async()=>{
+  await mount();await click('Playground');
+  const pane=document.querySelector('.playground-pane')!;
+  await act(async()=>{
+    const input=pane.querySelector('[aria-label="Search samples"]') as HTMLInputElement;
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value')!.set!.call(input,'laterality');
+    input.dispatchEvent(new window.Event('input',{bubbles:true}));
+  });
+  assert.equal(pane.querySelectorAll('.playground-sample').length,1);
+  await click('Laterality mismatch');
+  assert.match(pane.querySelector('.playground-report-text')!.textContent!,/Left effusion/);
+  await click('Paste report');await field('playground-report','Findings: preserved. Impression: preserved.');
+  await click('Sample reports');
+  assert.match(pane.querySelector('.playground-report-text')!.textContent!,/Left effusion/);
+  await click('Paste report');
+  assert.equal((pane.querySelector('#playground-report') as HTMLTextAreaElement).value,'Findings: preserved. Impression: preserved.');
+  let payload:unknown;
+  api.startPlaygroundRun=async input=>{payload=input;return playgroundRun('completed');};
+  await click('Run test review');
+  assert.deepEqual(payload,{model:'gpt-6-astra',report_text:'Findings: preserved. Impression: preserved.'});
+});
+
 test('critical review shows JEV labels and an urgency verification cue',async()=>{
   const source = {...review('qr-critical','Findings: Acute right pneumothorax. Impression: Same.'),
     execution_status:'completed',result:{critical_comments:[{observation_id:'obs-critical',comment:'Acute right pneumothorax.'}]}} as unknown as Review;
@@ -331,4 +355,69 @@ test('critical review shows JEV labels and an urgency verification cue',async()=
   assert.match(document.body.textContent!,/Verify the suggested communication priority/);
   await click('Accept labels');
   assert.equal(feedback.action,'accept');
+});
+
+test('Classification uses minimal empty states and clears the previous review immediately', async () => {
+  api.classificationsForReview = async () => [];
+  await mount();
+  await click('Classification');
+  assert.match(document.querySelector('.classification-pane')!.textContent!, /Review this report to see classification\./);
+  await click('Current review');
+  await paste('Findings: test. Impression: test.');
+  await click('Review');
+  await click('Classification');
+  assert.match(document.querySelector('.classification-pane')!.textContent!, /No classification available\./);
+  await click('New review');
+  await click('Classification');
+  assert.match(document.querySelector('.classification-pane')!.textContent!, /Review this report to see classification\./);
+});
+
+
+test('late classification responses cannot cross review or input-version boundaries', async () => {
+  let finish: (value: any) => void = () => {};
+  const source = {...review('qr-one','Findings: one. Impression: one.'), execution_status:'completed',
+    result:{critical_comments:[{observation_id:'obs-one'}]}} as unknown as Review;
+  api.classificationsForReview = async () => new Promise(resolve => { finish = resolve; });
+  function Probe({value}: {value: Review | null}) {
+    const data = useClassification(value, true, false);
+    return <div id="classification-probe">{data.runs.map(run => run.id).join(',')}</div>;
+  }
+  await act(async () => { root.render(<Probe value={source}/>); });
+  const oldResponse = finish;
+  await act(async () => { root.render(<Probe value={{...source,input_version:2}}/>); });
+  await act(async () => { oldResponse([{id:'old-classification',review_id:source.id,input_version:1,source_status:'current',observation_id:'obs-one',execution_status:'completed'}]); });
+  assert.equal(document.querySelector('#classification-probe')!.textContent, '');
+  await act(async () => { finish([{id:'new-classification',review_id:source.id,input_version:2,source_status:'current',observation_id:'obs-one',execution_status:'completed'}]); });
+  assert.equal(document.querySelector('#classification-probe')!.textContent, 'new-classification');
+  await act(async () => { root.render(<Probe value={null}/>); });
+  assert.equal(document.querySelector('#classification-probe')!.textContent, '');
+});
+
+test('classification progress preserves completed Results on pending and failed classification', async () => {
+  const source = {...review('qr-one','text'), execution_status:'completed'} as Review;
+  const data = {runs:[],config:null,loading:true,error:'',refresh:()=>{}};
+  await act(async () => {root.render(<ReviewJourney review={source} edited={false} busy={false} disconnected={false} classificationEnabled classification={data}/>);});
+  assert.equal(document.querySelectorAll('.review-journey .complete').length,4);
+  assert.match(document.querySelector('.review-journey .current')!.textContent!,/Classification/);
+  await act(async () => {root.render(<ReviewJourney review={source} edited={false} busy={false} disconnected={false} classificationEnabled classification={{...data,loading:false,runs:[{execution_status:'failed'} as any]}}/>);});
+  assert.equal(document.querySelectorAll('.review-journey .complete').length,4);
+  assert.match(document.querySelector('.review-journey .blocked')!.textContent!,/Classification/);
+});
+
+test('classification is not applicable only for a completed review with no critical findings', async () => {
+  const source = {...review('qr-clean','text'), execution_status:'completed', result:{critical_comments:[]}} as unknown as Review;
+  const renderJourney = async (value: Review, edited = false) => act(async () => {
+    root.render(<ReviewJourney review={value} edited={edited} busy={false} disconnected={false} classificationEnabled/>);
+  });
+  await renderJourney(source);
+  const stage = document.querySelector('.review-journey li:last-child')!;
+  assert.equal(stage.className, 'not-applicable');
+  assert.match(stage.textContent!, /not applicable — no critical findings reported/);
+  assert.ok(stage.querySelector('.lucide-minus'));
+  await renderJourney({...source,execution_status:'failed',result:null});
+  assert.equal(stage.className, 'pending');
+  await renderJourney(source, true);
+  assert.equal(stage.className, 'pending');
+  await renderJourney({...source,result:null});
+  assert.equal(stage.className, 'unavailable');
 });

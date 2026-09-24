@@ -39,7 +39,7 @@ def test_actual_http_adapter_is_single_call(client, monkeypatch, outcome):
     def factory(**kwargs):
         return AsyncOpenAI(**kwargs, api_key='controlled-never-transmitted', http_client=httpx.AsyncClient(transport=httpx.MockTransport(respond)))
     monkeypatch.setattr(reviewer,'AsyncOpenAI',factory)
-    monkeypatch.setenv('QA_MODE','openai')
+    monkeypatch.setenv('RUN_MODE','live')
     monkeypatch.setenv('OPENAI_API_KEY','controlled-never-transmitted')
     monkeypatch.setenv('OPENAI_MODEL','controlled-sdk-test')
     receipt = post(client,key=uuid.uuid4().hex,sample='clean')
@@ -53,7 +53,7 @@ def test_actual_http_adapter_is_single_call(client, monkeypatch, outcome):
 
 
 def test_invalid_input_uses_zero_calls(client,monkeypatch):
-    monkeypatch.setenv('QA_MODE','openai')
+    monkeypatch.setenv('RUN_MODE','live')
     monkeypatch.setenv('OPENAI_API_KEY','controlled-only')
     monkeypatch.setenv('OPENAI_MODEL','controlled-sdk-test')
     monkeypatch.setattr(reviewer,'make_model',lambda *args: pytest.fail('Invalid input reached provider'))
@@ -66,7 +66,7 @@ def test_concurrent_post_replay_uses_one_attempt(client,monkeypatch):
     from concurrent.futures import ThreadPoolExecutor
     from test_sdk import ControlledModel
     calls=[]
-    monkeypatch.setenv('QA_MODE','openai')
+    monkeypatch.setenv('RUN_MODE','live')
     monkeypatch.setenv('OPENAI_API_KEY','controlled-only')
     monkeypatch.setenv('OPENAI_MODEL','controlled-sdk-test')
     monkeypatch.setattr(reviewer,'make_model',lambda *args: ControlledModel(calls))

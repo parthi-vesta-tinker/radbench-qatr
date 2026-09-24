@@ -9,7 +9,7 @@ test('F3 phases and copy survive completion and reload',async({page,request})=>{
   await page.getByLabel('Report text',{exact:true}).fill(sample.report_text);
   await page.getByRole('button',{name:'Review',exact:true}).click();
   await expect(page.getByText('AI review',{exact:true})).toBeVisible();
-  await expect(page.getByText('Output',{exact:true})).toBeVisible();
+  await expect(page.getByText('Results',{exact:true})).toBeVisible();
   await expect(page.locator('.review-journey .complete')).toHaveCount(4);
   await expect(page.getByText('Language review',{exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:'Copy all comments',exact:true}).click();

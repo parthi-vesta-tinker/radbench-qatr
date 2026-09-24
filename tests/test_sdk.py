@@ -103,7 +103,7 @@ class ControlledModel(Model):
 )
 def test_sdk_durable_path(client, monkeypatch, mode):
     calls = []
-    monkeypatch.setenv("QA_MODE", "openai")
+    monkeypatch.setenv("RUN_MODE", "live")
     monkeypatch.setenv("OPENAI_API_KEY", "test-only-not-transmitted")
     monkeypatch.setenv("OPENAI_MODEL", "controlled-sdk-test")
     monkeypatch.setattr(

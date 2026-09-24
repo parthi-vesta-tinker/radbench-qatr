@@ -104,7 +104,7 @@ test('collapsed Studio keeps actual review status visible and can reveal all pha
   await page.getByRole('button',{name:'Collapse QA Studio',exact:true}).click();
   await page.getByLabel('Report text',{exact:true}).fill(config.samples.find((sample:{id:string})=>sample.id==='mixed').report_text);
   await page.getByRole('button',{name:'Review',exact:true}).click();
-  await expect(page.locator('#input-help[role="status"]')).toHaveText('Output ready.');
+  await expect(page.locator('#input-help[role="status"]')).toHaveText('Results ready.');
   await expect(page.locator('.review-journey .complete')).toHaveCount(4);
   await expect(page.getByText('AI review',{exact:true})).toBeVisible();
 });

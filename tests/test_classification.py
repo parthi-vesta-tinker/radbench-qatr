@@ -209,3 +209,42 @@ def test_replaced_review_does_not_attach_old_classification(workspace, monkeypat
     assert old["source_status"] == "superseded"
     assert old["result"] == run["result"]
     assert workspace.get(f'/api/v1/reviews/{source["id"]}/classifications').json() == []
+
+
+def test_analysis_uses_saved_request_and_excludes_private_metadata(workspace, monkeypatch):
+    calls = responses(monkeypatch)
+    source = review(workspace)
+    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    run = settle(workspace, classify(workspace, source).json()["id"])
+    # Inspection remains possible without current provider readiness or current rubric.
+    monkeypatch.delenv("TYPESAFE_API_KEY")
+    monkeypatch.setattr("backend.classification.rubric", lambda: (_ for _ in ()).throw(ValueError("changed")))
+    response = workspace.get(f'/api/v1/classifications/{run["id"]}/analysis')
+    assert response.status_code == 200, response.text
+    analysis = response.json()
+    assert analysis["state"] == calls[0]["state"]
+    assert analysis["questions"] == calls[0]["questions"]
+    assert analysis["model"] == calls[0]["model"]
+    assert analysis["rubric_version"] == "1.0.0"
+    assert analysis["rubric_status"] == "draft_research"
+    assert run["input"]["source"] == "qa_comment"
+    assert classification_store.job("different-tenant", run["id"]) is None
+    from backend.access import principal, Principal
+    from backend.main import app
+    monkeypatch.setitem(app.dependency_overrides, principal,
+                        lambda: Principal("different-tenant", frozenset({"reviews:read"})))
+    assert workspace.get(f'/api/v1/classifications/{run["id"]}/analysis').status_code == 404
+    assert workspace.get('/api/v1/classifications/missing/analysis').status_code == 404
+    assert len(calls) == 1
+    assert not any(key in response.text for key in ("grounded_anchors", "Authorization", "controlled-test-key", "workflow_id"))
+
+
+def test_classification_projection_identifies_quote_source_without_anchor_metadata():
+    from backend import presentation
+    item = dict(id="jc", review_id="qr", input_version=1, observation_id="obs", input_hash="hash",
+                input=dict(finding_text="Exact quote", qa_comment="QA", report_quotes=["Exact quote"]),
+                execution_status="completed", steps=[], result=None, error=None,
+                config=dict(model="jev", rubric=dict(id="rubric"), rubric_hash="hash", workflow_version="v1"),
+                created_at="now", updated_at="now")
+    public = presentation.classification(item, "current")
+    assert public["input"] == dict(finding_text="Exact quote", qa_comment="QA", source="report_excerpts")

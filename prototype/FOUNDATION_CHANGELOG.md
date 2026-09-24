@@ -1,5 +1,45 @@
 # Foundation implementation decisions and releases
 
+## Compact guidance and classification overviews — 2026-09-24
+
+Use a shared accessible disclosure for Post-review Guidance and Classification Overview.
+Default to two guidance steps or two finding group summaries, with an expansion chevron
+when more content exists. Keep feedback forms mounted while collapsed and reset expansion
+on review/version changes. Replace the three feedback actions with Give feedback, followed
+by Accept or Reject / correct. Require a reason for rejection/correction; preserve immutable
+predictions and existing accept/edit/reject API semantics. Remove the requested verification
+and model-suggestion sentences. No subtype is invented: the current contract has none.
+Frontend build passed. No automated tests or browser checks run per the user's earlier
+instruction; no database, API, provider or installed clinical-content changes.
+
+
+## Runtime settings and access naming — 2026-09-24
+
+Top-right Settings now saves tenant run mode (Demo/Live), the approved core review
+model and Playground, Skills and JEV switches. `RUN_MODE` and `ACCESS_MODE` replace
+the former environment names; access defaults to local and is server-controlled.
+JEV remains available in either run mode. The launcher no longer automatically enables
+JEV or overrides access when selecting Live, superseding the startup behavior below.
+Atomic revision-checked sidecars preserve accepted review snapshots and schema 8.
+Skills switching affects editorial tools, never published instructions. Controlled
+verification: 80 affected backend tests, then 32 settings/launcher/API checks after
+follow-up fixes; four focused Chromium browser tests and production build passed.
+
+
+## Post-review guidance boundary — 2026-09-24
+
+Rename the Studio section to “Post-review Guidance”. Use neutral placeholder
+copy until a completed current result exists; remove pre-review instructions, running
+commentary, and error recovery from this section. Suppress steps when text is stale or
+status is unconfirmed. Preserve result-specific advice for critical, other, and empty
+results. Extract a dedicated component and pure content derivation function so future
+classification and workflow rules can evolve independently of Studio layout.
+
+The workspace contract and backlog define future finding-linked classification guidance,
+support workflow configuration, and radiologist preferences. These are not activated by
+this change. No API/storage migration or provider behavior change. Tests and browser
+checks were not run at the user's request.
+
 ## Local live launch with both providers — 2026-09-24
 
 `npm run live` now enables OpenAI report review and JEV critical-finding
@@ -11,6 +51,9 @@ The existing `.qa-data-local` application store was explicitly upgraded from
 schema 7 to 8 after confirming no pending work or open SQLite users; a dated
 backup was created. Nine launcher/migration tests and the no-key command check
 passed. No provider request was made for this startup change.
+An isolated follow-up used the configured keys: one synthetic OpenAI review completed
+with a critical comment, and its automatic JEV classification completed. The command
+also started with both providers on a separate port without prompting.
 
 ## Critical finding JEV classification — 2026-09-24
 
@@ -223,7 +266,7 @@ storage schema or workflow identity changes. See [WORKSPACE_SPEC.md](WORKSPACE_S
 
 ## Explicit public access — 2026-09-21
 
-By user request, `QA_AUTH_MODE=public` permits unauthenticated remote access through Funnel
+By user request, `ACCESS_MODE=public` permits unauthenticated remote access through Funnel
 to the shared Vesta tenant with all scopes. The default remains loopback-only `local`;
 `api_key` keeps credential-scoped tenant access. Caller-controlled tenant overrides remain
 rejected. Forwarded client addresses are preserved rather than disguised as loopback.
@@ -472,3 +515,12 @@ F2 is implemented; see the current release above.
 F3: one combined DBOS request, at-most-once dispatch and independent session-spend ledger.
 F4: integrated product/browser regression and operational handoff.
 F5: separate explicit authorization for bounded live evaluation and qualified review.
+
+
+### 24 September 2026 — Classification workspace
+
+Added the review-scoped Classification tool, collapsed source inputs, organized
+label summary and saved-request analysis projection. Renamed visible Output to
+Results and connected the existing independent DBOS classification status to the
+journey. Provider request shape, rubric, stored workflow steps and recovery identity
+are unchanged. No storage migration or clinical-content release is involved.

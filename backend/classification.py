@@ -33,17 +33,18 @@ def rubric():
     return value, hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def configuration():
+def configuration(tenant_id="vesta", *, accepted=False):
     content, rubric_hash = rubric()
-    enabled = os.environ.get("QA_JEV_ENABLED", "false").lower() == "true"
+    from .preferences import read
+    enabled = accepted or read(tenant_id).features.classification
     model = os.environ.get("QA_JEV_MODEL", MODEL).strip()
     if model != MODEL:
         raise ValueError(f"QA_JEV_MODEL must be pinned to {MODEL}")
-    from .access import auth_mode
+    from .access import access_mode
     reason = None
     if not enabled:
         reason = "JEV classification is disabled."
-    elif auth_mode() == "public":
+    elif access_mode() == "public":
         reason = "JEV classification requires local or API-key access."
     elif not os.environ.get("TYPESAFE_API_KEY"):
         reason = "Configure TYPESAFE_API_KEY to classify findings."
@@ -61,8 +62,8 @@ def configuration():
     ), content, calibration
 
 
-def snapshot():
-    status, content, calibration = configuration()
+def snapshot(tenant_id="vesta", *, accepted=False):
+    status, content, calibration = configuration(tenant_id, accepted=accepted)
     if not status.ready:
         raise ClassificationProblem("JEV_NOT_CONFIGURED", status.reason or "JEV is unavailable.")
     return dict(model=status.model, rubric=content, rubric_hash=status.rubric_hash,

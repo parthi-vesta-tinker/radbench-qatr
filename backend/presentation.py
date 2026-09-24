@@ -26,6 +26,7 @@ PROVENANCE = {
     "authorship_status",
     "signature_status",
     "upstream_qa",
+    "jev_enabled_at_acceptance",
 }
 
 
@@ -38,7 +39,8 @@ def classification(item, source_status):
     return dict(id=item["id"], object="finding_classification", classification_schema_version="1.0",
                 review_id=item["review_id"], input_version=item["input_version"],
                 observation_id=item["observation_id"], input_hash=item["input_hash"],
-                input=pick(item["input"], {"finding_text", "qa_comment"}), source_status=source_status,
+                input={**pick(item["input"], {"finding_text", "qa_comment"}),
+                       "source": "report_excerpts" if item["input"].get("report_quotes") else "qa_comment"}, source_status=source_status,
                 execution_status=item["execution_status"], steps=item["steps"],
                 result=item["result"], error=item["error"],
                 provenance=dict(model=item["config"]["model"],
@@ -46,6 +48,18 @@ def classification(item, source_status):
                                 rubric_hash=item["config"]["rubric_hash"],
                                 workflow_version=item["config"]["workflow_version"]),
                 created_at=item["created_at"], updated_at=item["updated_at"])
+
+
+def classification_analysis(rid, input_data, config):
+    """Explicit inspection of the saved JEV request; no private anchor metadata."""
+    from .classification import request_body
+    body = request_body(input_data, config)
+    return dict(classification_id=rid, model=body["model"],
+                state=pick(body["state"], {"finding_text", "qa_comment", "report_quotes"}),
+                questions={field: pick(question, {"type", "instructions", "criteria"})
+                           for field, question in body["questions"].items()},
+                rubric_id=config["rubric"]["id"], rubric_version=config["rubric"]["version"],
+                rubric_status=config["rubric"]["status"], rubric_hash=config["rubric_hash"])
 
 
 def review(record, version=API_VERSION):

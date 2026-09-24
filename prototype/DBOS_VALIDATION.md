@@ -35,3 +35,15 @@ and provider checkpoint operation checks its captured input_version atomically b
 writing. A superseded execution cannot dispatch or overwrite a newer review. Queued or
 running reviews cannot be replaced. Playground retains isolated storage and the same
 four-phase execute implementation.
+
+
+## Classification progress
+
+The independent `qa.finding.classify.v1` workflow already runs on
+`qa-finding-classifications-v1`. The UI now presents its status after Results;
+classification does not block or rewrite the completed review. Its steps remain
+input validation, JEV classification, output validation and result assembly.
+The visible Results label combines the review's output validation and comment
+assembly without renaming persisted step IDs or changing recovery identities.
+Classification inspection is read-only. Ambiguous provider outcomes still require
+an explicit new request; viewing details and polling never retry dispatch.

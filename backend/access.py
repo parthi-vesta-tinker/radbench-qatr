@@ -10,7 +10,7 @@ import re
 from fastapi import Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-SCOPES = frozenset({"reviews:read", "reviews:write", "feedback:read", "feedback:write", "skills:read", "skills:write"})
+SCOPES = frozenset({"reviews:read", "reviews:write", "feedback:read", "feedback:write", "skills:read", "skills:write", "settings:write"})
 bearer = HTTPBearer(auto_error=False)
 
 
@@ -43,10 +43,10 @@ def tenants():
     return entries
 
 
-def auth_mode():
-    mode = os.environ.get("QA_AUTH_MODE", "local")
+def access_mode():
+    mode = os.environ.get("ACCESS_MODE", "local")
     if mode not in ("local", "public", "api_key"):
-        raise ValueError("QA_AUTH_MODE must be local, public or api_key.")
+        raise ValueError("ACCESS_MODE must be local, public or api_key.")
     return mode
 
 
@@ -82,14 +82,14 @@ def key_grants():
 
 def validate_access_config():
     tenants()
-    if auth_mode() == "api_key":
+    if access_mode() == "api_key":
         key_grants()
 
 
 def principal(
     request: Request, credentials: HTTPAuthorizationCredentials | None = Depends(bearer)
 ):
-    mode = auth_mode()
+    mode = access_mode()
     if request.headers.get("X-Tenant-Id") is not None:
         raise AccessError(
             400,
