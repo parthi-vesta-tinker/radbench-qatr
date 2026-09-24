@@ -589,7 +589,7 @@ def list_feedback_inbox(
 @app.get("/api/v1/analytics", response_model=AnalyticsResource)
 def get_analytics(
     p: Read,
-    period: Literal["7d", "30d", "all"] = "7d",
+    period: Literal["1h", "6h", "12h", "24h", "7d", "30d", "all"] = "7d",
     source: Literal["openai", "demo", "all"] = "openai",
 ):
     return reporting.analytics(p.tenant_id, period, source, "feedback:read" in p.scopes)

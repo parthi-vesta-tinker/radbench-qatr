@@ -459,6 +459,13 @@ class ReviewCounts(BaseModel):
     statuses: dict[str, int]
 
 
+class FindingCounts(BaseModel):
+    inconsistencies: int
+    critical_findings: int
+    clinical_observations: int
+    other_issues: int
+
+
 class FeedbackCounts(BaseModel):
     total: int
     reviews: int
@@ -486,10 +493,11 @@ class AnalyticsResource(BaseModel):
     object: Literal["qa_analytics"]
     tenant_id: str
     checked_at: str
-    period: Literal["7d", "30d", "all"]
+    period: Literal["1h", "6h", "12h", "24h", "7d", "30d", "all"]
     period_start: str | None
     source: Literal["openai", "demo", "all"]
     reviews: ReviewCounts
+    findings: FindingCounts
     feedback: FeedbackCounts | None
     critical_evaluation: CriticalEvaluationReadiness
 

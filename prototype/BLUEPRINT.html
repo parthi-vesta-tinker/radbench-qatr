@@ -116,6 +116,17 @@
 </tbody></table></div>
 <p>Reference entrypoints: [API design](API_DESIGN.md), [DBOS validation](DBOS_VALIDATION.md), [acceptance](ACCEPTANCE.md), [Workspace](WORKSPACE_SPEC.md), [Analytics](ANALYTICS_SPEC.md), [Skills Studio](SKILLS_STUDIO_SPEC.md), [backlog](BACKLOG.md).</p>
 <p>Sources: <a href="https://github.com/parthi-vesta-tinker/qatr/tree/b906151a2bdef8c206325de64d46b61cdf5b7ad7/src/qatr/_vendor/qa_skills/skills/qa-critical-match/references">pinned qatr references</a> and <a href="https://developers.openai.com/api/docs/guides/structured-outputs">OpenAI structured outputs</a>. Structured schemas constrain shape, not clinical correctness; refusal and incomplete output need explicit handling. Runtime/DBOS claims must be checked against installed code and F3 tests.</p></section><section id="changes"><h2 id="changes-foundation-implementation-decisions-and-releases">Foundation implementation decisions and releases</h2>
+<h3 id="changes-analytics-findings-and-rolling-periods-2026-09-24">Analytics findings and rolling periods — 2026-09-24</h3>
+<p>Simplify Analytics around saved review findings. The page shows counts of accepted comments for inconsistencies, critical findings, clinical observations and other issues, followed by submitted, completed and failed review counts. Private accepted check identities supply the category when available; older/demo comments use their public group and finding type. These are comment counts, not adjudicated clinical accuracy measures. Feedback and the unmeasured clinical-performance fields remain in the API but no longer crowd the page.</p>
+<p>The screen has one period selector with rolling 1, 6, 12 and 24 hour, 7 and 30 day, and all-time windows. It requests all review sources so demo records are not silently hidden. The optional API source filter remains for existing clients. The analytics response adds finding counts; generated OpenAPI and TypeScript are synchronized. Schema 7 and the review execution path are unchanged.</p>
+<p>Verification: 37 affected API/reporting tests, 24 DOM tests, and focused Chromium analytics checks passed with controlled data; production build, generated-contract checks and documentation checks passed. No real-provider request or clinical adjudication was performed.</p>
+<h3 id="changes-review-history-table-labels-and-status-presentation-2026-09-24">Review History table labels and status presentation — 2026-09-24</h3>
+<p>Rename the Review History columns to Review ID, Report description and Submitted time. The History table now renders every status with one neutral, equal-size label, so Completed and Failed do not use different colour treatments. Progress and system-status presentation are unchanged.</p>
+<p>Verification: 24 DOM tests and production build passed. No API, storage or provider behavior changed.</p>
+<h3 id="changes-review-history-and-prior-review-input-handling-2026-09-23">Review history and prior-review input handling — 2026-09-23</h3>
+<p>Review History now supports text/status/result/feedback filters, the last 24 hours, 3 days, 7 days or a custom submitted-time range, compact display IDs, submitter, last submitted time, comments and feedback dialogs, and 20-item cursor pages. Re-review replaces the same current record and timestamp. The reports rail is scrollable and displays each entry on one line with a timestamp.</p>
+<p>Input validation accepts an earlier Findings/Impression pair only when it is clearly preceded by History or Comparison context; the final pair is supplied to the model as the current pair. Two unmarked reports, mismatched labels and addendum-separated pairs remain blocked before any model request. The one contextual input message now gives a plain warning icon and actionable wording for missing or unscoped repeated sections. Local setup documents <code>npm run demo</code>, <code>npm run live</code>, and the optional local operator name used in Review History.</p>
+<p>Verification: 18 focused backend tests, 24 DOM tests, production build, generated API/TypeScript checks and documentation checks passed. Demo startup used no provider call.</p>
 <h3 id="changes-copy-alignment-and-pacs-comments-2026-09-22">Copy alignment and PACS comments — 2026-09-22</h3>
 <p>Align all three copy buttons with their headings using consistent sizing at desktop and phone widths. Rename General comments to PACS comments in the workspace, playground and copy formatting; omit display/copy numbering. Successful copy no longer emits a message. Clipboard failure still exposes a manual fallback. Historical UI copy projection regenerates text from observations, excluding old QA review prefixes and numbering without changing stored results or replay receipts. Internal general_comments field names remain compatible. Verification: production build, 21 affected backend tests, 22 component tests and the clipboard/reload browser scenario passed, including all three copy actions and alignment at 1536/390/320px. Mobile screenshot inspected. No real-provider calls.</p>
 <h3 id="changes-service-health-presentation-redesign-2026-09-22">Service health presentation redesign — 2026-09-22</h3>
@@ -352,6 +363,30 @@
 <p>Current release: application <strong>0.14.0</strong>, bundle <strong>1.20</strong>, foundation <strong>F3</strong>, API <strong>2026-09-22</strong>, SQLite schema <strong>7</strong>.</p>
 <h3 id="status-implemented">Implemented</h3>
 <ul>
+<li><strong>Finding-first Analytics:</strong> four saved-comment categories lead, with submitted/completed/failed</li>
+</ul>
+<p>  counts secondary. One rolling period selector (1/6/12/24 hours, 7/30 days, all time) replaces   the source control; the screen includes all review sources. The API adds finding counts while   retaining feedback, source filtering and unmeasured clinical fields for existing clients.   Verification on 24 September 2026: 37 affected Python tests, 24 DOM tests, focused Chromium   analytics checks, production build, generated-contract checks and documentation checks passed.   Controlled data only; no real-provider call or clinical adjudication.</p>
+<ul>
+<li><strong>Review History ID presentation:</strong> removed the second-line “AI”/“Demo” mode text from each</li>
+</ul>
+<p>  Review ID cell; IDs remain clickable and provider mode remains in stored provenance.   Verification on 24 September 2026: production build, 24 DOM tests, and the focused   two-review browser test passed in demo mode; the populated desktop table was inspected.   No API, storage, or provider behavior changed.</p>
+<ul>
+<li><strong>Unsubmitted review results presentation:</strong> the section title is “Review Results”</li>
+</ul>
+<p>  and its empty message is “Report review and comments will appear here,” aligned directly below   the title without an icon. Verification on 24 September 2026: production build, 24 DOM tests,   and the focused header browser check passed; desktop and 390px screenshots were inspected.   No provider call or API change.</p>
+<ul>
+<li><strong>Completed empty review presentation:</strong> the output shows only “No actionable observations,”</li>
+</ul>
+<p>  aligned with the comment content; the extra icon and explanatory line are removed.   Verification on 24 September 2026: production build, 24 DOM tests, and the focused   replacement browser test passed in demo mode at 1536px, 390px, and 320px. No provider call   or API change.</p>
+<ul>
+<li><strong>Review History table presentation:</strong> column labels now use Review ID, Report description and</li>
+</ul>
+<p>  Submitted time. Completed and Failed use the same neutral, equal-size History-table label;   progress and system-status severity presentation is unchanged. Verification: 24 DOM tests and   production build passed. No API, storage or provider behavior changed.</p>
+<ul>
+<li><strong>Review History and prior-review input:</strong> history supports practical filters, quick submitted</li>
+</ul>
+<p>  time ranges, compact IDs, operator, latest submission time, comments and feedback dialogs, and   20-item pages. Re-review replaces the same current record. Explicit History/Comparison context   permits a prior Findings/Impression pair while unmarked duplicate reports remain blocked before   a provider request. New Review gives one actionable pre-check message with a warning icon.   The reports rail is single-line and scrollable. <code>npm run demo</code> and <code>npm run live</code> are documented,   including optional local operator configuration. Verification: 18 focused backend tests, 24 DOM   tests, production build, generated-contract checks and documentation checks passed; no provider   call was made.</p>
+<ul>
 <li><strong>Copy presentation:</strong> aligned buttons, PACS comments naming, unnumbered comments and clipboard text, no success message. Build, 21 backend and 22 component tests plus responsive clipboard browser checks passed.</li>
 </ul>
 <ul>
@@ -493,7 +528,49 @@
 <li><strong>F4 — product regression and handoff:</strong> repeat integrated acceptance on a fresh store, review operator-facing failure handling and recovery guidance, verify the distributable bundle, and record any release-blocking issue.</li>
 <li><strong>F5 — bounded evaluation:</strong> run a predeclared live-provider evaluation and keep model behavior review separate from qualified clinical adjudication.</li>
 </ul>
-<p>See [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md) for gate details and [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md) for implementation decisions.</p></section><section id="api"><h2 id="api-api-contract">API contract</h2>
+<p>See [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md) for gate details and [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md) for implementation decisions.</p>
+<h3 id="status-review-history-investigation-24-september-2026">Review history investigation — 24 September 2026</h3>
+<ul>
+<li>Added <code>frontend/tests/history-retention.spec.ts</code>: two submissions through New review</li>
+</ul>
+<p>  retain distinct IDs and input version 1, appear in the sidebar and history after reload,   and reopen with their original text. The controlled browser test reported no page errors;   its desktop screenshot was inspected at 1536×1024.</p>
+<ul>
+<li>The new retention test and existing replacement test both passed (<strong>2 Playwright tests</strong>)</li>
+</ul>
+<p>  against isolated demo storage at <code>http://127.0.0.1:8765</code>. The frontend production build   passed. Playwright used local Chromium because the Browser plugin was not available;   sandbox server connectivity timed out, then the approved outside-sandbox run passed.</p>
+<ul>
+<li>The inspected configured local store contained one review at input version 4; request</li>
+</ul>
+<p>  receipts included one create operation and replacement operations. This supports repeated   replacement as the local explanation, but does not establish behavior on a different server.   Review again intentionally retains one history entry under the workspace contract.</p>
+<ul>
+<li>No application behavior, live records, or provider execution changed. No deployment or</li>
+</ul>
+<p>  clinical evaluation was performed. The new retention flow was checked on desktop only.</p>
+<h3 id="status-applied-local-history-recovery-24-september-2026">Applied local history recovery — 24 September 2026</h3>
+<ul>
+<li>Explicitly restored 39 terminal reviews from <code>.qa-data-foundation-v5</code> into the active</li>
+</ul>
+<p>  <code>.qa-data-local</code> store, preserving its existing review: <strong>40 reviews total</strong>. Imported   associated snapshots, results, observations, three feedback records, provider checkpoints   and 49 review-related idempotency receipts. Original review projections match exactly.</p>
+<ul>
+<li>Both application and DBOS databases were backed up in each folder under</li>
+</ul>
+<p>  <code>history-backup-20260924T154948978537Z</code> before importing with the application stopped.   No DBOS workflows, Playground records or Studio drafts were imported. Source data and   current tenant bindings remain intact. SQLite integrity and foreign-key checks passed.</p>
+<ul>
+<li>Added the explicit offline <code>scripts/restore_review_history.py</code> utility and documented</li>
+</ul>
+<p>  its use. <strong>4 controlled recovery tests passed</strong>, covering preservation, repeat import,   rollback on conflicts, and refusing pending work in either store. A rehearsal against   copies of the actual stores verified all 40 original review projections before recovery.</p>
+<ul>
+<li><strong>1 isolated demo browser regression passed</strong>: New review creates distinct entries,</li>
+</ul>
+<p>  retained after reload and accessible from history. No provider calls were made.</p>
+<ul>
+<li>The live app required its interactive API key to be re-entered on restart. After restart,</li>
+</ul>
+<p>  read-only Chromium checks at <code>http://localhost:8000</code> passed: 40 distinct reviews across   API and UI pagination, newest/oldest records reopen with matching text, New review opens   blank, and returning to history retains the records. Page identity, rendered content,   absence of a framework overlay and browser console/page errors were checked. Desktop   screenshot inspected at 1536×1024. No live submissions or provider probes were performed.</p>
+<ul>
+<li>Documentation link/inventory validation passed. This recovery does not imply clinical</li>
+</ul>
+<p>  validation or production readiness; mobile recovery verification was not repeated.</p></section><section id="api"><h2 id="api-api-contract">API contract</h2>
 <p>The active public contract is <code>QA-Version: 2026-09-22</code>; omitting the header selects the same version. Other explicit versions are rejected. Generated [openapi.json](openapi.json) is the schema authority and must be regenerated from the FastAPI application.</p>
 <h3 id="api-general-rules">General rules</h3>
 <ul>
@@ -567,7 +644,7 @@ npm --prefix frontend run build</code></pre>
 <li><strong>Studio:</strong> compact tools for New review, Review history, Feedbacks, Analytics, Skills, and Playground. Tool navigation preserves the current report draft and mounted editor state.</li>
 <li><strong>Review panel:</strong> review steps show real execution state; <strong>Guidance: Next steps</strong> lists the numbered actions for the current state. Guidance is advice, not tracked progress, and stores no per-step state.</li>
 <li><strong>Feedback:</strong> thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.</li>
-<li><strong>Quality review:</strong> the output panel is headed <strong>Quality review</strong>. PACS comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.</li>
+<li><strong>Review results:</strong> the output panel is headed <strong>Review Results</strong>. PACS comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.</li>
 <li><strong>Side panels:</strong> Report reviews and QA Studio collapse independently into 60px rails. Expand/collapse controls live in their headers. The collapsed Report reviews rail retains Current review; the Studio rail retains all six tool icons in the same order. Every rail control has a visible hover/focus tooltip and an accessible name. Escape dismisses tooltips without moving focus. The entire Studio side panel, including guidance, collapses together.</li>
 <li><strong>Skills placement:</strong> six equal Studio tiles in three rows: New review / Review history, Feedbacks / Analytics, Skills / Playground. The destination heading and Playground link also use Skills; reference content remains available inside it.</li>
 <li><strong>Responsive behavior:</strong> above 1120px both panels default expanded and remember independent browser-local collapse preferences. At 651–1120px both default to rails, with at most one expanded. At 650px and below, Report reviews and QA Studio buttons open modal side drawers over full-width work. Escape, close, backdrop, or navigation dismisses the drawer; focus is trapped while open and returned to its opener on dismissal. Desktop preferences survive viewport changes. Appearance supports light and dark themes.</li>
@@ -581,7 +658,10 @@ npm --prefix frontend run build</code></pre>
 <ul>
 <li>Review history is tenant scoped and paginated.</li>
 <li>Feedbacks is a searchable/filterable inbox linked to the original review.</li>
-<li>Analytics uses the full matching tenant dataset and keeps operational, feedback, and unmeasured clinical metrics distinct.</li>
+<li>Analytics shows saved comment counts by inconsistency, critical finding, clinical observation,</li>
+</ul>
+<p>  and other issue first; submitted/completed/failed counts are secondary. One period control   spans 1 hour through all time and includes all review sources. Feedback and unmeasured   clinical metrics remain distinct in the API and are omitted from this compact screen.</p>
+<ul>
 <li>Stakeholder outcomes are removed; no outcome controls or acceptance analytics remain.</li>
 <li>Skills shows verified installed content and tenant draft revisions; editing never activates a model change.</li>
 <li>Playground runs the real review against curated samples or a pasted report, in isolation. It never becomes a review: no history, feedback, analytics, outcome or copy action, and its banner cannot be dismissed.</li>
@@ -589,25 +669,30 @@ npm --prefix frontend run build</code></pre>
 </ul>
 <p>No control sends a report, edits a source report, triggers clinical escalation, or releases a content draft.</p>
 <h3 id="workspace-secondary-workspace-typography">Secondary workspace typography</h3>
-<p>Review history, Feedbacks, Analytics, Skills and Playground share 18px page titles, 16px section headings, 14px subsection headings and controls, and 13px supporting text. Filters are grouped with consistent labels and spacing; mobile controls have 44px minimum heights. History retains a table on desktop and labelled entries on phones, with every column available. Skills source editors keep monospace text; Playground keeps its test boundary and distinct notice. Analytics counts and clinical-boundary wording are unchanged.</p>
+<p>Review history, Feedbacks, Analytics, Skills and Playground share 18px page titles, 16px section headings, 14px subsection headings and controls, and 13px supporting text. Filters are grouped with consistent labels and spacing; mobile controls have 44px minimum heights. History retains a table on desktop and labelled entries on phones, with every column available. Skills source editors keep monospace text; Playground keeps its test boundary and distinct notice. Analytics uses a monochrome four-metric findings row, a smaller activity row, and one concise clinical-boundary sentence.</p>
 <p>The four-stage journey is compact and shares one row with the Review button at desktop and mobile widths. One status message lives below the journey; no duplicate input hint or output status is shown. Copy actions omit the UI-only QA review prefix. Light/dark palettes are monochrome, with amber reserved for progress warning/blocker states.</p>
 <p>Contextual review feedback sits directly below the New review/Report review title, above the paste field. The compact journey beside Review uses Input, Validate, AI review and Output. Show the feedback once only.</p>
 <h3 id="workspace-service-health-presentation">Service health presentation</h3>
 <p>The popup pairs a concise summary with a prominent top-right refresh icon and its Last checked timestamp. A bordered, keyboard-operable View all N checks disclosure reveals consistent name/status rows for API backend, Database, DBOS, QA skills and OpenAI. The OpenAI row has a tooltip-labelled check icon; only explicit activation probes the connection. Its result updates the row status and summary. Refresh clears that result. Routine descriptions and model-metadata/no-report disclaimers are omitted from the UI; connection errors retain actionable messages and codes. Keep monochrome styling, light/dark appearance, narrow-screen fit, Escape/outside-click dismissal and focus return.</p>
 <p>Copy buttons share one size and align with the right edge of their headings. Display comments without numbering; copied groups use PACS comments and omit numbering and the UI-only QA review title. Successful copying adds no contextual message; clipboard failure retains a manual-copy fallback.</p></section><section id="analytics"><h2 id="analytics-analytics-contract">Analytics contract</h2>
 <p>Analytics aggregates the entire tenant-scoped database population matching the selected UTC period and source. It never treats the currently loaded history page as its denominator.</p>
+<p>The Analytics screen has one period control: rolling 1, 6, 12 and 24 hours; 7 and 30 days; or all time. It includes all saved review sources so controlled/demo reviews are visible. The API retains its optional source parameter for existing clients. Changing the period reloads all counts from the full matching tenant dataset.</p>
 <h3 id="analytics-definitions">Definitions</h3>
 <ul>
 <li><strong>Review operations:</strong> accepted, queued/running, completed, needs-input, and failed reviews; known model calls, tokens, and conservative cost fields remain nullable when unavailable.</li>
+<li><strong>Review findings:</strong> counts of saved comments on completed latest-state reviews. Each comment</li>
+</ul>
+<p>  belongs to exactly one display category: critical comments are <strong>Critical findings</strong>;   internal-consistency checks are <strong>Inconsistencies</strong>; clinical-question and recommendation   checks are <strong>Clinical observations</strong>; remaining checks are <strong>Other issues</strong>. If an older or   demo result lacks private check identity, a noncritical discrepancy counts as an   inconsistency and a noncritical suggestion as another issue. These are comment counts,   so a report can contribute to multiple categories. They do not assert clinical accuracy.</p>
+<ul>
 <li><strong>Feedback:</strong> latest applicable feedback counts and reasons. Feedback measures user response, not clinical correctness.</li>
 <li><strong>Clinical performance:</strong> recall, precision, false-positive rate, false-alert share, and related values remain <code>null</code> until an independent adjudicated reference cohort exists. Missing evidence is never displayed as zero.</li>
 </ul>
-<p>Source filters describe provenance such as live-provider or controlled fixture data. They do not represent Test/Production isolation.</p>
+<p>The screen prioritizes findings, with submitted/completed/failed review counts secondary. Feedback and unmeasured clinical-performance detail remain available through the API but do not occupy the simplified screen. Source filters describe provenance such as live-provider or controlled fixture data; they do not represent Test/Production isolation.</p>
 <h3 id="analytics-future-clinical-metrics">Future clinical metrics</h3>
 <p>Enabling clinical performance requires a predeclared representative cohort, explicit unit of analysis, versioned reference standard, qualified independent adjudication, disagreement handling, positive and negative cases, immutable release provenance, and visible exclusions. Report-level detection and finding-level matching must be reported separately with numerator, denominator, coverage, sample size, and uncertainty.</p>
 <h3 id="analytics-latest-state-reviews-0-14-0">Latest-state reviews (0.14.0)</h3>
 <p>Review totals count saved review IDs once, using latest submitted text/status/time. A failure replaced by a completed review counts as completed, not an additional failure. Feedback events remain review-scoped and continue contributing to feedback totals. These are latest-state operational counts, not historical execution-attempt reliability metrics.</p>
-<p>Stakeholder outcomes and acceptance measures were removed on 2026-09-22 by user decision. Analytics exposes review totals, feedback totals and explicitly unmeasured clinical metrics only. Dormant legacy outcome rows are not queried.</p></section><section id="skills"><h2 id="skills-skills-contract">Skills contract</h2>
+<p>Stakeholder outcomes and acceptance measures were removed on 2026-09-22 by user decision. Analytics exposes review totals, finding-category counts, feedback totals and explicitly unmeasured clinical metrics. Dormant legacy outcome rows are not queried.</p></section><section id="skills"><h2 id="skills-skills-contract">Skills contract</h2>
 <p>Skills is a tenant-scoped editorial tool inside QA Studio. It can inspect verified installed instructions and references, compare proposed text, save immutable draft revisions, restore an older revision as a new proposal, and export a saved proposal. It makes no provider call.</p>
 <h3 id="skills-content-boundary">Content boundary</h3>
 <p>The catalog is built from the verified installed package and includes skill documents, shared references, qatr source/catalog documents, and configured tenant guidance. It shows actual combined-request usage. Host validation references are labeled as such and are not presented as model instructions.</p>

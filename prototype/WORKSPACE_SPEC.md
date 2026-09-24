@@ -14,7 +14,7 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 - **Studio:** compact tools for New review, Review history, Feedbacks, Analytics, Skills, and Playground. Tool navigation preserves the current report draft and mounted editor state.
 - **Review panel:** review steps show real execution state; **Guidance: Next steps** lists the numbered actions for the current state. Guidance is advice, not tracked progress, and stores no per-step state.
 - **Feedback:** thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.
-- **Quality review:** the output panel is headed **Quality review**. PACS comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.
+- **Review results:** the output panel is headed **Review Results**. PACS comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.
 - **Side panels:** Report reviews and QA Studio collapse independently into 60px rails. Expand/collapse controls live in their headers. The collapsed Report reviews rail retains Current review; the Studio rail retains all six tool icons in the same order. Every rail control has a visible hover/focus tooltip and an accessible name. Escape dismisses tooltips without moving focus. The entire Studio side panel, including guidance, collapses together.
 - **Skills placement:** six equal Studio tiles in three rows: New review / Review history, Feedbacks / Analytics, Skills / Playground. The destination heading and Playground link also use Skills; reference content remains available inside it.
 - **Responsive behavior:** above 1120px both panels default expanded and remember independent browser-local collapse preferences. At 651–1120px both default to rails, with at most one expanded. At 650px and below, Report reviews and QA Studio buttons open modal side drawers over full-width work. Escape, close, backdrop, or navigation dismisses the drawer; focus is trapped while open and returned to its opener on dismissal. Desktop preferences survive viewport changes. Appearance supports light and dark themes.
@@ -32,7 +32,10 @@ Copy text is always server derived from the same immutable result displayed on s
 
 - Review history is tenant scoped and paginated.
 - Feedbacks is a searchable/filterable inbox linked to the original review.
-- Analytics uses the full matching tenant dataset and keeps operational, feedback, and unmeasured clinical metrics distinct.
+- Analytics shows saved comment counts by inconsistency, critical finding, clinical observation,
+  and other issue first; submitted/completed/failed counts are secondary. One period control
+  spans 1 hour through all time and includes all review sources. Feedback and unmeasured
+  clinical metrics remain distinct in the API and are omitted from this compact screen.
 - Stakeholder outcomes are removed; no outcome controls or acceptance analytics remain.
 - Skills shows verified installed content and tenant draft revisions; editing never activates a model change.
 - Playground runs the real review against curated samples or a pasted report, in isolation. It never becomes a review: no history, feedback, analytics, outcome or copy action, and its banner cannot be dismissed.
@@ -47,7 +50,8 @@ Review history, Feedbacks, Analytics, Skills and Playground share 18px page titl
 Filters are grouped with consistent labels and spacing; mobile controls have 44px minimum
 heights. History retains a table on desktop and labelled entries on phones, with every
 column available. Skills source editors keep monospace text; Playground keeps its test
-boundary and distinct notice. Analytics counts and clinical-boundary wording are unchanged.
+boundary and distinct notice. Analytics uses a monochrome four-metric findings row,
+a smaller activity row, and one concise clinical-boundary sentence.
 
 The four-stage journey is compact and shares one row with the Review button at desktop and mobile widths. One status message lives below the journey; no duplicate input hint or output status is shown. Copy actions omit the UI-only QA review prefix. Light/dark palettes are monochrome, with amber reserved for progress warning/blocker states.
 

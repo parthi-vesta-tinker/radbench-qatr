@@ -16,12 +16,13 @@ def reporting_db(client, monkeypatch, tmp_path):
     return client
 
 
-def seed(tenant="vesta", source="openai", status="completed", days=0, critical=False):
+def seed(tenant="vesta", source="openai", status="completed", days=0, hours=0,
+         critical=False, result=None):
     rid = "qr_" + uuid.uuid4().hex
-    doc = dict(review_id=rid, tenant_id=tenant, created_at=(datetime.now(timezone.utc)-timedelta(days=days)).isoformat(),
+    doc = dict(review_id=rid, tenant_id=tenant, created_at=(datetime.now(timezone.utc)-timedelta(days=days, hours=hours)).isoformat(),
                input_hash="controlled-hash", input={"report_text": "Controlled source report."},
                execution_status=status, provenance={"mode": source},
-               result={"result_version": 1, "outcome": "observations" if critical else "no_observations",
+               result=result or {"result_version": 1, "outcome": "observations" if critical else "no_observations",
                        "critical_finding_detected": critical, "general_comments": [],
                        "critical_comments": [{"observation_id": "obs-1", "comment": "Controlled comment."}] if critical else []})
     with store.db() as conn:
@@ -80,6 +81,51 @@ def test_analytics_database_totals_not_page_counts_and_period(reporting_db):
     assert week['critical_evaluation']['recall'] is None
     assert week['critical_evaluation']['fp'] is None
     assert 'acceptance' not in week
+
+
+def test_analytics_finding_categories_and_short_periods(reporting_db):
+    client = reporting_db
+    comments = [
+        {"observation_id": "obs-1", "finding_type": "discrepancy", "comment": "Conflicting sides."},
+        {"observation_id": "obs-2", "finding_type": "discrepancy", "comment": "Question unanswered."},
+        {"observation_id": "obs-3", "finding_type": "suggestion", "comment": "Correct terminology."},
+        {"observation_id": "obs-5", "finding_type": "discrepancy", "comment": "Recommendation conflicts with report."},
+    ]
+    result = {
+        "result_version": 1, "outcome": "observations", "critical_finding_detected": True,
+        "general_comments": comments,
+        "critical_comments": [{"observation_id": "obs-4", "finding_type": "suggestion", "comment": "Critical concern."}],
+        "_candidate_mapping": [
+            {"observation_id": "obs-1", "candidates": [{"check_id": "qa-internal-consistency"}]},
+            {"observation_id": "obs-2", "candidates": [{"check_id": "qa-clinical-question"}]},
+            {"observation_id": "obs-3", "candidates": [{"check_id": "qa-terminology-errors"}]},
+            {"observation_id": "obs-4", "candidates": [{"check_id": "qa-critical-match"}]},
+            {"observation_id": "obs-5", "candidates": [{"check_id": "qa-recommendations"}]},
+        ],
+    }
+    seed(result=result)
+    seed(hours=2, source="demo", result={
+        "result_version": 1, "outcome": "observations", "critical_finding_detected": False,
+        "general_comments": [{"observation_id": "obs-1", "finding_type": "discrepancy", "comment": "Demo discrepancy."}],
+        "critical_comments": [],
+    })
+    seed(hours=8, status="failed")
+    seed(hours=18)
+    seed(days=10, critical=True)
+    seed(tenant="tenant_b", critical=True)
+    hour = client.get('/api/v1/analytics?period=1h&source=all').json()
+    assert hour['reviews']['total'] == 1
+    assert hour['findings'] == {
+        'inconsistencies': 1, 'critical_findings': 1,
+        'clinical_observations': 2, 'other_issues': 1,
+    }
+    assert client.get('/api/v1/analytics?period=6h&source=all').json()['findings']['inconsistencies'] == 2
+    assert client.get('/api/v1/analytics?period=12h&source=all').json()['reviews']['statuses']['failed'] == 1
+    assert client.get('/api/v1/analytics?period=24h&source=all').json()['reviews']['total'] == 4
+    assert client.get('/api/v1/analytics?period=7d&source=all').json()['reviews']['total'] == 4
+    assert client.get('/api/v1/analytics?period=30d&source=all').json()['findings']['critical_findings'] == 2
+    assert client.get('/api/v1/analytics?period=all&source=all').json()['reviews']['total'] == 5
+    assert client.get('/api/v1/analytics?period=6h').json()['reviews']['total'] == 1
 
 
 def test_stakeholder_outcomes_removed(reporting_db):

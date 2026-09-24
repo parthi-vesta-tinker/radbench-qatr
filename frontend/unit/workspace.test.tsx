@@ -21,7 +21,7 @@ async function click(name:string) { await act(async()=>{button(name).click();});
 async function paste(text:string) { await act(async()=>{const input=document.querySelector('#report-text') as HTMLTextAreaElement; assert.ok(input && !input.readOnly); Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value')!.set!.call(input,text);input.dispatchEvent(new window.Event('input',{bubbles:true}));}); }
 async function mount() {await act(async()=>{root.render(<App/>);});}
 const text = () => (document.querySelector('#report-text') as HTMLTextAreaElement).value;
-const analytics = (): Analytics => ({object:'qa_analytics',tenant_id:'vesta',checked_at:new Date().toISOString(),period:'7d',period_start:null,source:'openai',reviews:{total:0,with_comments:0,no_comments:0,critical:0,statuses:{queued:0,running:0,completed:0,needs_input:0,failed:0}},feedback:{total:0,reviews:0,up:0,down:0,reasons:{}},critical_evaluation:{status:'not_measured',precision:null,recall:null,false_positive_rate:null,false_alert_share:null,reason:'No adjudicated reference cohort.'}});
+const analytics = (): Analytics => ({object:'qa_analytics',tenant_id:'vesta',checked_at:new Date().toISOString(),period:'24h',period_start:null,source:'all',reviews:{total:0,with_comments:0,no_comments:0,critical:0,statuses:{queued:0,running:0,completed:0,needs_input:0,failed:0}},findings:{inconsistencies:0,critical_findings:0,clinical_observations:0,other_issues:0},feedback:{total:0,reviews:0,up:0,down:0,reasons:{}},critical_evaluation:{status:'not_measured',precision:null,recall:null,false_positive_rate:null,false_alert_share:null,reason:'No adjudicated reference cohort.'}});
 const knowledgeDetail = (): KnowledgeDetail => ({document:{document_id:'skill_test',title:'Review instructions',kind:'skill',description:'Controlled editorial content.',source_path:'skills/test/SKILL.md',version:'0.2.0',source_sha256:'a'.repeat(64),stages:['critical_finding_review'],used_by:['test'],runtime_use:'model_instruction',latest_revision:0,has_changes:false,source_changed:false},package_sha256:'b'.repeat(64),installed_content:'Installed instructions.',draft:null,saved_diff:'',recent_revisions:[],history_truncated:false});
 const playgroundCatalog = (mode:'demo'|'openai'='openai'): PlaygroundCatalog => ({object:'qa_playground_catalog',mode,ready:true,models:['gpt-6-astra'],live_model:'configured-model',pack_version:'0.3.0',pack_release:'vesta-qatr-0.3.0',skills:['a','b'],boundary:'Playground output is not a clinical review.',
   categories:[{id:'critical_finding',title:'Critical findings',description:'Reports containing a critical observation.'},{id:'inconsistency',title:'Findings and impression inconsistency',description:'Impression does not follow from findings.'}],
@@ -34,6 +34,7 @@ const playgroundRun = (status:PlaygroundRun['status'],extra:Partial<PlaygroundRu
 const knowledgeCatalog = (): KnowledgeCatalog => ({package_version:'0.2.0',package_sha256:'b'.repeat(64),can_edit:true,items:[knowledgeDetail().document]});
 async function field(id:string,value:string) {await act(async()=>{const input=document.getElementById(id)!;const prototype=input.tagName==='TEXTAREA'?window.HTMLTextAreaElement.prototype:window.HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(prototype,'value')!.set!.call(input,value);input.dispatchEvent(new window.Event('input',{bubbles:true}));});}
 async function choose(label:string,value:string) { await act(async()=>{const select=[...document.querySelectorAll('label')].find(n=>n.textContent?.startsWith(label))?.querySelector('select');assert.ok(select);select.value=value;select.dispatchEvent(new window.Event('change',{bubbles:true}));}); }
+async function choosePeriod(value:Analytics['period']) { await act(async()=>{const select=document.querySelector('#analytics-period') as HTMLSelectElement;assert.ok(select);select.value=value;select.dispatchEvent(new window.Event('change',{bubbles:true}));}); }
 beforeEach(()=>{
   sessionStorage.clear();localStorage.clear();results.clear();requests=[];
   document.body.innerHTML='<div id="root"></div>';root=createRoot(document.getElementById('root')!);
@@ -132,7 +133,7 @@ test('health reports unavailable truthfully and dismisses on every route',async(
 test('Studio navigation preserves report input and exposes distinct tools',async()=>{
   await mount();await paste('draft to preserve');await click('Review history');await click('Current review');assert.equal(text(),'draft to preserve');
   await click('Feedbacks');assert.match(document.querySelector('.history-pane h1')!.textContent!,/Feedbacks/);
-  await click('Analytics');assert.match(document.querySelector('.history-pane')!.textContent!,/Not measured/);
+  await click('Analytics');assert.match(document.querySelector('.history-pane')!.textContent!,/Review findings/);
   await click('Current review');assert.equal(text(),'draft to preserve');
 });
 
@@ -165,29 +166,26 @@ test('feedback inbox paginates once per entry and resets on filter change',async
   assert.equal(new URLSearchParams(queries.at(-1)).has('starting_after'),false);
 });
 
-test('analytics uses service totals and preserves unknown clinical performance',async()=>{
-  api.analytics=async()=>({...analytics(),reviews:{...analytics().reviews,total:237}});
+test('analytics shows saved finding counts and uses the selected period across sources',async()=>{
+  const queries:string[]=[];
+  api.analytics=async query=>{queries.push(query);return {...analytics(),reviews:{...analytics().reviews,total:237},findings:{inconsistencies:8,critical_findings:3,clinical_observations:2,other_issues:4}};};
   await mount();await click('Analytics');const pane=document.querySelector('.operational-analytics')!;
-  assert.match(pane.textContent!,/237/);assert.doesNotMatch(pane.textContent!,/stakeholders accepting/);
-  // Unmeasured clinical performance stays visible as a section-level verdict...
-  const critical=pane.querySelector('[aria-label="Critical finding performance"]')!;
-  assert.match(critical.querySelector('.section-status')!.textContent!,/Not measured/);
-  // ...and all four measures keep their distinct denominators and their null result.
-  const measures=critical.querySelectorAll('.measurement-list > div');
-  assert.equal(measures.length,4);
-  assert.ok([...measures].every(el=>/Not measured/.test(el.textContent!)));
-  for (const formula of ['TP / (TP + FN)','TP / (TP + FP)','FP / (FP + TN)','FP / (TP + FP)']) {
-    assert.ok(critical.textContent!.includes(formula),`Missing denominator: ${formula}`);
-  }
-
+  assert.match(pane.querySelector('[aria-label="Review findings"]')!.textContent!,/Inconsistencies8Critical findings3Clinical observations2Other issues4/);
+  assert.match(pane.querySelector('[aria-label="Review activity"]')!.textContent!,/Submitted237/);
+  assert.equal(pane.querySelectorAll('select').length,1);
+  assert.equal(new URLSearchParams(queries.at(-1)).get('source'),'all');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('period'),'24h');
+  await choosePeriod('1h');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('period'),'1h');
+  assert.doesNotMatch(pane.textContent!,/precision|recall|feedback totals/i);
 });
 
 test('late analytics response cannot replace a new period',async()=>{
   let release!:(value:Analytics)=>void;
-  api.analytics=query=>new URLSearchParams(query).get('period')==='7d' ? new Promise(resolve=>{release=resolve;}) : Promise.resolve({...analytics(),period:'30d',reviews:{...analytics().reviews,total:300}});
-  await mount();await click('Analytics');await choose('Period','30d');
+  api.analytics=query=>new URLSearchParams(query).get('period')==='24h' ? new Promise(resolve=>{release=resolve;}) : Promise.resolve({...analytics(),period:'30d',reviews:{...analytics().reviews,total:300}});
+  await mount();await click('Analytics');await choosePeriod('30d');
   await act(async()=>release({...analytics(),reviews:{...analytics().reviews,total:999}}));
-  const totals=document.querySelector('[aria-label="Review totals"]')!.textContent!;assert.match(totals,/300/);assert.doesNotMatch(totals,/999/);
+  const totals=document.querySelector('[aria-label="Review activity"]')!.textContent!;assert.match(totals,/300/);assert.doesNotMatch(totals,/999/);
 });
 
 test('Studio skills editor preserves unsaved edits across report navigation',async()=>{

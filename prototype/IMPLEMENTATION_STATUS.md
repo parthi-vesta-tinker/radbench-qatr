@@ -4,6 +4,14 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
 
 ## Implemented
 
+- **Finding-first Analytics:** four saved-comment categories lead, with submitted/completed/failed
+  counts secondary. One rolling period selector (1/6/12/24 hours, 7/30 days, all time) replaces
+  the source control; the screen includes all review sources. The API adds finding counts while
+  retaining feedback, source filtering and unmeasured clinical fields for existing clients.
+  Verification on 24 September 2026: 37 affected Python tests, 24 DOM tests, focused Chromium
+  analytics checks, production build, generated-contract checks and documentation checks passed.
+  Controlled data only; no real-provider call or clinical adjudication.
+
 - **Review History ID presentation:** removed the second-line “AI”/“Demo” mode text from each
   Review ID cell; IDs remain clickable and provider mode remains in stored provenance.
   Verification on 24 September 2026: production build, 24 DOM tests, and the focused

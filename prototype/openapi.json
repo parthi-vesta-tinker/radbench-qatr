@@ -96,7 +96,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -205,7 +205,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -319,7 +319,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -434,7 +434,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -573,7 +573,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -836,7 +836,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -984,7 +984,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1108,7 +1108,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1234,7 +1234,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1382,7 +1382,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1534,7 +1534,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1749,7 +1749,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -1795,6 +1795,10 @@
             "required": false,
             "schema": {
               "enum": [
+                "1h",
+                "6h",
+                "12h",
+                "24h",
                 "7d",
                 "30d",
                 "all"
@@ -1899,7 +1903,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2016,7 +2020,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2144,7 +2148,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2294,7 +2298,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2433,7 +2437,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2552,7 +2556,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2693,7 +2697,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2822,7 +2826,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "500": {
             "content": {
@@ -2942,6 +2946,10 @@
           "period": {
             "type": "string",
             "enum": [
+              "1h",
+              "6h",
+              "12h",
+              "24h",
               "7d",
               "30d",
               "all"
@@ -2971,6 +2979,9 @@
           "reviews": {
             "$ref": "#/components/schemas/ReviewCounts"
           },
+          "findings": {
+            "$ref": "#/components/schemas/FindingCounts"
+          },
           "feedback": {
             "anyOf": [
               {
@@ -2994,6 +3005,7 @@
           "period_start",
           "source",
           "reviews",
+          "findings",
           "feedback",
           "critical_evaluation"
         ],
@@ -3840,6 +3852,34 @@
           "created_at"
         ],
         "title": "FeedbackResource"
+      },
+      "FindingCounts": {
+        "properties": {
+          "inconsistencies": {
+            "type": "integer",
+            "title": "Inconsistencies"
+          },
+          "critical_findings": {
+            "type": "integer",
+            "title": "Critical Findings"
+          },
+          "clinical_observations": {
+            "type": "integer",
+            "title": "Clinical Observations"
+          },
+          "other_issues": {
+            "type": "integer",
+            "title": "Other Issues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "inconsistencies",
+          "critical_findings",
+          "clinical_observations",
+          "other_issues"
+        ],
+        "title": "FindingCounts"
       },
       "PlaygroundCatalog": {
         "properties": {

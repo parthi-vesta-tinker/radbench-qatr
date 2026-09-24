@@ -1,5 +1,24 @@
 # Foundation implementation decisions and releases
 
+## Analytics findings and rolling periods — 2026-09-24
+
+Simplify Analytics around saved review findings. The page shows counts of accepted comments
+for inconsistencies, critical findings, clinical observations and other issues, followed by
+submitted, completed and failed review counts. Private accepted check identities supply the
+category when available; older/demo comments use their public group and finding type.
+These are comment counts, not adjudicated clinical accuracy measures. Feedback and the
+unmeasured clinical-performance fields remain in the API but no longer crowd the page.
+
+The screen has one period selector with rolling 1, 6, 12 and 24 hour, 7 and 30 day, and
+all-time windows. It requests all review sources so demo records are not silently hidden.
+The optional API source filter remains for existing clients. The analytics response adds
+finding counts; generated OpenAPI and TypeScript are synchronized. Schema 7 and the review
+execution path are unchanged.
+
+Verification: 37 affected API/reporting tests, 24 DOM tests, and focused Chromium analytics
+checks passed with controlled data; production build, generated-contract checks and
+documentation checks passed. No real-provider request or clinical adjudication was performed.
+
 ## Review History table labels and status presentation — 2026-09-24
 
 Rename the Review History columns to Review ID, Report description and Submitted time. The

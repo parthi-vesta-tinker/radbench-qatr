@@ -76,18 +76,16 @@ test('real API input validation keeps the submitted report editable for another 
 test('Studio analytics and inbox work without provider inference',async({page})=>{
   await page.goto('/');
   await page.getByRole('button',{name:'Analytics',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Are reviews completing?'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Review findings'})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Review findings'}).locator('dt')).toHaveText(['Inconsistencies','Critical findings','Clinical observations','Other issues']);
+  await expect(page.getByRole('region',{name:'Review activity'}).locator('dt')).toHaveText(['Submitted','Completed','Failed']);
   await expect(page.getByText('Stakeholder outcomes',{exact:true})).toHaveCount(0);
-  // Unmeasured clinical performance stays visible as a verdict, with all four denominators kept.
-  const critical=page.getByRole('region',{name:'Critical finding performance'});
-  await expect(critical.locator('.section-status')).toHaveText('Not measured');
-  await critical.getByText(/What is needed to measure this/).click();
-  await expect(critical.locator('.measurement-list > div')).toHaveCount(4);
-  for (const formula of ['TP / (TP + FN)','TP / (TP + FP)','FP / (FP + TN)','FP / (TP + FP)']) {
-    await expect(critical.getByText(formula,{exact:true})).toBeVisible();
-  }
+  await expect(page.getByRole('combobox',{name:'Source'})).toHaveCount(0);
+  await page.getByRole('combobox',{name:'Period',exact:true}).selectOption('1h');
+  await expect(page.getByRole('region',{name:'Review findings'}).locator('dd')).toHaveCount(4);
+  await page.getByRole('combobox',{name:'Period',exact:true}).selectOption('24h');
   await page.getByRole('combobox',{name:'Period',exact:true}).selectOption('all');
-  await expect(page.getByRole('region',{name:'Feedback totals'})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Review activity'})).toBeVisible();
   await page.getByRole('button',{name:'Feedbacks',exact:true}).click();
   await expect(page.getByRole('heading',{name:'No feedback matches these filters'})).toBeVisible();
   await page.getByRole('combobox',{name:'Rating',exact:true}).selectOption('');
