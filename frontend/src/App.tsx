@@ -15,6 +15,13 @@ import { usePanels } from "./usePanels";
 import { PanelIcon } from "./PanelIcon";
 import { FeatureNotice } from "./FeatureNotice";
 import { assessReportText, precheck } from "./ReportReadiness";
+
+function railTime(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.valueOf())
+    ? value
+    : date.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
 export default function App() {
   const qa = useReview();
   const panels = usePanels();
@@ -32,8 +39,8 @@ export default function App() {
   const open = (id: string) => { qa.openReview(id); setView("current"); panels.close(); };
   const showCurrent = () => { if (qa.drafts[0]) qa.openReview(qa.drafts[0].id); setView("current"); panels.close(); };
   const create = () => { qa.newReview(); setView("current"); panels.close(); };
-  const active = qa.rows.filter(r => ["queued", "running"].includes(r.execution_status));
-  const recent = qa.rows.filter(r => !["queued", "running"].includes(r.execution_status));
+  const active = qa.rows.filter(r => ["queued", "running"].includes(r.execution_status)).slice(0, 20);
+  const recent = qa.rows.filter(r => !["queued", "running"].includes(r.execution_status)).slice(0, 20);
   const [pasted, setPasted] = useState(false);
   const reportPrecheck = precheck(assessReportText(qa.report), pasted);
   const [historyRefresh, setHistoryRefresh] = useState(0);
@@ -70,7 +77,7 @@ export default function App() {
         <div id="reports-content" className="reports-content" hidden={reportsCollapsed}>
         <nav className="scope-nav" aria-label="Report reviews">
           <button className={view === "current" ? "selected" : ""} onClick={showCurrent}><FileText size={17}/>Current review</button>
-          {[["Active", active], ["Recent", recent]] .map(([title, items]) => <section key={title as string}><p className="report-group-label">{title as string}</p>{(items as typeof qa.rows).map(r => <button className={"report-row " + (qa.selected === r.id && view === "current" ? "selected" : "")} key={r.id} onClick={() => open(r.id)}><span>{r.preview.slice(0, 52)}<small>{r.execution_status.replaceAll("_", " ")} · {r.mode === "demo" ? "Legacy fixture" : "AI"}</small></span></button>)}</section>)}
+          {[["Active", active], ["Recent", recent]] .map(([title, items]) => <section key={title as string}><p className="report-group-label">{title as string}</p>{(items as typeof qa.rows).map(r => <button className={"report-row " + (qa.selected === r.id && view === "current" ? "selected" : "")} key={r.id} onClick={() => open(r.id)} title={`${r.display_id} · ${r.execution_status.replaceAll("_", " ")} · ${r.preview}`}><span className="rail-preview"><b className="rail-id">{r.display_id}</b><span className="rail-summary">{r.preview}</span></span><time className="rail-time" dateTime={r.created_at}>{railTime(r.created_at)}</time></button>)}</section>)}
         </nav>
         {qa.listError && <p className="error" role="status">Report list unavailable. Reconnecting…</p>}
         <p className="scope-footer">Unsubmitted text stays in this tab.<br/>Submitted reviews are saved.</p>
