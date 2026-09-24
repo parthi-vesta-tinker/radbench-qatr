@@ -24,6 +24,8 @@ test('correcting a review replaces its text and result without another draft or 
   await expect(page.getByRole('button',{name:'Copy all comments',exact:true})).toBeDisabled();
   await page.getByRole('button',{name:'Review again',exact:true}).click();
   await expect(page.getByRole('heading',{name:'No actionable observations',exact:true})).toBeVisible();
+  await expect(page.locator('.empty.clean svg')).toHaveCount(0);
+  await expect(page.getByText('In the supplied report.',{exact:true})).toHaveCount(0);
   await expect(page.locator('.outcome-log')).toHaveCount(0);
   const feedback = await (await request.get(`/api/v1/reviews/${first.id}/feedback`)).json();
   expect(feedback.items).toHaveLength(1);

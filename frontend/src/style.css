@@ -498,7 +498,9 @@ textarea::placeholder {
   font-size: 15px;
 }
 .empty.clean {
-  min-height: 150px;
+  min-height: 0;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
 }
 .empty.clean h3 {
   color: #202020;

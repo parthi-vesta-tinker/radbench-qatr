@@ -59,9 +59,7 @@ export function ReviewOutput({
         <>
           {result.outcome === "no_observations" ? (
             <div className="empty clean">
-              <FileCheck2 size={26} strokeWidth={1.4} />
               <h3>No actionable observations</h3>
-              <p className="meta">In the supplied report.</p>
             </div>
           ) : (
             <div className="comment-document">

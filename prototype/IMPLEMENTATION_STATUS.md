@@ -4,6 +4,12 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
 
 ## Implemented
 
+- **Completed empty review presentation:** the output shows only “No actionable observations,”
+  aligned with the comment content; the extra icon and explanatory line are removed.
+  Verification on 24 September 2026: production build, 24 DOM tests, and the focused
+  replacement browser test passed in demo mode at 1536px, 390px, and 320px. No provider call
+  or API change.
+
 - **Review History table presentation:** column labels now use Review ID, Report description and
   Submitted time. Completed and Failed use the same neutral, equal-size History-table label;
   progress and system-status severity presentation is unchanged. Verification: 24 DOM tests and
