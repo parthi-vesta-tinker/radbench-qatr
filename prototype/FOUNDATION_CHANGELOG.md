@@ -1,12 +1,23 @@
 # Foundation implementation decisions and releases
 
+## Simplified Review History filters — 2026-09-24
+
+Review History now presents only the operator-facing status choices Any status, Completed and
+Failed; Failed includes both failed and needs-input records while retaining the stored backend status.
+Result choices are Any comments, General comments and Critical comments; Any comments shows all
+results and the API filters the two specific comment groups independently. Feedback choices are
+Any feedback, which shows all rows, and No feedback. The Date & time filter is unchanged.
+
+Verification: 5 focused backend tests, 25 DOM tests, production build, generated API/TypeScript
+checks and documentation checks passed.
+
 ## Review History table labels and status presentation — 2026-09-24
 
 Rename the Review History columns to Review ID, Report description and Submitted time. The
 History table now renders every status with one neutral, equal-size label, so Completed and Failed
 do not use different colour treatments. Progress and system-status presentation are unchanged.
 
-Verification: 24 DOM tests and production build passed. No API, storage or provider behavior
+Verification: 25 DOM tests and production build passed. No API, storage or provider behavior
 changed.
 
 ## Review history and prior-review input handling — 2026-09-23

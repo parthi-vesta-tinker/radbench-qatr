@@ -273,10 +273,33 @@ test('review history filters by submission time and opens comments without openi
   assert.equal(document.querySelector('.history-status')?.textContent,'Completed');
   await choose('Submitted','24h');
   assert.ok(new URLSearchParams(queries.at(-1)).has('submitted_after'));
+  await choose('Results','general');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('comment_type'),'general');
+  await choose('Results','any');
+  assert.equal(new URLSearchParams(queries.at(-1)).has('comment_type'),false);
+  await choose('Feedback','false');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('has_feedback'),'false');
+  await choose('Feedback','any');
+  assert.equal(new URLSearchParams(queries.at(-1)).has('has_feedback'),false);
+  await choose('Status','failed');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('status_group'),'failed_or_needs_input');
+  const statusSelect=[...document.querySelectorAll('label')].find(label=>label.textContent?.startsWith('Status'))?.querySelector('select');
+  assert.ok(statusSelect);
+  const statusOptions=[...statusSelect.options].map(option=>option.value);
+  assert.deepEqual(statusOptions,['','completed','failed']);
+  assert.equal(statusSelect.options[0].text,'Any status');
   await click('1 PACS · 0 critical');
   assert.match(document.querySelector('.history-modal')!.textContent!,/Controlled PACS comment/);
   assert.equal(document.querySelector('#report-text')?.getAttribute('value'),null);
   await click('Close history dialog');
+});
+
+test('review history presents needs-input rows as failed',async()=>{
+  api.history=async()=>({items:[{id:'qr-needs-input',display_id:'INPUT',created_at:new Date().toISOString(),submitted_by:null,execution_status:'needs_input',preview:'Findings: incomplete.',outcome:null,general_count:0,critical_count:0,feedback_count:null,mode:'demo'}],has_more:false,next_cursor:null});
+  await mount();await click('Review history');
+  const table=document.querySelector('.review-history-table')!;
+  assert.match(table.textContent!,/Failed/);
+  assert.doesNotMatch(table.textContent!,/Needs input/);
 });
 
 test('review history uses one neutral status label style',async()=>{

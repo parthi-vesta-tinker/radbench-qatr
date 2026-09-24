@@ -386,8 +386,10 @@ def list_reviews(
     starting_after=None,
     query="",
     status=None,
+    status_group=None,
     outcome=None,
     critical=None,
+    comment_type=None,
     has_feedback=None,
     include_feedback=False,
     submitted_after=None,
@@ -413,6 +415,8 @@ def list_reviews(
         if status:
             terms.append("json_extract(r.document, '$.execution_status')=?")
             values.append(status)
+        if status_group == "failed_or_needs_input":
+            terms.append("json_extract(r.document, '$.execution_status') IN ('failed','needs_input')")
         if outcome:
             terms.append("json_extract(r.document, '$.result.outcome')=?")
             values.append(outcome)
@@ -421,6 +425,10 @@ def list_reviews(
                 "json_extract(r.document, '$.result.critical_finding_detected')=?"
             )
             values.append(int(critical))
+        if comment_type == "general":
+            terms.append("COALESCE(json_array_length(json_extract(r.document, '$.result.general_comments')), 0)>0")
+        elif comment_type == "critical":
+            terms.append("COALESCE(json_array_length(json_extract(r.document, '$.result.critical_comments')), 0)>0")
         count_sql = "(SELECT count(*) FROM feedback f WHERE f.tenant_id=r.tenant_id AND f.review_id=r.id)"
         if has_feedback is not None:
             terms.append(count_sql + (">0" if has_feedback else "=0"))
