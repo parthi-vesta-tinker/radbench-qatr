@@ -19,6 +19,10 @@ function displayTime(value: string) {
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleString();
 }
 
+function historyStatus(status: string) {
+  return status === 'needs_input' ? 'failed' : status;
+}
+
 function CommentDialog({ modal, close }: { modal: Exclude<Modal, null>; close: () => void }) {
   const comments = modal.kind === 'comments' ? modal.data : null;
   const feedback = modal.kind === 'feedback' ? modal.data : null;
@@ -98,7 +102,7 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
     <form className="history-filters" onSubmit={event => { event.preventDefault(); applyFilters(() => { setQuery(search.trim()); setRefresh(value => value + 1); }); }}>
       <label>Search reports<input type="search" value={search} maxLength={200} onChange={event => setSearch(event.target.value)} placeholder="Report text or review ID" /></label>
       <button type="submit">Search</button>
-      <label>Status<select value={status} onChange={event => applyFilters(() => setStatus(event.target.value))}><option value="">All statuses</option><option value="completed">Completed</option><option value="failed">Failed</option></select></label>
+      <label>Status<select value={status} onChange={event => applyFilters(() => setStatus(event.target.value))}><option value="">Any status</option><option value="completed">Completed</option><option value="failed">Failed</option></select></label>
       <label>Results<select value={result} onChange={event => applyFilters(() => setResult(event.target.value))}><option value="any">Any comments</option><option value="general">General comments</option><option value="critical">Critical comments</option></select></label>
       <label>Feedback<select value={feedback} onChange={event => applyFilters(() => setFeedback(event.target.value))}><option value="any">Any feedback</option><option value="false">No feedback</option></select></label>
       <label>Submitted<select aria-label="Submitted time range" value={quickRange} onChange={event => chooseRange(event.target.value as QuickRange)}><option value="all">Any time</option><option value="24h">Last 24 hours</option><option value="3d">Last 3 days</option><option value="7d">Last 7 days</option><option value="custom">Custom range</option></select></label>
@@ -110,7 +114,7 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
       <td data-label="Description"><button className="report-link history-description" title={row.preview} disabled={busy || loading} onClick={() => openReview(row.id)}>{row.preview || 'Open report'}</button></td>
       <td data-label="Submitted by">{row.submitted_by ?? <span className="meta">Not recorded</span>}</td>
       <td data-label="Last submitted"><time dateTime={row.created_at}>{displayTime(row.created_at)}</time></td>
-      <td data-label="Status"><StatusPill status={row.execution_status} /></td>
+      <td data-label="Status"><StatusPill status={historyStatus(row.execution_status)} /></td>
       <td data-label="Comments">{row.execution_status === 'completed' ? <button className="linklike" onClick={() => void openComments(row)}>{row.general_count || row.critical_count ? `${row.general_count} PACS · ${row.critical_count} critical` : 'No comments'}</button> : '—'}</td>
       <td data-label="Feedback">{row.feedback_count === null ? '—' : <button className="linklike" onClick={() => void openFeedback(row)}>{row.feedback_count ? `${row.feedback_count} recorded` : 'No feedback'}</button>}</td>
     </tr>)}</tbody></table></div>

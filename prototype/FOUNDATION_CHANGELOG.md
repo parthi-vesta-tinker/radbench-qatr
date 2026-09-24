@@ -2,8 +2,8 @@
 
 ## Simplified Review History filters — 2026-09-24
 
-Review History now presents only the operator-facing status choices All statuses, Completed and
-Failed; Failed includes both failed and needs-input records while preserving the actual row status.
+Review History now presents only the operator-facing status choices Any status, Completed and
+Failed; Failed includes both failed and needs-input records while retaining the stored backend status.
 Result choices are Any comments, General comments and Critical comments; Any comments shows all
 results and the API filters the two specific comment groups independently. Feedback choices are
 Any feedback, which shows all rows, and No feedback. The Date & time filter is unchanged.

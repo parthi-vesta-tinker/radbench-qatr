@@ -284,10 +284,19 @@ test('review history filters by submission time and opens comments without openi
   assert.ok(statusSelect);
   const statusOptions=[...statusSelect.options].map(option=>option.value);
   assert.deepEqual(statusOptions,['','completed','failed']);
+  assert.equal(statusSelect.options[0].text,'Any status');
   await click('1 PACS · 0 critical');
   assert.match(document.querySelector('.history-modal')!.textContent!,/Controlled PACS comment/);
   assert.equal(document.querySelector('#report-text')?.getAttribute('value'),null);
   await click('Close history dialog');
+});
+
+test('review history presents needs-input rows as failed',async()=>{
+  api.history=async()=>({items:[{id:'qr-needs-input',display_id:'INPUT',created_at:new Date().toISOString(),submitted_by:null,execution_status:'needs_input',preview:'Findings: incomplete.',outcome:null,general_count:0,critical_count:0,feedback_count:null,mode:'demo'}],has_more:false,next_cursor:null});
+  await mount();await click('Review history');
+  const table=document.querySelector('.review-history-table')!;
+  assert.match(table.textContent!,/Failed/);
+  assert.doesNotMatch(table.textContent!,/Needs input/);
 });
 
 test('panel preferences preserve drafts and unsaved Skills content',async()=>{
