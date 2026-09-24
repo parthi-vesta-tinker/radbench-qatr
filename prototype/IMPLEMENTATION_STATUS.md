@@ -351,3 +351,13 @@ See [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md) for gate details and [FOUNDATION_CH
   a concurrent frontend import collision was resolved. Read-only verification of
   localhost:8000 confirmed the new endpoint serves Live, local access, and enabled JEV.
   No clinical evaluation or public deployment was performed.
+
+
+## Section refresh icons — 2026-09-24
+
+Feedback and Analytics now use icon-only Refresh controls; Review History has the
+same control at the top right. Existing tooltip buttons provide accessible labels.
+Refreshing keeps selected filters; history and feedback restart pagination.
+Production build and read-only localhost Chromium checks passed for all three
+refresh requests, visible headers, mobile history control, and no page errors.
+Chrome connector returned BRIDGE_NOT_READY; existing Playwright was used.

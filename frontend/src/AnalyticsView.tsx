@@ -1,3 +1,5 @@
+import { RefreshCw } from 'lucide-react';
+import { TooltipButton } from './TooltipButton';
 import { useEffect, useState } from 'react';
 import { api, describeError } from './api';
 import type { Analytics } from './types';
@@ -40,7 +42,7 @@ export function AnalyticsView() {
         <select id="analytics-period" value={period} onChange={e => setPeriod(e.target.value as Analytics['period'])}>
           {PERIODS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
-        <button type="button" disabled={loading} onClick={() => setRefresh(n => n + 1)}>Refresh</button>
+        <TooltipButton className="icon-button" side="left" label="Refresh analytics" disabled={loading} onClick={() => setRefresh(n => n + 1)}><RefreshCw size={19} aria-hidden="true" /></TooltipButton>
       </div>
     </div>
     {loading && <p className="meta" role="status">Loading analytics…</p>}

@@ -1,3 +1,5 @@
+import { RefreshCw } from 'lucide-react';
+import { TooltipButton } from './TooltipButton';
 import { useEffect, useState } from 'react';
 import { api, describeError } from './api';
 import type { FeedbackRecord, ReviewComments, ReviewSummary } from './types';
@@ -97,7 +99,7 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
   }
 
   return <main className="history-pane">
-    <div className="section-heading"><div><h1>Review history</h1><p className="meta">Latest submitted reviews, comments, and recorded feedback.</p></div></div>
+    <div className="section-heading"><div><h1>Review history</h1><p className="meta">Latest submitted reviews, comments, and recorded feedback.</p></div><TooltipButton className="icon-button" side="left" label="Refresh review history" disabled={loading} onClick={() => { reset(); setRefresh(value => value + 1); }}><RefreshCw size={19} aria-hidden="true" /></TooltipButton></div>
     <form className="history-filters" onSubmit={event => { event.preventDefault(); applyFilters(() => { setQuery(search.trim()); setRefresh(value => value + 1); }); }}>
       <label>Search reports<input type="search" value={search} maxLength={200} onChange={event => setSearch(event.target.value)} placeholder="Report text or review ID" /></label>
       <button type="submit">Search</button>

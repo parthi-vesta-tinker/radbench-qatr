@@ -239,8 +239,8 @@
     },
     {
       "path": "frontend/src/AnalyticsView.tsx",
-      "bytes": 3497,
-      "sha256": "f4fcd00534fb88d26f556d66d03f6080c1c0d45d3990e054e84ed7c07189cef4"
+      "bytes": 3685,
+      "sha256": "2fb4a03bc62365ec094843a9c1667c9c9d565ed2d983a319968326616c26b8b5"
     },
     {
       "path": "frontend/src/App.tsx",
@@ -264,8 +264,8 @@
     },
     {
       "path": "frontend/src/FeedbackInbox.tsx",
-      "bytes": 5603,
-      "sha256": "d0124a1f5e3e2201bf6f9d62f5eef163deb62848c59acecbf1c26faf4985ea33"
+      "bytes": 5773,
+      "sha256": "7eecbd147affe827a2d74e57ca8a31612f732c0e03f546b14fe0cc45ab1539af"
     },
     {
       "path": "frontend/src/FindingClassification.tsx",
@@ -289,8 +289,8 @@
     },
     {
       "path": "frontend/src/ReviewHistory.tsx",
-      "bytes": 10487,
-      "sha256": "c0c9eda43e667a2e9f51d397e88613464c12962d1eff2c2d9728dbc6d9357f73"
+      "bytes": 10798,
+      "sha256": "0fe13b61e347302c16e154358598661dc2758efc6627bf20249630f7393db44e"
     },
     {
       "path": "frontend/src/ReviewJourney.tsx",
@@ -504,8 +504,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 30659,
-      "sha256": "cc49614b67ed843420308af3552927c179e504cc1df6ba8b2ecd3c98b6c728f4"
+      "bytes": 31884,
+      "sha256": "639828ce00aaf455562372826b2b5cb840cb5ec4218957345976c48505b37206"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",

@@ -1,5 +1,6 @@
+import { TooltipButton } from './TooltipButton';
 import { useEffect, useState } from 'react';
-import { ThumbsDown, ThumbsUp } from 'lucide-react';
+import { RefreshCw, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { api, describeError } from './api';
 import { feedbackReasons, reasonLabel } from './feedbackLabels';
 import type { FeedbackInboxItem } from './types';
@@ -34,7 +35,7 @@ export function FeedbackInbox({ openReview }: { openReview: (id: string) => void
   }
   return <main className="history-pane feedback-inbox">
     <div className="section-heading"><div><h1>Feedbacks</h1><p className="meta">Saved feedback across reports · Newest first</p></div>
-      <button disabled={loading} onClick={() => { reset(); setRefresh(n => n + 1); }}>Refresh</button></div>
+      <TooltipButton className="icon-button" side="left" label="Refresh feedback" disabled={loading} onClick={() => { reset(); setRefresh(n => n + 1); }}><RefreshCw size={19} aria-hidden="true" /></TooltipButton></div>
     <form className="history-filters" onSubmit={e => { e.preventDefault(); filter('q', search.trim()); }}>
       <label>Search feedback<input type="search" value={search} maxLength={200} placeholder="Notes, suggested wording or ID" onChange={e => setSearch(e.target.value)} /></label>
       <button type="submit">Search</button>
