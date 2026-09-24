@@ -1,5 +1,15 @@
 # Foundation implementation decisions and releases
 
+## Simplified Review History filters — 2026-09-24
+
+Review History now presents only the operator-facing status choices All statuses, Completed and
+Failed. Result choices are Any comments, General comments and Critical comments; the API filters
+the general and critical groups independently. Feedback choices are Any feedback and No feedback.
+The Date & time filter is unchanged.
+
+Verification: 4 focused backend tests, 23 DOM tests, production build, generated API/TypeScript
+checks and documentation checks passed.
+
 ## Review history and prior-review input handling — 2026-09-23
 
 Review History now supports text/status/result/feedback filters, the last 24 hours, 3 days,

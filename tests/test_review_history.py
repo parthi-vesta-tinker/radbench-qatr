@@ -62,6 +62,38 @@ def test_history_summary_uses_display_id_actor_and_submission_time_filters(monke
     assert store.list_reviews("vesta", submitted_after=future)[0] == []
 
 
+def test_history_comment_type_filters_distinguish_general_and_critical_comments(monkeypatch, tmp_path):
+    monkeypatch.setattr(store, "DATA", tmp_path)
+    store.init()
+
+    def create(key, general, critical):
+        saved, _ = store.reserve(
+            "vesta", key, ReviewInput(report_text=f"Findings: {key}. Impression: {key}."), config()
+        )
+        review_id = saved["body"]["id"]
+        store.update(
+            "vesta",
+            review_id,
+            execution_status="completed",
+            result={
+                "result_version": 1,
+                "outcome": "observations" if general or critical else "no_observations",
+                "critical_finding_detected": critical,
+                "general_comments": ([{"observation_id": f"{key}-g", "finding_type": "suggestion", "report_section": "findings", "comment": "General."}] if general else []),
+                "critical_comments": ([{"observation_id": f"{key}-c", "finding_type": "discrepancy", "report_section": "impression", "comment": "Critical."}] if critical else []),
+            },
+        )
+        return review_id
+
+    general = create("general-only", True, False)
+    critical = create("critical-only", False, True)
+    create("no-comments", False, False)
+
+    assert {row["id"] for row in store.list_reviews("vesta", comment_type="any")[0]} == {general, critical}
+    assert [row["id"] for row in store.list_reviews("vesta", comment_type="general")[0]] == [general]
+    assert [row["id"] for row in store.list_reviews("vesta", comment_type="critical")[0]] == [critical]
+
+
 def test_comments_projection_exposes_observations_without_raw_report(monkeypatch, tmp_path):
     monkeypatch.setattr(store, "DATA", tmp_path)
     store.init()

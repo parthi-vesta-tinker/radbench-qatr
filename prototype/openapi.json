@@ -707,6 +707,27 @@
             }
           },
           {
+            "name": "comment_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "any",
+                    "general",
+                    "critical"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Comment Type"
+            }
+          },
+          {
             "name": "has_feedback",
             "in": "query",
             "required": false,

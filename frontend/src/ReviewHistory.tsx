@@ -62,8 +62,7 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
     const params = new URLSearchParams({ limit: '20' });
     if (query) params.set('q', query);
     if (status) params.set('status', status);
-    if (result === 'critical') params.set('critical', 'true');
-    else if (result) params.set('outcome', result);
+    if (result) params.set('comment_type', result);
     if (feedback) params.set('has_feedback', feedback);
     if (submittedAfter) params.set('submitted_after', submittedAfter);
     if (submittedBefore) params.set('submitted_before', submittedBefore);
@@ -98,9 +97,9 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
     <form className="history-filters" onSubmit={event => { event.preventDefault(); applyFilters(() => { setQuery(search.trim()); setRefresh(value => value + 1); }); }}>
       <label>Search reports<input type="search" value={search} maxLength={200} onChange={event => setSearch(event.target.value)} placeholder="Report text or review ID" /></label>
       <button type="submit">Search</button>
-      <label>Status<select value={status} onChange={event => applyFilters(() => setStatus(event.target.value))}><option value="">All statuses</option><option value="completed">Completed</option><option value="running">Running</option><option value="queued">Queued</option><option value="needs_input">Input needed</option><option value="failed">Failed</option></select></label>
-      <label>Result<select value={result} onChange={event => applyFilters(() => setResult(event.target.value))}><option value="">All results</option><option value="critical">Critical comments</option><option value="observations">With comments</option><option value="no_observations">No comments</option></select></label>
-      <label>Feedback<select value={feedback} onChange={event => applyFilters(() => setFeedback(event.target.value))}><option value="">Any feedback status</option><option value="true">Feedback recorded</option><option value="false">No feedback yet</option></select></label>
+      <label>Status<select value={status} onChange={event => applyFilters(() => setStatus(event.target.value))}><option value="">All statuses</option><option value="completed">Completed</option><option value="failed">Failed</option></select></label>
+      <label>Results<select value={result} onChange={event => applyFilters(() => setResult(event.target.value))}><option value="">All results</option><option value="any">Any comments</option><option value="general">General comments</option><option value="critical">Critical comments</option></select></label>
+      <label>Feedback<select value={feedback} onChange={event => applyFilters(() => setFeedback(event.target.value))}><option value="">Feedback</option><option value="true">Any feedback</option><option value="false">No feedback</option></select></label>
       <label>Submitted<select aria-label="Submitted time range" value={quickRange} onChange={event => chooseRange(event.target.value as QuickRange)}><option value="all">Any time</option><option value="24h">Last 24 hours</option><option value="3d">Last 3 days</option><option value="7d">Last 7 days</option><option value="custom">Custom range</option></select></label>
       {quickRange === 'custom' && <span className="history-custom-range"><label>From<input aria-label="Submitted after" type="datetime-local" value={submittedAfter ? submittedAfter.slice(0, 16) : ''} onChange={event => applyFilters(() => setSubmittedAfter(event.target.value ? new Date(event.target.value).toISOString() : ''))} /></label><label>To<input aria-label="Submitted before" type="datetime-local" value={submittedBefore ? submittedBefore.slice(0, 16) : ''} onChange={event => applyFilters(() => setSubmittedBefore(event.target.value ? new Date(event.target.value).toISOString() : ''))} /></label></span>}
     </form>

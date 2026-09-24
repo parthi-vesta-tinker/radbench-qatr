@@ -270,6 +270,14 @@ test('review history filters by submission time and opens comments without openi
   assert.match(document.querySelector('.history-pane')!.textContent!,/Not recorded/);
   await choose('Submitted','24h');
   assert.ok(new URLSearchParams(queries.at(-1)).has('submitted_after'));
+  await choose('Results','general');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('comment_type'),'general');
+  await choose('Feedback','false');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('has_feedback'),'false');
+  const statusSelect=[...document.querySelectorAll('label')].find(label=>label.textContent?.startsWith('Status'))?.querySelector('select');
+  assert.ok(statusSelect);
+  const statusOptions=[...statusSelect.options].map(option=>option.value);
+  assert.deepEqual(statusOptions,['','completed','failed']);
   await click('1 PACS · 0 critical');
   assert.match(document.querySelector('.history-modal')!.textContent!,/Controlled PACS comment/);
   assert.equal(document.querySelector('#report-text')?.getAttribute('value'),null);

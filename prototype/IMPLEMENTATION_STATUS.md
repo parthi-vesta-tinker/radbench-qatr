@@ -4,6 +4,12 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
 
 ## Implemented
 
+- **Simplified Review History filters:** Status offers All statuses, Completed and Failed. Results
+  offers Any comments, General comments and Critical comments, with server-side filtering for the
+  two comment groups. Feedback offers Any feedback and No feedback. The Date & time filter is
+  unchanged. Verification: 4 focused backend tests, 23 DOM tests, production build,
+  generated-contract checks and documentation checks passed.
+
 - **Review History and prior-review input:** history supports practical filters, quick submitted
   time ranges, compact IDs, operator, latest submission time, comments and feedback dialogs, and
   20-item pages. Re-review replaces the same current record. Explicit History/Comparison context
