@@ -335,7 +335,7 @@ test('playground filters samples and preserves pasted text across source switche
   assert.deepEqual(payload,{model:'gpt-6-astra',report_text:'Findings: preserved. Impression: preserved.'});
 });
 
-test('critical review shows JEV labels and an urgency verification cue',async()=>{
+test('classification preview expands priority and all labels with feedback',async()=>{
   const source = {...review('qr-critical','Findings: Acute right pneumothorax. Impression: Same.'),
     execution_status:'completed',result:{critical_comments:[{observation_id:'obs-critical',comment:'Acute right pneumothorax.'}]}} as unknown as Review;
   const labels = {finding_group:'thoracic',polarity:'affirmed',certainty:'definite',temporal_status:'not_stated',urgency:'minutes'};
@@ -352,8 +352,13 @@ test('critical review shows JEV labels and an urgency verification cue',async()=
   api.classificationFeedback=async(_id,input)=>{feedback=input;return {} as any;};
   await act(async()=>{root.render(<FindingClassification review={source} stale={false}/>);});
   assert.match(document.body.textContent!,/Finding group.*Thoracic/);
-  assert.match(document.body.textContent!,/Verify the suggested communication priority/);
-  await click('Accept labels');
+  assert.match(document.querySelector('.classification-preview')!.textContent!,/PriorityMinutes/);
+  await click('More details');
+  assert.equal(button('Classification Overview').getAttribute('aria-expanded'),'true');
+  assert.match(document.body.textContent!,/Polarity.*Affirmed/);
+  assert.match(document.body.textContent!,/Temporal status.*Not stated/);
+  await click('Something wrong?');
+  await click('Accept');
   assert.equal(feedback.action,'accept');
 });
 

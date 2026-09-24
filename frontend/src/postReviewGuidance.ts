@@ -13,7 +13,7 @@ export function derivePostReviewGuidance(
   if (stale)
     return { kind: "unavailable", message: "Next steps are available only for a completed review matching the current report with confirmed status." };
   if (review?.execution_status !== "completed" || !review.result)
-    return { kind: "unavailable", message: "Next steps will appear after the review is complete." };
+    return { kind: "unavailable", message: "Guidance appears after review." };
 
   if (review.result.critical_finding_detected)
     return { kind: "ready", steps: [

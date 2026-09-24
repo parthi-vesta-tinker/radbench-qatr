@@ -1484,3 +1484,12 @@ button.primary:hover:not(:disabled) {background:var(--muted);border-color:var(--
 
 .review-journey .not-applicable .journey-node {border-color:var(--muted);color:var(--muted);background:var(--selected);}
 .classification-back {margin:0 0 16px;gap:6px;}
+
+.studio-more {font-size:12px;margin-top:10px;gap:6px;}
+.classification-preview {margin:12px 0;}
+.classification-group {font-size:14px;font-weight:500;color:var(--text);margin:0 0 6px;}
+.classification-priority {display:flex;flex-wrap:wrap;gap:4px 8px;margin:0;font-size:13px;}
+.classification-priority > :first-child {color:var(--muted);}
+.classification-priority > :last-child {font-weight:500;}
+.jev-labels dd {font-size:14px;font-weight:500;}
+.classification-pane .jev-labels dd {font-size:16px;}

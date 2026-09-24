@@ -12,6 +12,7 @@ export function PostReviewGuidance({ review, stale }: { review: Review | null; s
   const content = derivePostReviewGuidance(review, stale);
   return <StudioDisclosure key={`${review?.id}:${review?.input_version}:${stale}:${content.kind}`}
     title="Post-review Guidance" expandable={content.kind === "ready" && content.steps.length > 2}
+    moreLabel={content.kind === "ready" ? `${content.steps.length - 2} more ${content.steps.length === 3 ? 'step' : 'steps'}` : undefined}
     preview={content.kind === "unavailable" ? <p className="meta">{content.message}</p> : <GuidanceSteps steps={content.steps.slice(0, 2)}/>}
   >
     {content.kind === "ready" && <GuidanceSteps steps={content.steps}/>}

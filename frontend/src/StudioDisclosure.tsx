@@ -1,8 +1,8 @@
 import { useId, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-export function StudioDisclosure({ title, preview, children, expandable = true }: {
-  title: string; preview: ReactNode; children?: ReactNode; expandable?: boolean;
+export function StudioDisclosure({ title, preview, children, expandable = true, moreLabel }: {
+  title: string; preview: ReactNode; children?: ReactNode; expandable?: boolean; moreLabel?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const id = useId();
@@ -13,7 +13,11 @@ export function StudioDisclosure({ title, preview, children, expandable = true }
         <span>{title}</span>{open ? <ChevronUp size={16} aria-hidden="true"/> : <ChevronDown size={16} aria-hidden="true"/>}
       </button> : <span>{title}</span>}
     </h3>
-    <div hidden={open}>{preview}</div>
+    <div hidden={open}>{preview}
+      {expandable && moreLabel && <button type="button" className="linklike studio-more" aria-expanded={open} aria-controls={id} onClick={() => setExpanded(true)}>
+        <ChevronDown size={14} aria-hidden="true"/>{moreLabel}
+      </button>}
+    </div>
     <div id={id} hidden={!open}>{children}</div>
   </section>;
 }

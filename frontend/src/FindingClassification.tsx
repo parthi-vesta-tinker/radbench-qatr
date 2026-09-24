@@ -49,9 +49,9 @@ export function ResultCard({ run, config, stale }: {run: ClassificationResource;
     {run.execution_status === "queued" || run.execution_status === "running" ? <span className="jev-loading" role="status" aria-label="Classifying"><LoaderCircle className="journey-spinner" size={16}/></span> : null}
     {run.execution_status === "failed" ? <p className="meta">No classification available.</p> : null}
     {result && <>
-      <dl className="jev-labels">{fields.slice(0, 3).map(field => <div key={field}><dt>{names[field]}</dt><dd>{format(result.fields[field]?.label || "Unknown")}</dd></div>)}</dl>
+      <dl className="jev-labels">{fields.map(field => <div key={field}><dt>{names[field]}</dt><dd>{format(result.fields[field]?.label || "Unknown")}</dd></div>)}</dl>
       {canRespond && !action && <div className="jev-actions">
-        <button type="button" disabled={busy} onClick={() => {setAction("choose"); setNotice("");}}>Give feedback</button>
+        <button type="button" disabled={busy} onClick={() => {setAction("choose"); setNotice("");}}>Something wrong?</button>
       </div>}
       {canRespond && action === "choose" && <div className="jev-actions" role="group" aria-label="Classification feedback">
         <button type="button" disabled={busy} onClick={() => void save({action:"accept"})}>Accept</button>
@@ -85,15 +85,17 @@ export function FindingClassification({review, stale, data, openAnalysis}: {
     {loading && !runs.length && <span className="jev-loading" role="status" aria-label="Loading classification"><LoaderCircle className="journey-spinner" size={16}/></span>}
     {!loading && !runs.length && <p className="meta">No classification available.</p>}
     {error && <button type="button" onClick={(data ?? local).refresh}>Retry</button>}
-    {runs.slice(0, 2).map((run, index) => <p className="classification-preview" key={run.id}>
+    {runs.slice(0, 2).map((run, index) => <div className="classification-preview" key={run.id}>
       {runs.length > 1 && <span>Finding {index + 1} · </span>}
-      {run.execution_status === "completed" && run.result ? <>Group: <strong>{format(run.result.fields.finding_group?.label || "Unknown")}</strong></> :
+      {run.execution_status === "completed" && run.result ? <>
+        <p className="classification-group">{format(run.result.fields.finding_group?.label || "Unknown")}</p>
+        <p className="classification-priority"><span>Priority</span><span>{format(run.result.fields.urgency?.label || "Unknown")}</span></p>
+      </> :
         run.execution_status === "failed" ? "No classification available." : "Classifying…"}
-    </p>)}
-    {runs.length > 2 && <p className="meta">+{runs.length - 2} more findings</p>}
+    </div>)}
   </>;
   return <StudioDisclosure key={`${review.id}:${review.input_version}:${stale}`} title="Classification Overview"
-    expandable={hasDetails || runs.length > 2} preview={preview}>
+    expandable={hasDetails || runs.length > 2} moreLabel={runs.length > 2 ? `More details · ${runs.length - 2} more findings` : "More details"} preview={preview}>
     {openAnalysis && <button type="button" className="linklike" onClick={openAnalysis}>Full analysis</button>}
     {runs.map((run, index) => <div key={run.id} className="jev-observation">
       {runs.length > 1 && <h4>Finding {index + 1}</h4>}
