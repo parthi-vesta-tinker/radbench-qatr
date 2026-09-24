@@ -1117,7 +1117,7 @@ textarea::placeholder {color:var(--muted);}
 .history-pane .history-table th {font-size:13px;}
 .history-pane .report-link {font-size:14px;}
 .history-pane .review-id {font-size:12px;overflow-wrap:anywhere;}
-.history-pane .status-pill {font-size:12px;}
+.history-status {display:inline-flex;align-items:center;min-height:24px;padding:2px 8px;border:1px solid var(--line);border-radius:3px;color:var(--text);background:var(--soft);font-size:12px;font-weight:400;white-space:nowrap;}
 .history-pane .empty {padding:32px 20px;border:1px dashed var(--line);border-radius:8px;text-align:left;}
 .history-pane .empty h2 {margin-bottom:8px;}
 .inbox-list > li {padding:24px 0;}
