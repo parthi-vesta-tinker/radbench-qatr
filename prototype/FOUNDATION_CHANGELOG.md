@@ -1,5 +1,14 @@
 # Foundation implementation decisions and releases
 
+## Review History table labels and status presentation — 2026-09-24
+
+Rename the Review History columns to Review ID, Report description and Submitted time. The
+History table now renders every status with one neutral, equal-size label, so Completed and Failed
+do not use different colour treatments. Progress and system-status presentation are unchanged.
+
+Verification: 24 DOM tests and production build passed. No API, storage or provider behavior
+changed.
+
 ## Review history and prior-review input handling — 2026-09-23
 
 Review History now supports text/status/result/feedback filters, the last 24 hours, 3 days,

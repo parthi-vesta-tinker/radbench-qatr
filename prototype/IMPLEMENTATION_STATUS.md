@@ -4,6 +4,11 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
 
 ## Implemented
 
+- **Review History table presentation:** column labels now use Review ID, Report description and
+  Submitted time. Completed and Failed use the same neutral, equal-size History-table label;
+  progress and system-status severity presentation is unchanged. Verification: 24 DOM tests and
+  production build passed. No API, storage or provider behavior changed.
+
 - **Review History and prior-review input:** history supports practical filters, quick submitted
   time ranges, compact IDs, operator, latest submission time, comments and feedback dialogs, and
   20-item pages. Re-review replaces the same current record. Explicit History/Comparison context

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, describeError } from './api';
 import type { FeedbackRecord, ReviewComments, ReviewSummary } from './types';
-import { StatusPill } from './statusPill';
 
 type Modal =
   | { kind: 'comments'; row: ReviewSummary; data: ReviewComments }
@@ -17,6 +16,10 @@ function rangeStart(range: Exclude<QuickRange, 'all' | 'custom'>) {
 function displayTime(value: string) {
   const date = new Date(value);
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleString();
+}
+
+function historyStatus(status: string) {
+  return status.replaceAll('_', ' ').replace(/^./, letter => letter.toUpperCase());
 }
 
 function CommentDialog({ modal, close }: { modal: Exclude<Modal, null>; close: () => void }) {
@@ -105,12 +108,12 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
       {quickRange === 'custom' && <span className="history-custom-range"><label>From<input aria-label="Submitted after" type="datetime-local" value={submittedAfter ? submittedAfter.slice(0, 16) : ''} onChange={event => applyFilters(() => setSubmittedAfter(event.target.value ? new Date(event.target.value).toISOString() : ''))} /></label><label>To<input aria-label="Submitted before" type="datetime-local" value={submittedBefore ? submittedBefore.slice(0, 16) : ''} onChange={event => applyFilters(() => setSubmittedBefore(event.target.value ? new Date(event.target.value).toISOString() : ''))} /></label></span>}
     </form>
     {error && <p className="error" role="alert">{error} <button onClick={() => setRefresh(value => value + 1)}>Retry history</button></p>}
-    <div className="history-table review-history-table" role="region" aria-label="Saved reviews" tabIndex={0}><table><thead><tr><th>Review</th><th>Description</th><th>Submitted by</th><th>Last submitted</th><th>Status</th><th>Comments</th><th>Feedback</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}>
-      <td data-label="Review"><button className="report-link review-short-id" disabled={busy || loading} onClick={() => openReview(row.id)}>{row.display_id}</button><span className="meta">{row.mode === 'demo' ? 'Demo' : 'AI'}</span></td>
-      <td data-label="Description"><button className="report-link history-description" title={row.preview} disabled={busy || loading} onClick={() => openReview(row.id)}>{row.preview || 'Open report'}</button></td>
+    <div className="history-table review-history-table" role="region" aria-label="Saved reviews" tabIndex={0}><table><thead><tr><th>Review ID</th><th>Report description</th><th>Submitted by</th><th>Submitted time</th><th>Status</th><th>Comments</th><th>Feedback</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}>
+      <td data-label="Review ID"><button className="report-link review-short-id" disabled={busy || loading} onClick={() => openReview(row.id)}>{row.display_id}</button><span className="meta">{row.mode === 'demo' ? 'Demo' : 'AI'}</span></td>
+      <td data-label="Report description"><button className="report-link history-description" title={row.preview} disabled={busy || loading} onClick={() => openReview(row.id)}>{row.preview || 'Open report'}</button></td>
       <td data-label="Submitted by">{row.submitted_by ?? <span className="meta">Not recorded</span>}</td>
-      <td data-label="Last submitted"><time dateTime={row.created_at}>{displayTime(row.created_at)}</time></td>
-      <td data-label="Status"><StatusPill status={row.execution_status} /></td>
+      <td data-label="Submitted time"><time dateTime={row.created_at}>{displayTime(row.created_at)}</time></td>
+      <td data-label="Status"><span className="history-status">{historyStatus(row.execution_status)}</span></td>
       <td data-label="Comments">{row.execution_status === 'completed' ? <button className="linklike" onClick={() => void openComments(row)}>{row.general_count || row.critical_count ? `${row.general_count} PACS · ${row.critical_count} critical` : 'No comments'}</button> : '—'}</td>
       <td data-label="Feedback">{row.feedback_count === null ? '—' : <button className="linklike" onClick={() => void openFeedback(row)}>{row.feedback_count ? `${row.feedback_count} recorded` : 'No feedback'}</button>}</td>
     </tr>)}</tbody></table></div>
