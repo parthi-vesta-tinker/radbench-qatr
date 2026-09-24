@@ -4,6 +4,12 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 
 ## Implemented
 
+- **Starter guide clarification:** README now separates demo and live commands, shows
+  the two `.env` key names and their provider roles, explains no-prompt startup and
+  alternate-port syntax, and links to the detailed local setup guide. `START_HERE.md`
+  carries the current release identifiers. Verification: documentation boundary check,
+  whitespace check, and source bundle verification passed on 24 September 2026.
+
 - **No-prompt local live startup:** `npm run live` enables OpenAI and JEV, forces local
   access for that process, and reads both provider keys from the ignored `.env` or process
   environment. Missing keys exit with a named setting instead of a prompt. The existing

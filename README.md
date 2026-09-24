@@ -2,29 +2,36 @@
 
 Application **0.15.0** · bundle **1.21** · foundation **F3** · API **2026-09-22** · schema **8**.
 
-Vesta Report QA is a local FastAPI, DBOS, OpenAI Agents SDK, React, and SQLite prototype. A user pastes report text, runs one durable combined review request, reads two copy-ready comment groups, and records feedback or stakeholder outcomes. It also includes tenant-scoped analytics and a Skills Studio draft editor.
+Vesta Report QA is a local FastAPI, DBOS, OpenAI Agents SDK, React, and SQLite prototype. A user pastes report text, runs one durable combined review request, reads two copy-ready comment groups, and records feedback. It also includes tenant-scoped analytics and a Skills Studio draft editor.
 
 Start with [START_HERE.md](START_HERE.md). Use [LOCAL_TESTING.md](LOCAL_TESTING.md) for setup and test commands. Current implementation decisions and evidence live in [prototype/FOUNDATION_CHANGELOG.md](prototype/FOUNDATION_CHANGELOG.md) and [prototype/IMPLEMENTATION_STATUS.md](prototype/IMPLEMENTATION_STATUS.md).
 
-## Run locally
+## Starter guide
 
-Install Python 3.11+, `uv`, and Node.js 22 LTS, then:
+Install Python 3.11+, `uv`, and Node.js 22 LTS. From the repository root, install the locked Python dependencies:
 
 ```sh
 uv sync --locked
-copy .env.example .env
-npm run demo
 ```
 
-`npm run demo` builds the browser app when needed, starts FastAPI and DBOS, and runs controlled local examples without an OpenAI API key. Open the address printed in the terminal, normally `http://127.0.0.1:8000`.
+If `.env` does not exist, create it from the example (`cp .env.example .env` on Linux/macOS or `Copy-Item .env.example .env` in PowerShell). Keep any existing `.env`; it is ignored by Git. Choose a run mode:
 
-For a real provider review, run:
+| Mode | Command | Provider use |
+| --- | --- | --- |
+| Demo | `npm run demo` | Controlled local examples; no OpenAI request. Leave `QA_JEV_ENABLED=false` for provider-free demo use. |
+| Live | `npm run live` | Real OpenAI report review. JEV classifies a finding only after the review produces a critical comment. |
 
-```sh
-npm run live
+For **live mode**, put both keys in the repository-root `.env` file. OpenAI reviews the
+report; TypeSafe JEV classifies critical findings from the completed review.
+
+```dotenv
+OPENAI_API_KEY=your_openai_key
+TYPESAFE_API_KEY=your_typesafe_key
 ```
 
-It builds the browser app when needed and uses both `OPENAI_API_KEY` and `TYPESAFE_API_KEY` from `.env` without prompting. This command uses local access for its process. Set the optional `QA_LOCAL_OPERATOR_NAME` in `.env` when you want Review History to show who submitted local reviews. See [the live provider session instructions](LOCAL_TESTING.md#live-provider-session). Controlled tests and demo mode make no paid provider call.
+`npm run live` reads these values without prompting and exits with a named missing-key message if either is absent. It uses local access for that process, even if `.env` specifies another access mode. Existing shell environment variables take precedence over `.env`. The launcher checks that keys are present; provider acceptance is checked when a real review or classification runs. Never commit `.env`.
+
+Both commands build the browser app when needed and print its address, normally `http://127.0.0.1:8000`. If that port is occupied, use `npm run live -- --port 8900` (or `npm run demo -- --port 8900`); npm passes the argument after the first `--` to the launcher. Stop with Ctrl+C. You can set `QA_LOCAL_OPERATOR_NAME` in `.env` to show a local submitter in Review History. See [local testing and storage upgrade instructions](LOCAL_TESTING.md) for more detail.
 
 ## Current architecture
 
