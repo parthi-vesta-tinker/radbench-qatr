@@ -18,6 +18,16 @@ for (const width of [1536, 390]) {
     await page.route('**/api/v1/classifications/config', route => route.fulfill({json: {enabled:true, ready:true, labels:Object.fromEntries(Object.entries(labels).map(([key,value]) => [key,[value]]))}}));
     let source: any;
     let status = 'running';
+    await page.route(/\/api\/v1\/reviews\?/, async route => {
+      const response = await route.fetch();
+      const body = await response.json();
+      await route.fulfill({json:{...body,items:body.items.map((item:any) => item.id === source?.id ? {...item,classification_overview:[{finding_group:'thoracic',communication_priority:'cannot_determine'}]} : item)}});
+    });
+    await page.route('**/api/v1/analytics?*', async route => {
+      const response = await route.fetch();
+      const body = await response.json();
+      await route.fulfill({json:{...body,classification:{finding_groups:{thoracic:1},communication_priorities:{cannot_determine:1}}}});
+    });
     let analysisReads = 0;
     let mutations = 0;
     await page.route('**/api/v1/reviews/*/classifications', async route => {
@@ -55,6 +65,14 @@ for (const width of [1536, 390]) {
     await expect(page.locator('.review-journey li').last()).toHaveClass('current');
     status = 'completed';
     await expect(page.locator('.review-journey li').last()).toHaveClass('complete');
+    // Connector halves meet at each column boundary, even for the wider last stage.
+    const connectors = await page.locator('.review-journey li').evaluateAll(items => items.slice(0,-1).map((item,index) => {
+      const next = items[index+1];
+      const right = getComputedStyle(item,'::after');
+      const left = getComputedStyle(next,'::before');
+      return {end:item.getBoundingClientRect().x + parseFloat(right.left) + parseFloat(right.width), start:next.getBoundingClientRect().x + parseFloat(left.left), rightY:right.top, leftY:left.top};
+    }));
+    for (const line of connectors) { expect(Math.abs(line.end-line.start)).toBeLessThan(1); expect(line.rightY).toBe(line.leftY); }
     await page.screenshot({path:`/tmp/qa-classification-journey-${width}.png`,fullPage:true});
     if (width < 700) await page.getByRole('button',{name:'Open QA Studio',exact:true}).click();
     const guidance = page.locator('section[aria-label="Post-review Guidance"]');
@@ -99,6 +117,21 @@ for (const width of [1536, 390]) {
     await tool('Classification');
     await expect(pane).toContainText('Review this report to see classification.');
     await expect(pane).not.toContainText('Thoracic');
+    await tool('Review history');
+    const classificationCell = page.locator('tr').filter({has:page.getByRole('button',{name:source.id.slice(-5).toUpperCase(),exact:true})}).locator('td[data-label="Classification"]');
+    await expect(classificationCell).toContainText('Thoracic');
+    await expect(classificationCell).toContainText('Priority: Cannot determine');
+    await expect(classificationCell).not.toContainText('Definite');
+    await expect(classificationCell).not.toContainText('Affirmed');
+    await page.screenshot({path:`/tmp/qa-history-classification-${width}.png`,fullPage:true});
+    await tool('Analytics');
+    const counts = page.getByRole('region',{name:'Classification counts',exact:true});
+    await expect(counts).toContainText('Thoracic');
+    await expect(counts).toContainText('Cannot determine');
+    await expect(counts.locator('dd')).toHaveText(['1','1']);
+    await expect(counts).not.toContainText('Certainty');
+    await expect(counts).not.toContainText('Polarity');
+    await page.screenshot({path:`/tmp/qa-analytics-classification-${width}.png`,fullPage:true});
     expect(analysisReads).toBe(1);
     expect(mutations).toBe(0);
     expect(errors).toEqual([]);

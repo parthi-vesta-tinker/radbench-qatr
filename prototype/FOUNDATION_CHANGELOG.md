@@ -1,5 +1,20 @@
 # Foundation implementation decisions and releases
 
+## Stage-linked review feedback — 2026-09-24
+
+Moved the single review context message from below the work title to below the journey.
+The message identifies its stage from the live workflow step: input and submission,
+validation, combined AI review, or the two output phases. When enabled, classification
+progress and errors use its own stage. A skill-configuration 503 before review creation
+points to AI review with a Retry connection action. Failure messages remain visible on
+touch screens and omit technical request details. Frontend build,
+all 33 DOM tests and five targeted demo browser regressions passed. No API or provider
+change.
+
+The edited-text message now reads “Review again. Changes not reviewed” with the
+“Restore change” action on the same line. The production build and replacement
+browser tests passed at 390px and 320px without horizontal overflow.
+
 ## Compact guidance and classification overviews — 2026-09-24
 
 Use a shared accessible disclosure for Post-review Guidance and Classification Overview.
@@ -524,3 +539,12 @@ label summary and saved-request analysis projection. Renamed visible Output to
 Results and connected the existing independent DBOS classification status to the
 journey. Provider request shape, rubric, stored workflow steps and recovery identity
 are unchanged. No storage migration or clinical-content release is involved.
+
+
+### 24 September 2026 — Compact Studio and classification reporting
+
+Connected the unequal-width Results/Classification journey segment, added explicit
+more-content actions to Studio previews, reduced label emphasis, and renamed the
+classification feedback entry point to Something wrong?. History and Analytics now
+project only saved finding group and communication priority, sharing current-version
+and latest-attempt filtering. No provider dispatch, rubric or storage schema change.

@@ -9,7 +9,7 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 - **Feature notice:** a dismissible single-line “New: Collapsible panels” notice sits immediately below QA Studio when expanded. It has no Try it action. Dismissal is browser-local and keyed to this announcement so future notices can use a new key.
 
 - **Scope:** a slim reports column with independent in-tab drafts, active work, recent results, and history access. Selection does not jump when another review finishes.
-- **Work:** New review accepts pasted text without a scope badge or permanent instruction. Contextual feedback below the input reports pasted text, unreviewed changes and submission uncertainty. Review again replaces the same saved review and clears the previous output atomically. An edit stays in the same input; before submission the earlier output is marked stale and cannot be copied. Exact text restoration restores its matching output.
+- **Work:** New review accepts pasted text without a scope badge or permanent instruction. Contextual feedback below the journey reports pasted text, unreviewed changes and submission uncertainty at the corresponding stage. Review again replaces the same saved review and clears the previous output atomically. An edit stays in the same input; before submission the earlier output is marked stale and cannot be copied. Exact text restoration restores its matching output.
 - **Typography:** system fonts, an 18px semibold application and work heading, 16px panel headings, 14px secondary sidebar headings, 13px tool labels and 15px report input. New drafts use the heading New review; the matching Studio action is also New review.
 - **Studio:** compact tools for New review, Review history, Feedbacks, Analytics, Skills, and Playground. Tool navigation preserves the current report draft and mounted editor state.
 - **Review panel:** review steps show real execution state. **Post-review Guidance** provides advice only after a completed, current review; it stores no per-step progress. See the post-review guidance contract below.
@@ -18,7 +18,7 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 - **Side panels:** Report reviews and QA Studio collapse independently into 60px rails. Expand/collapse controls live in their headers. The collapsed Report reviews rail retains Current review; the Studio rail retains all six tool icons in the same order. Every rail control has a visible hover/focus tooltip and an accessible name. Escape dismisses tooltips without moving focus. The entire Studio side panel, including guidance, collapses together.
 - **Skills placement:** six equal Studio tiles in three rows: New review / Review history, Feedbacks / Analytics, Skills / Playground. The destination heading and Playground link also use Skills; reference content remains available inside it.
 - **Responsive behavior:** above 1120px both panels default expanded and remember independent browser-local collapse preferences. At 651–1120px both default to rails, with at most one expanded. At 650px and below, Report reviews and QA Studio buttons open modal side drawers over full-width work. Escape, close, backdrop, or navigation dismisses the drawer; focus is trapped while open and returned to its opener on dismissal. Desktop preferences survive viewport changes. Appearance supports light and dark themes.
-- **Preserved work:** collapsing panels does not remount editors or reset report input, selection, Skills edits or Playground state. When Studio is collapsed or a mobile drawer is closed, the center always retains the single review journey beside the Review button, with contextual feedback below the review title.
+- **Preserved work:** collapsing panels does not remount editors or reset report input, selection, Skills edits or Playground state. When Studio is collapsed or a mobile drawer is closed, the center always retains the single review journey beside the Review button, with contextual feedback beneath its relevant stage.
 
 Draft report text lives only in the current tab. The latest submitted text and outcome persist in SQLite. History and the sidebar contain one entry per review, ordered by latest submission. No submitted-text revision history is maintained. Feedback belongs to the review and survives replacement. Only one unfinished review is kept per tab under Current review. New review returns to it without discarding text; there are no numbered draft entries, deletion or Undo controls. Once submission begins, the input locks; an ambiguous HTTP response keeps the exact input and idempotency key available for retry. After reload, users inspect history before intentionally resubmitting.
 
@@ -53,9 +53,9 @@ column available. Skills source editors keep monospace text; Playground keeps it
 boundary and distinct notice. Analytics uses a monochrome four-metric findings row,
 a smaller activity row, and one concise clinical-boundary sentence.
 
-The journey is compact and shares one row with the Review button at desktop and mobile widths. One status message lives below the journey; no duplicate input hint or output status is shown. Copy actions omit the UI-only QA review prefix. Light/dark palettes are monochrome, with amber reserved for progress warning/blocker states.
+The journey is compact and shares one row with the Review button at desktop and mobile widths. One status message lives below the journey; a persistent error callout points to its Input, Validate, AI review, Results or Classification stage. Skill or provider configuration failures before review admission point to AI review and retain Retry connection. Error callouts show only the readable message, without request codes, IDs or a technical-details disclosure. The message remains readable on narrow screens and is announced as an alert for errors. No duplicate input hint or output status is shown. Copy actions omit the UI-only QA review prefix. Light/dark palettes are monochrome, with amber reserved for progress warning/blocker states.
 
-Contextual review feedback sits directly below the New review/Report review title, above the paste field. The compact journey beside Review uses Input, Validate, AI review, Results and optional Classification. Show the feedback once only.
+The compact journey beside Review uses Input, Validate, AI review, Results and optional Classification. Show contextual feedback once, beneath the journey and associated with the relevant stage.
 
 ## Service health presentation
 
@@ -98,7 +98,7 @@ were reported. Classification is not applicable.” Other unavailable classifica
 show “No classification available.” A small indicator covers loading; actual failures remain visible in Run details.
 
 The compact **Classification Overview** defaults to up to two finding summaries, each
-showing “Group: [grouping type]”. Its neutral heading is clickable when more content
+showing the finding group in medium-weight text and a compact Priority label/value. Its neutral heading is clickable when more content
 is available, with a chevron indicating expansion. Expanding reveals the finding group,
 Report certainty, Communication priority, inputs and feedback for each finding. The current
 classification contract has no subtype field; omit subtype until a governed contract supplies it. Inputs used is collapsed by
@@ -106,7 +106,7 @@ default and distinguishes report excerpts plus the QA comment from comment-only
 fallback. The introductory JEV sentence and repeated expanded input are removed.
 The Classification workspace includes all five fields, raw and available calibrated
 probabilities, provider confidence, margin, review flags, saved questions/criteria,
-exact JEV state and run details. Feedback remains separate from immutable predictions. A single **Give feedback** button
+exact JEV state and run details. Feedback remains separate from immutable predictions. A single **Something wrong?** button
 opens Accept and Reject / correct choices. Accept saves acceptance. Reject / correct opens
 editable labels and a required reason: changed labels save an `edit`, unchanged labels save
 a `reject`. Save errors preserve the form and retry receipt. Cancel makes no request.
@@ -139,7 +139,7 @@ content have no chevron. Expanding/collapsing does not dispatch provider request
 The Studio section is titled **Post-review Guidance**. Its heading has a subtle neutral
 background, compact padding, and softly rounded corners using theme-aware colors. Before a review,
 while queued or running, and after needs-input or failed work, show only the neutral
-placeholder “Next steps will appear after the review is complete.” Do not render
+placeholder “Guidance appears after review.” Do not render
 numbered steps, input instructions, running updates, or error recovery here. The
 existing journey and contextual review feedback own those messages.
 
@@ -179,3 +179,21 @@ component. No additional request, persisted step state, or provider call is intr
   unknown without an exact report quote. Advice never establishes that communication,
   acknowledgement, report editing, delivery, or stakeholder outcomes occurred, and does not
   execute these actions. Clinical content changes require the existing governed release process.
+
+
+### Compact Studio interaction and history projection
+
+When guidance has more than two steps, its collapsed preview shows two steps and a
+clickable remaining-step count on the third line. That cue and the heading chevron
+open the same disclosure. Classification Overview previews group and priority, with
+an explicit More details action; expanding reveals all five labels (including
+certainty, polarity and temporal status), inputs and the feedback entry point.
+Typography uses existing neutral tokens and medium-weight values, not bold category
+headlines. Journey connector halves meet at shared column boundaries so Results to
+Classification remains connected even when the final column is wider.
+
+Review History adds a Classification column containing only paired finding-group
+and communication-priority labels for each current critical observation's latest
+completed attempt. Other classification fields remain in Classification. A newer
+pending/failed attempt suppresses previous labels; replaced review versions never
+appear. Existing saved classification records provide this read-only projection.

@@ -57,6 +57,17 @@ export function AnalyticsView() {
           <div><dt>Other issues</dt><dd>{data.findings.other_issues}</dd></div>
         </dl>
       </section>
+      <section className="analytics-classification" aria-label="Classification counts">
+        <h2>Classification</h2>
+        {Object.keys(data.classification?.finding_groups ?? {}).length ? <div className="analytics-classification-groups">
+          <div><h3>Finding group</h3><dl>{Object.entries(data.classification?.finding_groups ?? {}).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0])).map(([label, count]) =>
+            <div key={label}><dt>{label.replaceAll('_',' ').replace(/^./, value => value.toUpperCase())}</dt><dd>{count}</dd></div>
+          )}</dl></div>
+          <div><h3>Communication priority</h3><dl>{['minutes','hours','days','routine','cannot_determine'].filter(label => (data.classification?.communication_priorities?.[label] ?? 0) > 0).map(label =>
+            <div key={label}><dt>{label.replaceAll('_',' ').replace(/^./, value => value.toUpperCase())}</dt><dd>{data.classification?.communication_priorities?.[label]}</dd></div>
+          )}</dl></div>
+        </div> : <p className="meta">No classifications available.</p>}
+      </section>
       <section className="analytics-activity" aria-label="Review activity">
         <h2>Review activity</h2>
         <dl className="analytics-metrics analytics-metrics-secondary">

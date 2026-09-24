@@ -25,19 +25,19 @@ test('Current review, Studio navigation and themes remain usable on desktop and 
   await page.getByRole('button',{name:'Switch to light theme'}).click();
   // A single click opens it; Escape, the close button and an outside click all dismiss it.
   await page.locator('.health-trigger').click();
-  await expect(page.getByRole('heading',{name:'Service health'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Application health'})).toBeVisible();
   await page.locator('.health-trigger').press('Escape');
-  await expect(page.getByRole('heading',{name:'Service health'})).toBeHidden();
+  await expect(page.getByRole('heading',{name:'Application health'})).toBeHidden();
   await page.locator('.health-trigger').click();
-  await page.getByRole('button',{name:'Close service health'}).click();
-  await expect(page.getByRole('heading',{name:'Service health'})).toBeHidden();
+  await page.getByRole('button',{name:'Close application health'}).click();
+  await expect(page.getByRole('heading',{name:'Application health'})).toBeHidden();
   await page.locator('.health-trigger').click();
-  await expect(page.getByRole('heading',{name:'Service health'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Application health'})).toBeVisible();
   await page.locator('.app-header .brand').click();
-  await expect(page.getByRole('heading',{name:'Service health'})).toBeHidden();
+  await expect(page.getByRole('heading',{name:'Application health'})).toBeHidden();
   // A double click must close it, not force it open.
   await page.locator('.health-trigger').dblclick();
-  await expect(page.getByRole('heading',{name:'Service health'})).toBeHidden();
+  await expect(page.getByRole('heading',{name:'Application health'})).toBeHidden();
   expect(errors).toEqual([]);
 });
 

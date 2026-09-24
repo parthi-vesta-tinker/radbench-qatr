@@ -16,10 +16,10 @@ test('branded header, feature notice and icon actions remain usable at narrow wi
     await expect(page.getByRole('tooltip',{name,exact:true})).toBeHidden();
   }
   await expect(page.getByRole('button',{name:'Settings',exact:true})).toBeEnabled();
-  const health=page.getByRole('button',{name:'Service health: Local checks passed',exact:true});
+  const health=page.getByRole('button',{name:'Application health: Local checks passed',exact:true});
   await expect(health).toBeVisible();
-  await health.click();await expect(page.getByRole('dialog',{name:'Service health',exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Close service health'}).click();await expect(health).toBeFocused();
+  await health.click();await expect(page.getByRole('dialog',{name:'Application health',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Close application health'}).click();await expect(health).toBeFocused();
   const notice=page.getByLabel('New feature',{exact:true});
   await expect(notice).toHaveText('New: Collapsible panels');
   const noticeHeight=(await notice.boundingBox())!.height;
@@ -39,7 +39,7 @@ test('branded header, feature notice and icon actions remain usable at narrow wi
     expect(header!.height).toBeLessThanOrEqual(120);
     for(const name of ['Share — coming soon'])await expect(page.getByRole('button',{name,exact:true})).toBeVisible();
     await health.click();
-    const bounds=(await page.getByRole('dialog',{name:'Service health',exact:true}).boundingBox())!;
+    const bounds=(await page.getByRole('dialog',{name:'Application health',exact:true}).boundingBox())!;
     expect(bounds.x).toBeGreaterThanOrEqual(0);expect(bounds.x+bounds.width).toBeLessThanOrEqual(width);
     await page.keyboard.press('Escape');
   }

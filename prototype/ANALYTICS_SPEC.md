@@ -40,3 +40,22 @@ operational counts, not historical execution-attempt reliability metrics.
 Stakeholder outcomes and acceptance measures were removed on 2026-09-22 by user decision.
 Analytics exposes review totals, finding-category counts, feedback totals and explicitly
 unmeasured clinical metrics. Dormant legacy outcome rows are not queried.
+
+
+## Classification overview counts
+
+The Classification section reports only counts by **Finding group** and
+**Communication priority**. The unit is one critical observation on a completed
+current review version, using its latest classification attempt only when completed.
+Each included observation contributes once to each grouping. Multiple observations
+can contribute from one report. No certainty, polarity, temporal-status, confidence,
+probability, question or criteria fields enter this analytics projection.
+
+The source and rolling period filters apply to the review's latest submission,
+using the same tenant and full-database scope as review counts. Classification
+completion time does not move an old review into a recent submission period.
+Superseded versions, failed/pending classifications and prior attempts hidden by a
+newer failed/pending attempt are excluded. Unknown priority remains cannot_determine;
+absence of classification is never counted as routine. Saved model suggestions are
+counted; separate reviewer feedback does not relabel them or establish ground truth.
+No current provider configuration is required to read these counts.

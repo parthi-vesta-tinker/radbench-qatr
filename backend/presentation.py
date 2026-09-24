@@ -62,6 +62,13 @@ def classification_analysis(rid, input_data, config):
                 rubric_status=config["rubric"]["status"], rubric_hash=config["rubric_hash"])
 
 
+def classification_overview(result):
+    """History and analytics expose only the two agreed classification labels."""
+    fields = result["fields"]
+    return dict(finding_group=fields["finding_group"]["label"],
+                communication_priority=fields["urgency"]["label"])
+
+
 def review(record, version=API_VERSION):
     if version != API_VERSION:
         raise ValueError("Unsupported API version")

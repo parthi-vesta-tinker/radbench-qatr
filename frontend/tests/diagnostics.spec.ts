@@ -4,8 +4,8 @@ test('component status shows actual local checks and never probes OpenAI automat
   let probes = 0;
   page.on('request', request => { if (request.url().endsWith('/diagnostics/openai')) probes++; });
   await page.goto('/');
-  await page.getByRole('button', {name:'Service health: Local checks passed',exact:true}).click();
-  await expect(page.getByRole('heading', {name:'Service health'})).toBeVisible();
+  await page.getByRole('button', {name:'Application health: Local checks passed',exact:true}).click();
+  await expect(page.getByRole('heading', {name:'Application health'})).toBeVisible();
   // Healthy checks collapse behind a verdict; the full list stays one click away.
   await expect(page.getByText(/All 5 checks passed/)).toBeVisible();
   await page.getByText(/View all 5 checks/).click();
@@ -13,6 +13,7 @@ test('component status shows actual local checks and never probes OpenAI automat
     await expect(page.locator('.system-status dt').filter({hasText:label})).toBeVisible();
   }
   await expect(page.getByRole('button', {name:'Check OpenAI connection'})).toBeDisabled();
+  await expect(page.locator('.health-check-row').filter({hasText:'OpenAI'})).toContainText('Not configured');
   expect(probes).toBe(0);
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
@@ -52,14 +53,17 @@ test('health refresh and inline OpenAI checks show concise results and recover f
       {status:'accessible',message:'OpenAI authentication and model metadata access succeeded. Inference has not been tested.'}});
   });
   await page.goto('/');
-  await page.getByRole('button',{name:'Service health: Local checks passed',exact:true}).click();
-  const popup=page.getByRole('dialog',{name:'Service health',exact:true});
+  await page.getByRole('button',{name:'Application health: Local checks passed',exact:true}).click();
+  const popup=page.getByRole('dialog',{name:'Application health',exact:true});
   await expect(popup.locator('time')).toHaveAttribute('datetime',times[0]);
   await expect(popup.getByRole('button',{name:'Check OpenAI connection',exact:true})).toBeHidden();
   const disclosure=popup.locator('summary');
   await disclosure.focus();await page.keyboard.press('Enter');
   const rows=popup.locator('.health-check-row');
   await expect(rows).toHaveCount(5);
+  const iconEdges = await rows.locator('dd > :last-child').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().right));
+  expect(Math.max(...iconEdges)-Math.min(...iconEdges)).toBeLessThanOrEqual(1);
+  await expect(popup.locator('.health-last-checked br')).toHaveCount(0);
   const openai=rows.filter({hasText:'OpenAI'});
   await expect(openai).toContainText('Configured');
   await expect(popup).not.toContainText('API responds');
@@ -89,6 +93,9 @@ test('health refresh and inline OpenAI checks show concise results and recover f
       expect(bounds.x).toBeGreaterThanOrEqual(0);
       expect(bounds.x+bounds.width).toBeLessThanOrEqual(width);
       expect(await popup.evaluate(node=>node.scrollWidth<=node.clientWidth)).toBe(true);
+      const verdictBox=(await popup.locator('.health-verdict').boundingBox())!;
+      const checkedBox=(await popup.locator('.health-last-checked').boundingBox())!;
+      expect(Math.abs(verdictBox.y-checkedBox.y)).toBeLessThanOrEqual(3);
       await page.mouse.move(0,800);
       await page.screenshot({path:`/tmp/qa-health-${theme}-${width}.png`});
     }

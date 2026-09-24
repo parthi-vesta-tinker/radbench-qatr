@@ -3,11 +3,11 @@ import {X} from 'lucide-react';
 import {api, describeError} from './api';
 import type {AppSettings, Features, SettingsUpdate} from './types';
 
-const accessLabels = {local:'Local only', public:'Public', api_key:'API key required'};
+const accessLabels = {local:'Local', public:'Public', api_key:'API key required'};
 const featureLabels: {key:keyof Features; title:string; description:string}[] = [
-  {key:'playground', title:'Playground', description:'Try samples and pasted reports.'},
-  {key:'skills', title:'Skills', description:'Browse instructions and edit drafts.'},
-  {key:'classification', title:'JEV classification', description:'Classify critical findings in Demo or Live.'},
+  {key:'playground', title:'Playground', description:'Test reports'},
+  {key:'skills', title:'Skills', description:'Edit instructions'},
+  {key:'classification', title:'CF classification', description:'Critical findings'},
 ];
 
 export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppSettings)=>void}) {
@@ -18,12 +18,11 @@ export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppS
   const [busy,setBusy] = useState(false);
   const [loading,setLoading] = useState(true);
   const [error,setError] = useState('');
-  const [notice,setNotice] = useState('');
   const [attempt,setAttempt] = useState(0);
   useEffect(()=>{const element=dialog.current;element?.showModal();return()=>{element?.close();queueMicrotask(()=>opener.current?.focus());};},[]);
   useEffect(()=>{
     let stopped=false;
-    setLoading(true);setError('');setNotice('');
+    setLoading(true);setError('');
     api.settings().then(value=>{
       if(stopped)return;
       setSettings(value);
@@ -33,14 +32,15 @@ export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppS
       .finally(()=>{if(!stopped)setLoading(false);});
     return()=>{stopped=true;};
   },[attempt]);
-  function change(value:Partial<SettingsUpdate>){setDraft(old=>old?{...old,...value}:old);setNotice('');}
+  function change(value:Partial<SettingsUpdate>){setDraft(old=>old?{...old,...value}:old);}
+  const changed = !!(settings && draft && (draft.run_mode !== settings.run_mode ||
+    draft.core_model !== settings.core_model || featureLabels.some(({key}) => draft.features[key] !== settings.features[key])));
   async function save(){
-    if(!draft || busy || !settings?.can_edit)return;
-    setBusy(true);setError('');setNotice('');
+    if(!draft || busy || !settings?.can_edit || !changed)return;
+    setBusy(true);setError('');
     try {
       const value=await api.saveSettings(draft);
-      setSettings(value);setDraft({...draft,revision:value.revision});
-      saved(value);setNotice('Settings saved. Applies to new runs.');
+      saved(value);close();
     }catch(e){setError(describeError(e));}
     finally{setBusy(false);}
   }
@@ -61,9 +61,8 @@ export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppS
               <option value="demo">Demo</option><option value="live">Live</option>
             </select>
           </label>
-          <p className="meta">{draft.run_mode==='demo'?'Predefined core review results. JEV can still run.':'Core review uses the selected AI model.'}</p>
-          <label className="settings-field" htmlFor="settings-core-model">Core review model
-            <select id="settings-core-model" aria-label="Core review model" value={draft.core_model} onChange={e=>change({core_model:e.target.value})}>
+          <label className="settings-field" htmlFor="settings-core-model">Clinical review model
+            <select id="settings-core-model" aria-label="Clinical review model" value={draft.core_model} onChange={e=>change({core_model:e.target.value})}>
               {!settings.available_models.includes(draft.core_model) && <option value={draft.core_model}>{draft.core_model} (unavailable)</option>}
               {settings.available_models.map(model=><option key={model} value={model}>{model}</option>)}
             </select>
@@ -73,18 +72,17 @@ export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppS
         <fieldset disabled={busy || !settings.can_edit}>
           <legend>Features</legend>
           {featureLabels.map(feature=><label className="settings-feature" key={feature.key}>
-            <span><strong>{feature.title}</strong><span className="meta">{feature.description}</span></span>
+            <span><strong>{feature.title}</strong><span className="meta"> · {feature.description}</span></span>
             <input type="checkbox" role="switch" aria-label={feature.title} checked={draft.features[feature.key]}
               onChange={e=>change({features:{...draft.features,[feature.key]:e.target.checked}})}/>
           </label>)}
           {draft.features.classification && !settings.classification_configured && <p className="notice">Configure the JEV key on the server before enabling classification.</p>}
         </fieldset>
-        <section className="settings-access"><h3>Access</h3><div><span>Access mode</span><strong>{accessLabels[settings.access_mode]}</strong></div><p className="meta">Managed on the server.</p></section>
+        <section className="settings-access" aria-label="Access"><span>Access</span><strong>{accessLabels[settings.access_mode]}</strong></section>
       </>}
       {error && <div className="error" role="alert"><p>{error}</p><button type="button" disabled={busy} onClick={()=>setAttempt(n=>n+1)}>Reload settings</button></div>}
-      {notice && <p className="meta" role="status">{notice}</p>}
-      <div className="settings-footer"><button type="button" disabled={busy} onClick={close}>Close</button>
-        {settings?.can_edit && <button type="submit" className="primary" disabled={busy || loading || !draft}>{busy?'Saving…':'Save changes'}</button>}
+      <div className="settings-footer">{!changed && <button type="button" disabled={busy} onClick={close}>Close</button>}
+        {settings?.can_edit && changed && <button type="submit" className="primary" disabled={busy || loading || !draft}>{busy?'Saving…':'Save'}</button>}
       </div>
     </form>
   </dialog>;

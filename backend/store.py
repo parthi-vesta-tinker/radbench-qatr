@@ -398,6 +398,7 @@ def list_reviews(
 ):
     """Newest-first bounded summaries; source fetched only when opening a review."""
     with db() as conn:
+        conn.execute("BEGIN")
         terms, values = ["r.tenant_id=?"], [tenant]
         if starting_after:
             row = conn.execute(
@@ -460,6 +461,10 @@ def list_reviews(
                     mode=doc["provenance"]["mode"],
                 )
             )
+        from .classification_store import overviews
+        classifications = overviews(conn, tenant, review_ids=[item["id"] for item in items])
+        for item in items:
+            item["classification_overview"] = classifications.get(item["id"], [])
         return items, len(rows) > limit
 
 

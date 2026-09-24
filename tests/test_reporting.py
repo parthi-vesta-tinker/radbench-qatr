@@ -166,3 +166,69 @@ def test_completed_result_cannot_change_under_feedback(reporting_db):
         with store.db() as conn:
             conn.execute("UPDATE review_results SET result_version=2 WHERE review_id=?", (rid,))
     assert reporting_db.get('/api/v1/feedback').json()['items'][0]['target_comment'] == 'Controlled comment.'
+
+
+def classification(rid, *, tenant='vesta', observation='obs-1', group='thoracic', priority='hours', status='completed', version=1):
+    cid = 'jc_' + uuid.uuid4().hex
+    result = {'fields': {'finding_group': {'label': group}, 'urgency': {'label': priority},
+                         'certainty': {'label': 'definite'}, 'polarity': {'label': 'affirmed'},
+                         'temporal_status': {'label': 'new'}}} if status == 'completed' else None
+    with store.db() as conn:
+        conn.execute('''INSERT INTO finding_classifications
+          (tenant_id,id,review_id,input_version,observation_id,input_hash,input,config,workflow_id,
+           execution_status,steps,result,created_at,updated_at)
+          VALUES(?,?,?,?,?,'hash','{}','{}',?,?,'[]',?,?,?)''',
+          (tenant,cid,rid,version,observation,cid,status,store.canonical(result) if result else None,store.now(),store.now()))
+    return cid
+
+
+def test_history_and_analytics_capture_only_current_group_and_priority(reporting_db):
+    client = reporting_db
+    rid = seed(critical=True)
+    classification(rid, group='neurological', priority='minutes')
+    classification(rid, group='vascular_cardiac', priority='hours')  # latest replaces earlier labels
+    failed = seed(critical=True)
+    classification(failed)
+    classification(failed, status='failed')  # never resurrect an older successful attempt
+    obsolete = seed(critical=True)
+    classification(obsolete, version=2)  # not the currently submitted version
+    classification(seed(critical=True, days=10), priority='days')
+    classification(seed(critical=True, source='demo'), priority='routine')
+    classification(seed(critical=True, tenant='tenant_b'), tenant='tenant_b', priority='minutes')
+    # A noncritical report cannot acquire a classification in these projections.
+    classification(seed(), priority='minutes')
+    expected = {'finding_group':'vascular_cardiac','communication_priority':'hours'}
+    history = client.get('/api/v1/reviews', params={'q':rid}).json()['items']
+    assert history[0]['classification_overview'] == [expected]
+    for absent in (failed, obsolete):
+        assert client.get('/api/v1/reviews', params={'q':absent}).json()['items'][0]['classification_overview'] == []
+    counts = client.get('/api/v1/analytics?period=1h').json()['classification']
+    assert counts == {'finding_groups':{'vascular_cardiac':1},'communication_priorities':{'hours':1}}
+    all_sources = client.get('/api/v1/analytics?period=all&source=all').json()['classification']
+    assert all_sources == {'finding_groups':{'vascular_cardiac':1,'thoracic':2},
+                           'communication_priorities':{'hours':1,'days':1,'routine':1}}
+    # Replacement removes old-version labels from both surfaces immediately.
+    with store.db() as conn:
+        conn.execute('UPDATE review_records SET input_version=2 WHERE tenant_id=? AND id=?',('vesta',rid))
+    assert client.get('/api/v1/reviews', params={'q':rid}).json()['items'][0]['classification_overview'] == []
+    assert client.get('/api/v1/analytics?period=1h').json()['classification'] == {'finding_groups':{},'communication_priorities':{}}
+
+
+def test_classification_counts_multiple_findings_without_page_or_readiness_dependency(reporting_db, monkeypatch):
+    result = {'result_version':1,'outcome':'observations','critical_finding_detected':True,'general_comments':[],
+              'critical_comments':[{'observation_id':f'obs-{i}','comment':f'Controlled finding {i}.'} for i in (1,2)]}
+    rid = seed(result=result)
+    classification(rid, observation='obs-1', group='thoracic', priority='cannot_determine')
+    classification(rid, observation='obs-2', group='neurological', priority='minutes')
+    for _ in range(21):
+        seed()
+    monkeypatch.delenv('TYPESAFE_API_KEY', raising=False)
+    monkeypatch.setenv('QA_JEV_ENABLED','false')
+    history = reporting_db.get('/api/v1/reviews', params={'q':rid}).json()['items'][0]
+    assert history['classification_overview'] == [
+        {'finding_group':'thoracic','communication_priority':'cannot_determine'},
+        {'finding_group':'neurological','communication_priority':'minutes'}]
+    assert all(set(value) == {'finding_group','communication_priority'} for value in history['classification_overview'])
+    counts = reporting_db.get('/api/v1/analytics?period=all').json()['classification']
+    assert counts == {'finding_groups':{'thoracic':1,'neurological':1},
+                      'communication_priorities':{'cannot_determine':1,'minutes':1}}

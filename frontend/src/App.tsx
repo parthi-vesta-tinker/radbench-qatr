@@ -1,6 +1,6 @@
 import { SettingsPanel } from "./SettingsPanel";
 import type { AppSettings } from "./types";
-import { ReviewJourney, ReviewContext } from "./ReviewJourney";
+import { ReviewJourney } from "./ReviewJourney";
 import { useEffect, useState } from "react";
 import { FileText, History, Plus, MessageSquare, ChartNoAxesColumn, BookOpen, FlaskConical, Moon, Sun, X, Share2, Settings, RefreshCw, Tags } from "lucide-react";
 import { useReview } from "./useReview";
@@ -107,14 +107,11 @@ export default function App() {
       <main className="review-workspace" hidden={view !== "current"}>
         <div className="input-pane">
           <div className="section-heading"><h1>{qa.draft ? "New review" : "Report review"}</h1></div>
-          <ReviewContext review={qa.review} hasText={Boolean(qa.report.trim())} edited={qa.edited} disconnected={qa.disconnected} pasted={pasted} uncertain={qa.locked && !qa.busy} restore={qa.restore} error={qa.error}/>
           <form className="input-section" onSubmit={e => {e.preventDefault(); if (qa.draft) void qa.submit(); else qa.reviewAgain();}}>
             <textarea id="report-text" aria-label="Report text" value={qa.report} readOnly={qa.locked || qa.busy} onPaste={() => setPasted(true)} onChange={e => {if (e.nativeEvent instanceof InputEvent && e.nativeEvent.inputType !== "insertFromPaste") setPasted(false); qa.editReport(e.target.value);}} maxLength={40000} rows={7} spellCheck={false} aria-describedby="input-help" placeholder="Paste your report, including Findings and Impression."/>
-            <div className="input-actions"><ReviewJourney classification={classification} classificationEnabled={features.classification} review={qa.review} edited={qa.edited} busy={qa.busy} disconnected={qa.disconnected}/>
+            <div className="input-actions"><ReviewJourney classification={classification} classificationEnabled={features.classification} review={qa.review} edited={qa.edited} busy={qa.busy} disconnected={qa.disconnected} hasText={Boolean(qa.report.trim())} pasted={pasted} uncertain={qa.locked && !qa.busy} restore={qa.restore} error={qa.error} configurationError={qa.configurationError} configurationUnavailable={Boolean(qa.config && !qa.config.ready)} retryConfiguration={qa.retryConfiguration}/>
               {qa.draft ? <button className="primary" disabled={qa.busy || !qa.config?.ready || !qa.report.trim()}>{qa.busy ? "Submitting…" : qa.draft.key ? "Retry submission" : "Review"}</button> : <button className="primary" disabled={!qa.canReviewAgain || qa.busy || !qa.config?.ready || !qa.report.trim()}>{qa.busy ? "Reviewing…" : qa.locked ? "Retry submission" : "Review again"}</button>}
             </div>
-            {qa.configurationError && <div className="notice" role="alert"><p>{qa.configurationError}</p><button type="button" onClick={qa.retryConfiguration}>Retry connection</button></div>}
-            {qa.config && !qa.config.ready && <p className="notice">Live review is not configured. Set the backend model and OpenAI key, then restart.</p>}
           </form>
         </div>
         <div className="output-pane">

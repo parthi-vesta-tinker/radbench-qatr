@@ -137,6 +137,13 @@ def analytics(tenant, period="7d", source="openai", include_feedback=False):
             )
             findings[category] += 1
         feedback = None
+        from .classification_store import overviews
+        classification = dict(finding_groups={}, communication_priorities={})
+        for labels in overviews(conn, tenant, period_start=start, period_end=checked.isoformat(), source=source).values():
+            for label in labels:
+                for name, key in (("finding_groups", "finding_group"), ("communication_priorities", "communication_priority")):
+                    value = label[key]
+                    classification[name][value] = classification[name].get(value, 0) + 1
         if include_feedback:
             joined = " FROM feedback f JOIN reviews r ON r.tenant_id=f.tenant_id AND r.id=f.review_id WHERE " + " AND ".join(feedback_terms)
             summary = conn.execute(
@@ -153,7 +160,7 @@ def analytics(tenant, period="7d", source="openai", include_feedback=False):
             feedback = dict(summary) | {"reasons": {row["reason"] or "other": row["total"] for row in reasons}}
     return dict(object="qa_analytics", tenant_id=tenant, checked_at=checked.isoformat(),
                 period=period, period_start=start, source=source,
-                reviews=totals | {"statuses": counts}, findings=findings, feedback=feedback,
+                reviews=totals | {"statuses": counts}, findings=findings, classification=classification, feedback=feedback,
                 critical_evaluation=dict(
                     status="not_measured", unit="report", scope="report_text_only",
                     precision=None, recall=None, false_positive_rate=None,

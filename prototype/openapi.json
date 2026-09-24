@@ -4151,6 +4151,9 @@
           "findings": {
             "$ref": "#/components/schemas/FindingCounts"
           },
+          "classification": {
+            "$ref": "#/components/schemas/ClassificationCounts"
+          },
           "feedback": {
             "anyOf": [
               {
@@ -4398,6 +4401,26 @@
           "labels"
         ],
         "title": "ClassificationConfig"
+      },
+      "ClassificationCounts": {
+        "properties": {
+          "finding_groups": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Finding Groups"
+          },
+          "communication_priorities": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Communication Priorities"
+          }
+        },
+        "type": "object",
+        "title": "ClassificationCounts"
       },
       "ClassificationFeedbackInput": {
         "properties": {
@@ -4686,6 +4709,42 @@
           "urgency"
         ],
         "title": "ClassificationLabels"
+      },
+      "ClassificationOverview": {
+        "properties": {
+          "finding_group": {
+            "type": "string",
+            "enum": [
+              "neurological",
+              "vascular_cardiac",
+              "thoracic",
+              "abdominal_pelvic",
+              "gu_obstetric",
+              "musculoskeletal",
+              "device_procedural",
+              "other",
+              "insufficient_context"
+            ],
+            "title": "Finding Group"
+          },
+          "communication_priority": {
+            "type": "string",
+            "enum": [
+              "minutes",
+              "hours",
+              "days",
+              "routine",
+              "cannot_determine"
+            ],
+            "title": "Communication Priority"
+          }
+        },
+        "type": "object",
+        "required": [
+          "finding_group",
+          "communication_priority"
+        ],
+        "title": "ClassificationOverview"
       },
       "ClassificationPublicInput": {
         "properties": {
@@ -6692,6 +6751,13 @@
           "mode": {
             "type": "string",
             "title": "Mode"
+          },
+          "classification_overview": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationOverview"
+            },
+            "type": "array",
+            "title": "Classification Overview"
           }
         },
         "type": "object",

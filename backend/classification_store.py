@@ -114,6 +114,43 @@ def pending():
                 for row in conn.execute("SELECT tenant_id,id,workflow_id FROM finding_classifications WHERE execution_status IN ('queued','running')")]
 
 
+def overviews(conn, tenant, *, review_ids=None, period_start=None, period_end=None, source="all"):
+    """Latest attempt per current critical observation, only if completed.
+
+    Use the caller's read transaction so history and analytics stay snapshot-consistent.
+    Newer pending/failed attempts suppress older results rather than recycling them.
+    """
+    terms = ["r.tenant_id=?", "json_extract(r.document,'$.execution_status')='completed'",
+             "c.input_version=json_extract(r.document,'$.input_version')",
+             "c.execution_status='completed'", "c.result IS NOT NULL", "o.group_name='critical_comments'"]
+    values = [tenant]
+    if review_ids is not None:
+        if not review_ids:
+            return {}
+        terms.append("r.id IN (" + ",".join("?" for _ in review_ids) + ")")
+        values.extend(review_ids)
+    if source != "all":
+        terms.append("json_extract(r.document,'$.provenance.mode')=?")
+        values.append(source)
+    for bound, operator in ((period_start, ">="), (period_end, "<")):
+        if bound:
+            terms.append(f"julianday(json_extract(r.document,'$.created_at')){operator}julianday(?)")
+            values.append(bound)
+    rows = conn.execute(
+        "SELECT c.review_id,c.result FROM finding_classifications c "
+        "JOIN reviews r ON r.tenant_id=c.tenant_id AND r.id=c.review_id "
+        "JOIN observations o ON o.tenant_id=c.tenant_id AND o.review_id=c.review_id AND o.id=c.observation_id "
+        "WHERE " + " AND ".join(terms) +
+        " AND NOT EXISTS (SELECT 1 FROM finding_classifications newer WHERE newer.tenant_id=c.tenant_id "
+        "AND newer.review_id=c.review_id AND newer.input_version=c.input_version "
+        "AND newer.observation_id=c.observation_id AND (newer.created_at,newer.id)>(c.created_at,c.id)) "
+        "ORDER BY c.review_id,o.position,c.created_at,c.id", values).fetchall()
+    grouped = {}
+    for row in rows:
+        grouped.setdefault(row["review_id"], []).append(presentation.classification_overview(json.loads(row["result"])))
+    return grouped
+
+
 def pending_automatic():
     """Only current critical findings from reviews admitted with JEV enabled."""
     with store.db() as conn:

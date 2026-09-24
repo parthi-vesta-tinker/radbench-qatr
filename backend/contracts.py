@@ -604,6 +604,16 @@ class FindingCounts(BaseModel):
     other_issues: int
 
 
+class ClassificationCounts(BaseModel):
+    finding_groups: dict[str, int] = Field(default_factory=dict)
+    communication_priorities: dict[str, int] = Field(default_factory=dict)
+
+
+class ClassificationOverview(BaseModel):
+    finding_group: FindingGroup
+    communication_priority: Urgency
+
+
 class FeedbackCounts(BaseModel):
     total: int
     reviews: int
@@ -636,6 +646,7 @@ class AnalyticsResource(BaseModel):
     source: Literal["openai", "demo", "all"]
     reviews: ReviewCounts
     findings: FindingCounts
+    classification: ClassificationCounts = Field(default_factory=ClassificationCounts)
     feedback: FeedbackCounts | None
     critical_evaluation: CriticalEvaluationReadiness
 
@@ -689,6 +700,7 @@ class ReviewSummary(BaseModel):
     critical_count: int
     feedback_count: int | None
     mode: str
+    classification_overview: list[ClassificationOverview] = Field(default_factory=list)
 
 
 class ReviewComments(BaseModel):

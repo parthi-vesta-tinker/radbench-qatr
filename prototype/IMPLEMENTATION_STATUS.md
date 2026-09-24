@@ -4,6 +4,35 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 
 ## Implemented
 
+- **Stage-linked review feedback (2026-09-24):** the single contextual message now sits
+  below the review journey and is associated with Input, Validate, AI review, Results or
+  Classification. Failure callouts point to the failed stage and omit technical request
+  details. A skill-configuration 503 from startup points
+  to AI review even before a review exists; Retry connection stays in its callout.
+  Edited text says “Review again. Changes not reviewed” with “Restore change” on
+  the same line, including at 390px and 320px. The report title no longer carries
+  an unrelated error. Verification: production
+  build and all 33 DOM tests passed; five isolated demo browser regressions passed,
+  including the replacement flow at 1536px, 390px and 320px and the configuration
+  error at 390px. Mobile error screenshots were inspected. No live provider call or
+  backend change.
+
+- **Studio refinement and classification reporting (2026-09-24):** journey connectors
+  meet consistently across Results and Classification. Guidance uses “Guidance appears
+  after review.” and a clickable remaining-step count after two preview steps.
+  Classification previews finding group and priority in medium-weight typography;
+  More details and the heading expand all labels and inputs. Feedback starts with
+  “Something wrong?”. Redundant tooltips are hidden on the labeled mobile Studio tools.
+  History projects only finding group and communication priority; Analytics counts
+  these same two dimensions for current critical observations. Shared tenant, source,
+  period, current-input-version and latest-attempt filters prevent obsolete labels
+  from appearing. Detailed classifier fields remain in Classification. No migration
+  or provider dispatch change. Verification: **38 controlled backend/API tests**,
+  DOM suite, production build, generated-contract checks, and **9 isolated Chromium
+  regressions passed**. Desktop 1536px and mobile 390px screenshots were inspected;
+  connector geometry, disclosure actions, History and Analytics were checked using
+  controlled classification fixtures. No live provider or clinical evaluation occurred.
+
 - **Compact Studio summaries (2026-09-24):** Post-review Guidance and Classification
   Overview share accessible, independently collapsible headings with neutral backgrounds.
   Guidance previews two steps; classification previews two finding groups. Expanded cards
@@ -361,3 +390,41 @@ Refreshing keeps selected filters; history and feedback restart pagination.
 Production build and read-only localhost Chromium checks passed for all three
 refresh requests, visible headers, mobile history control, and no page errors.
 Chrome connector returned BRIDGE_NOT_READY; existing Playwright was used.
+
+
+## Compact Settings — 2026-09-24
+
+Settings uses compact label/control rows for Run mode and Clinical review model.
+The requested feature label is JEV classifcation. Save replaces Save changes and
+is shown only for modified settings; reverting or saving hides it again.
+Production build and four focused Chromium tests passed, including unchanged,
+modified, reverted and saved states plus responsive dialog overflow checks.
+
+Settings density follow-up: feature descriptions now sit inline (Test reports,
+Edit instructions, Critical findings); CF classification replaces the provider-named
+feature label. Access is one label/value row with redundant copy removed. Build and
+four focused Chromium checks passed; the 320px screenshot confirms single-line
+feature rows and visible Close control without horizontal overflow.
+
+Settings Save now closes the dialog after a successful response and restores focus
+to the Settings button. Failed saves keep the dialog and draft open. Production
+build and four focused Chromium checks passed, including success and error paths.
+
+
+## Application health presentation — 2026-09-24
+
+Renamed Service health to Application health. Last checked and its timestamp share
+a single line. Service status labels precede a consistently aligned check/warning
+icon; OpenAI retains its explicit connection-check action using the same icon style.
+The optional-provider status not_required displays as Not configured; backend
+status and readiness semantics are unchanged. Build and five focused Chromium
+checks passed, including refresh, probe failure/recovery, icon alignment and
+light/dark layouts at 1280, 390 and 320px. Provider diagnostics were mocked.
+
+Health layout follow-up: the verdict and last-checked timestamp now share one
+summary row beneath the title and refresh controls. Build and five Chromium
+checks passed, including row alignment at 1280, 390 and 320px in both themes.
+
+Settings footer now shows Close only while unchanged, or Save while modified.
+Reverting edits restores Close; successful Save closes the dialog. Build and four
+focused Chromium checks passed, including mutually exclusive footer actions.

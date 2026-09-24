@@ -108,3 +108,15 @@ Settings persist in an atomic tenant sidecar under `QA_DATA_DIR/settings`; no sc
 Config and Playground catalog expose `run_mode: demo|live`. Accepted execution snapshots
 retain their provider `mode` for recovery compatibility. Feature gates preserve idempotent
 receipt replay and existing accepted work. Skills gating affects editorial tools only.
+
+
+### Classification overview in history and analytics
+
+Review summaries include `classification_overview`, an ordered list of only
+`finding_group` and `communication_priority` pairs. Analytics includes
+`classification.finding_groups` and `classification.communication_priorities`, maps
+of label to observation count. Both use the same tenant-scoped current-version,
+latest-attempt selector and include only completed classifications of current critical
+observations. History pagination does not limit analytics. No additional classification
+fields, inputs or rubric details are projected into these surfaces. This is additive
+under the existing API version and reads already-persisted records without migration.

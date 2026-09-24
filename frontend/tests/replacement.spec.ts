@@ -11,8 +11,22 @@ test('correcting a review replaces its text and result without another draft or 
   const first = await (await created).json();
   await expect(page.locator('.review-journey .blocked')).toBeVisible();
   await expect(page.locator('.review-journey .blocked')).toContainText('Validate');
+  await expect(page.locator('.review-journey #input-help[role="alert"]')).toBeVisible();
+  await page.setViewportSize({width:390,height:900});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:'/tmp/qa-review-validation-error-390.png'});
+  await page.setViewportSize({width:1536,height:1024});
   await input.fill(config.samples.find((s:{id:string})=>s.id==='mixed').report_text);
-  await expect(page.locator('#input-help')).toContainText('Changes haven’t been reviewed.');
+  await expect(page.locator('#input-help')).toContainText('Review again. Changes not reviewed');
+  await expect(page.locator('#input-help button')).toHaveText('Restore change');
+  for (const width of [390,320]) {
+    await page.setViewportSize({width,height:900});
+    const message = (await page.locator('#input-help').boundingBox())!;
+    const restore = (await page.locator('#input-help button').boundingBox())!;
+    expect(Math.abs(message.y-restore.y)).toBeLessThan(2);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({width:1536,height:1024});
   const replaced = page.waitForResponse(r=>r.request().method()==='PUT' && r.url().endsWith('/reviews/'+first.id));
   await page.getByRole('button',{name:'Review again',exact:true}).click();
   expect((await (await replaced).json()).id).toBe(first.id);
@@ -44,11 +58,26 @@ test('correcting a review replaces its text and result without another draft or 
     await expect(page.locator('.review-journey li')).toHaveCount(4);
     await expect(page.locator('#input-help')).toHaveCount(1);
     const context = (await page.locator('#input-help').boundingBox())!;
-    const title = (await page.locator('.input-pane h1').boundingBox())!;
-    const field = (await input.boundingBox())!;
-    expect(context.y).toBeGreaterThanOrEqual(title.y+title.height);
-    expect(context.y+context.height).toBeLessThanOrEqual(field.y);
+    expect(context.y).toBeGreaterThan(journey.y);
+    expect(context.x).toBeGreaterThanOrEqual(journey.x);
+    expect(context.x+context.width).toBeLessThanOrEqual(journey.x+journey.width);
     await page.mouse.move(0,0);
     await page.screenshot({path:`/tmp/qa-review-journey-${width}.png`});
   }
+});
+
+test('skill configuration error is anchored to AI review', async ({page}) => {
+  await page.route('**/api/v1/config', route => route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:{code:'SKILL_CONFIGURATION_INVALID',message:'The skill package or configuration is invalid.'}})}));
+  await page.setViewportSize({width:390,height:900});
+  await page.goto('/');
+  const stage = page.locator('.review-journey li[aria-describedby="input-help"]');
+  await expect(stage).toContainText('AI review');
+  await expect(stage).toHaveClass('blocked');
+  await expect(page.locator('.review-journey .current')).toHaveCount(0);
+  await expect(page.locator('.review-journey #input-help[role="alert"]')).toContainText('The skill package or configuration is invalid.');
+  await expect(page.locator('#input-help')).not.toContainText('SKILL_CONFIGURATION_INVALID');
+  await expect(page.locator('#input-help details')).toHaveCount(0);
+  await expect(page.locator('#input-help button')).toHaveText('Retry connection');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:'/tmp/qa-review-config-error-390.png'});
 });

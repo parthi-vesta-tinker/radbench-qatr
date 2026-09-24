@@ -120,7 +120,7 @@ test('health reports unavailable truthfully and dismisses on every route',async(
   const open=async()=>act(async()=>{(summary as HTMLButtonElement).click();});
   // The close button exists and dismisses the panel.
   await open();assert.equal(panel.hidden,false);
-  await click('Close service health');assert.equal(panel.hidden,true);
+  await click('Close application health');assert.equal(panel.hidden,true);
   // Escape works wherever focus sits, not only on the summary.
   await open();
   await act(async()=>{document.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));});
@@ -269,7 +269,7 @@ test('review history filters by submission time and opens comments without openi
   assert.match(document.querySelector('.history-pane')!.textContent!,/ABCDE/);
   assert.match(document.querySelector('.history-pane')!.textContent!,/Not recorded/);
   const headers=[...document.querySelectorAll('.review-history-table th')].map(header=>header.textContent);
-  assert.deepEqual(headers,['Review ID','Report description','Submitted by','Submitted time','Status','Comments','Feedback']);
+  assert.deepEqual(headers,['Review ID','Report description','Submitted by','Submitted time','Status','Comments','Classification','Feedback']);
   assert.equal(document.querySelector('.history-status')?.textContent,'Completed');
   await choose('Submitted','24h');
   assert.ok(new URLSearchParams(queries.at(-1)).has('submitted_after'));
@@ -401,10 +401,11 @@ test('late classification responses cannot cross review or input-version boundar
 test('classification progress preserves completed Results on pending and failed classification', async () => {
   const source = {...review('qr-one','text'), execution_status:'completed'} as Review;
   const data = {runs:[],config:null,loading:true,error:'',refresh:()=>{}};
-  await act(async () => {root.render(<ReviewJourney review={source} edited={false} busy={false} disconnected={false} classificationEnabled classification={data}/>);});
+  const context = {hasText:true,pasted:false,uncertain:false,restore:()=>{},error:''};
+  await act(async () => {root.render(<ReviewJourney review={source} edited={false} busy={false} disconnected={false} classificationEnabled classification={data} {...context}/>);});
   assert.equal(document.querySelectorAll('.review-journey .complete').length,4);
   assert.match(document.querySelector('.review-journey .current')!.textContent!,/Classification/);
-  await act(async () => {root.render(<ReviewJourney review={source} edited={false} busy={false} disconnected={false} classificationEnabled classification={{...data,loading:false,runs:[{execution_status:'failed'} as any]}}/>);});
+  await act(async () => {root.render(<ReviewJourney review={source} edited={false} busy={false} disconnected={false} classificationEnabled classification={{...data,loading:false,runs:[{execution_status:'failed'} as any]}} {...context}/>);});
   assert.equal(document.querySelectorAll('.review-journey .complete').length,4);
   assert.match(document.querySelector('.review-journey .blocked')!.textContent!,/Classification/);
 });
@@ -412,7 +413,7 @@ test('classification progress preserves completed Results on pending and failed 
 test('classification is not applicable only for a completed review with no critical findings', async () => {
   const source = {...review('qr-clean','text'), execution_status:'completed', result:{critical_comments:[]}} as unknown as Review;
   const renderJourney = async (value: Review, edited = false) => act(async () => {
-    root.render(<ReviewJourney review={value} edited={edited} busy={false} disconnected={false} classificationEnabled/>);
+    root.render(<ReviewJourney review={value} edited={edited} busy={false} disconnected={false} classificationEnabled hasText pasted={false} uncertain={false} restore={()=>{}} error=""/>);
   });
   await renderJourney(source);
   const stage = document.querySelector('.review-journey li:last-child')!;
@@ -425,4 +426,51 @@ test('classification is not applicable only for a completed review with no criti
   assert.equal(stage.className, 'pending');
   await renderJourney({...source,result:null});
   assert.equal(stage.className, 'unavailable');
+});
+
+test('review failures explain the stage that failed', async () => {
+  const context = {hasText:true,pasted:false,uncertain:false,restore:()=>{},error:''};
+  for (const [step, label] of [
+    ['input_validation','Validate'], ['combined_review','AI review'],
+    ['output_validation','Results'], ['comment_assembly','Results'],
+  ] as const) {
+    const source = {...review('qr-stage','Findings: x. Impression: x.'),
+      error:{code:'REVIEW_FAILED',message:`Failure in ${label}.`,retryable:false},
+      steps:[{step_id:step,status:'failed',started_at:null,completed_at:null}]} as Review;
+    await act(async()=>root.render(<ReviewJourney review={source} edited={false} busy={false} disconnected={false} {...context}/>));
+    const stage = document.querySelector('.review-journey li[aria-describedby="input-help"]')!;
+    assert.match(stage.textContent!,new RegExp(label));
+    assert.match(document.querySelector('#input-help[role="alert"]')!.textContent!,new RegExp(`Failure in ${label}`));
+    assert.equal(document.querySelector('#input-help details'),null);
+  }
+});
+
+test('configuration failures point to AI review before a review exists', async () => {
+  let retries = 0;
+  await act(async()=>root.render(<ReviewJourney review={null} edited={false} busy={false} disconnected={false}
+    hasText={false} pasted={false} uncertain={false} restore={()=>{}} error=""
+    configurationError="The skill package is invalid. [SKILL_CONFIGURATION_INVALID · HTTP 503 · req_test]"
+    retryConfiguration={()=>{retries++;}}/>));
+  const stage = document.querySelector('.review-journey li[aria-describedby="input-help"]')!;
+  assert.match(stage.textContent!,/AI review/);
+  assert.equal(stage.className,'blocked');
+  assert.equal(document.querySelectorAll('.review-journey .complete').length,0);
+  assert.match(document.querySelector('#input-help[role="alert"]')!.textContent!,/The skill package is invalid/);
+  assert.doesNotMatch(document.querySelector('#input-help')!.textContent!,/SKILL_CONFIGURATION_INVALID|HTTP 503|req_test/);
+  assert.equal(document.querySelector('#input-help details'),null);
+  await act(async()=>(document.querySelector('#input-help button') as HTMLButtonElement).click());
+  assert.equal(retries,1);
+});
+
+test('classification error stays under its stage without request diagnostics', async () => {
+  const source = {...review('qr-critical','Findings: x. Impression: x.'),execution_status:'completed',
+    result:{critical_comments:[{observation_id:'critical-1'}]}} as unknown as Review;
+  const classification = {runs:[],config:null,loading:false,error:'Classification unavailable. [JEV_UNAVAILABLE · HTTP 503 · req_test]',refresh:()=>{}};
+  await act(async()=>root.render(<ReviewJourney review={source} edited={false} busy={false} disconnected={false}
+    hasText pasted={false} uncertain={false} restore={()=>{}} error="" classificationEnabled classification={classification}/>));
+  assert.match(document.querySelector('.review-journey li[aria-describedby="input-help"]')!.textContent!,/Classification/);
+  const message = document.querySelector('#input-help[role="alert"]')!;
+  assert.match(message.textContent!,/Classification unavailable/);
+  assert.doesNotMatch(message.textContent!,/JEV_UNAVAILABLE|HTTP 503|req_test/);
+  assert.equal(message.querySelector('details'),null);
 });
