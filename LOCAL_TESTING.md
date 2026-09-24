@@ -169,3 +169,26 @@ and checks foreign keys before committing schema 7. It refuses pending work and 
 versions. Restart the application normally and refresh the browser. Existing separate reviews
 are not guessed or merged. Future Review again submissions replace the selected review.
 API clients must use QA-Version 2026-09-22 and the generated replacement/feedback contracts.
+
+### Recover history from another schema-7 folder
+
+If a changed `QA_DATA_DIR` makes older reviews disappear, first locate the previous
+folder. Do not replace the current folder with the old one: that would hide newer work.
+For an explicit import of finished reviews, stop all applications using either folder,
+ensure neither store has queued/running reviews or Playground runs, then run:
+
+```sh
+.venv/bin/python scripts/restore_review_history.py --source .qa-data-foundation-v5 --destination .qa-data-local --applications-stopped
+```
+
+The command backs up each folder's application and DBOS SQLite databases into a dated
+`history-backup-*` subfolder. It imports terminal reviews, their captured configurations,
+results, observations, feedback, dormant outcomes, provider checkpoints and review-related
+idempotency receipts in one transaction. Identical records are skipped; conflicts abort
+and roll back. Destination tenant bindings remain unchanged; unknown tenants are refused.
+Column order differences from an explicit schema-7 upgrade are supported.
+
+DBOS workflows, Studio drafts and Playground records are not imported. The source folder
+remains intact. Keep the backups and the original folder. Restart using the same destination
+`QA_DATA_DIR`; if the API key was entered interactively, enter it again at the launcher’s
+hidden prompt. Verify Review history, Load more reviews, and reopening an older review.

@@ -4,6 +4,18 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
 
 ## Implemented
 
+- **Review History ID presentation:** removed the second-line “AI”/“Demo” mode text from each
+  Review ID cell; IDs remain clickable and provider mode remains in stored provenance.
+  Verification on 24 September 2026: production build, 24 DOM tests, and the focused
+  two-review browser test passed in demo mode; the populated desktop table was inspected.
+  No API, storage, or provider behavior changed.
+
+- **Unsubmitted review results presentation:** the section title is “Review Results”
+  and its empty message is “Report review and comments will appear here,” aligned directly below
+  the title without an icon. Verification on 24 September 2026: production build, 24 DOM tests,
+  and the focused header browser check passed; desktop and 390px screenshots were inspected.
+  No provider call or API change.
+
 - **Completed empty review presentation:** the output shows only “No actionable observations,”
   aligned with the comment content; the extra icon and explanatory line are removed.
   Verification on 24 September 2026: production build, 24 DOM tests, and the focused
@@ -166,3 +178,45 @@ This is a visual correction only. No provider calls, deployment or remote push w
 - **F5 — bounded evaluation:** run a predeclared live-provider evaluation and keep model behavior review separate from qualified clinical adjudication.
 
 See [FOUNDATION_PLAN.md](FOUNDATION_PLAN.md) for gate details and [FOUNDATION_CHANGELOG.md](FOUNDATION_CHANGELOG.md) for implementation decisions.
+
+## Review history investigation — 24 September 2026
+
+- Added `frontend/tests/history-retention.spec.ts`: two submissions through New review
+  retain distinct IDs and input version 1, appear in the sidebar and history after reload,
+  and reopen with their original text. The controlled browser test reported no page errors;
+  its desktop screenshot was inspected at 1536×1024.
+- The new retention test and existing replacement test both passed (**2 Playwright tests**)
+  against isolated demo storage at `http://127.0.0.1:8765`. The frontend production build
+  passed. Playwright used local Chromium because the Browser plugin was not available;
+  sandbox server connectivity timed out, then the approved outside-sandbox run passed.
+- The inspected configured local store contained one review at input version 4; request
+  receipts included one create operation and replacement operations. This supports repeated
+  replacement as the local explanation, but does not establish behavior on a different server.
+  Review again intentionally retains one history entry under the workspace contract.
+- No application behavior, live records, or provider execution changed. No deployment or
+  clinical evaluation was performed. The new retention flow was checked on desktop only.
+
+## Applied local history recovery — 24 September 2026
+
+- Explicitly restored 39 terminal reviews from `.qa-data-foundation-v5` into the active
+  `.qa-data-local` store, preserving its existing review: **40 reviews total**. Imported
+  associated snapshots, results, observations, three feedback records, provider checkpoints
+  and 49 review-related idempotency receipts. Original review projections match exactly.
+- Both application and DBOS databases were backed up in each folder under
+  `history-backup-20260924T154948978537Z` before importing with the application stopped.
+  No DBOS workflows, Playground records or Studio drafts were imported. Source data and
+  current tenant bindings remain intact. SQLite integrity and foreign-key checks passed.
+- Added the explicit offline `scripts/restore_review_history.py` utility and documented
+  its use. **4 controlled recovery tests passed**, covering preservation, repeat import,
+  rollback on conflicts, and refusing pending work in either store. A rehearsal against
+  copies of the actual stores verified all 40 original review projections before recovery.
+- **1 isolated demo browser regression passed**: New review creates distinct entries,
+  retained after reload and accessible from history. No provider calls were made.
+- The live app required its interactive API key to be re-entered on restart. After restart,
+  read-only Chromium checks at `http://localhost:8000` passed: 40 distinct reviews across
+  API and UI pagination, newest/oldest records reopen with matching text, New review opens
+  blank, and returning to history retains the records. Page identity, rendered content,
+  absence of a framework overlay and browser console/page errors were checked. Desktop
+  screenshot inspected at 1536×1024. No live submissions or provider probes were performed.
+- Documentation link/inventory validation passed. This recovery does not imply clinical
+  validation or production readiness; mobile recovery verification was not repeated.

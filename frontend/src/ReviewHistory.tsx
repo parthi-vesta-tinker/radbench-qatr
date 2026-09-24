@@ -109,7 +109,7 @@ export function ReviewHistory({ busy, openReview, refreshToken = 0 }: { busy: bo
     </form>
     {error && <p className="error" role="alert">{error} <button onClick={() => setRefresh(value => value + 1)}>Retry history</button></p>}
     <div className="history-table review-history-table" role="region" aria-label="Saved reviews" tabIndex={0}><table><thead><tr><th>Review ID</th><th>Report description</th><th>Submitted by</th><th>Submitted time</th><th>Status</th><th>Comments</th><th>Feedback</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}>
-      <td data-label="Review ID"><button className="report-link review-short-id" disabled={busy || loading} onClick={() => openReview(row.id)}>{row.display_id}</button><span className="meta">{row.mode === 'demo' ? 'Demo' : 'AI'}</span></td>
+      <td data-label="Review ID"><button className="report-link review-short-id" disabled={busy || loading} onClick={() => openReview(row.id)}>{row.display_id}</button></td>
       <td data-label="Report description"><button className="report-link history-description" title={row.preview} disabled={busy || loading} onClick={() => openReview(row.id)}>{row.preview || 'Open report'}</button></td>
       <td data-label="Submitted by">{row.submitted_by ?? <span className="meta">Not recorded</span>}</td>
       <td data-label="Submitted time"><time dateTime={row.created_at}>{displayTime(row.created_at)}</time></td>

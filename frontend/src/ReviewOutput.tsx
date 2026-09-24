@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, FileCheck2 } from "lucide-react";
+import { Copy } from "lucide-react";
 import type { Review } from "./types";
 import { Feedback } from "./Feedback";
 export function ReviewOutput({
@@ -35,7 +35,7 @@ export function ReviewOutput({
   return (
     <section className="output" aria-labelledby="output-title">
       <div className="section-heading">
-        <h2 id="output-title">Quality review</h2>
+        <h2 id="output-title">Review Results</h2>
         {result?.outcome === "observations" && (
           <button
             type="button"
@@ -50,9 +50,8 @@ export function ReviewOutput({
         )}
       </div>
       {!review && (
-        <div className="empty">
-          <FileCheck2 size={26} strokeWidth={1.4} />
-          <p>The quality review will appear here.</p>
+        <div className="empty preview">
+          <p>Report review and comments will appear here</p>
         </div>
       )}
       {result && (
