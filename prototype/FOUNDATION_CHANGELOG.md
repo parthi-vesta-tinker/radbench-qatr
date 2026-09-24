@@ -1,5 +1,27 @@
 # Foundation implementation decisions and releases
 
+## Critical finding JEV classification — 2026-09-24
+
+Application 0.15.0, bundle 1.21, API 2026-09-22, schema 8. Completed report
+reviews admitted with JEV enabled automatically classify each critical comment through
+one five-Choice JEV request. Reviews without critical comments never call JEV. The
+classification workflow, attempt checkpoint, tenant-scoped receipts and feedback are
+separate from report QA; report replacement does not rewrite the prior suggestion.
+Public classification reads omit the private grounded report anchors retained in the
+immutable provider input.
+QA Studio shows the five labels, raw distributions and human feedback actions. The
+rubric is explicitly draft research, urgency is a communication suggestion rather
+than a care deadline. A nondefault urgency suggestion has a visible verification cue;
+the synthetic live smoke test produced one such suggestion without an explicit report
+communication instruction. Calibration starts uncalibrated. Local evaluation commands
+support frozen data partitions, scoring, fitting and threshold exploration.
+
+Schema-7 storage requires the explicit backed-up `upgrade_classification_storage.py`
+command with applications stopped and no pending work. Controlled API/workflow,
+migration and evaluation tests passed. A synthetic critical demo review completed
+with one live JEV classification using a process-only credential; no OpenAI request
+or clinical assessment was performed.
+
 ## Analytics findings and rolling periods — 2026-09-24
 
 Simplify Analytics around saved review findings. The page shows counts of accepted comments

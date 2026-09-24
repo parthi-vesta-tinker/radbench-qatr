@@ -1,6 +1,6 @@
 # Current repository instructions
 
-Application **0.14.0**, bundle **1.20**, foundation **F3**, API **2026-09-22**, schema **7**.
+Application **0.15.0**, bundle **1.21**, foundation **F3**, API **2026-09-22**, schema **8**.
 
 Read [prototype/FOUNDATION_PLAN.md](prototype/FOUNDATION_PLAN.md) before implementing F4 or F5. Use [prototype/FOUNDATION_CHANGELOG.md](prototype/FOUNDATION_CHANGELOG.md) and [prototype/IMPLEMENTATION_STATUS.md](prototype/IMPLEMENTATION_STATUS.md) for implemented decisions and evidence. The specifications listed in [prototype/README.md](prototype/README.md) govern their feature areas. `design-history/` is archive material and has no implementation authority.
 
@@ -20,8 +20,8 @@ Read [prototype/FOUNDATION_PLAN.md](prototype/FOUNDATION_PLAN.md) before impleme
 - Keep the modular FastAPI application, SQLite resource store, DBOS workflows, Agents SDK through `DBOSRunner`, and React frontend. DBOS owns the asynchronous event loop; never wrap an SDK child workflow in `asyncio.run`.
 - A valid admitted review uses one combined, tool-free provider request. Invalid input uses zero. Refusals, incomplete responses, malformed output, and local validation failures do not trigger repair calls.
 - A dispatch claim without a durable response is `MODEL_OUTCOME_UNKNOWN` and must never retry automatically. A durable response checkpoint may resume local validation and assembly.
-- DBOS system storage remains separate from the application resource store. Use schema-7 application storage. Schema-6 upgrades require the explicit backed-up upgrade command with the application stopped and no pending work. Never silently migrate or reset storage.
-- Current identities are application `foundation-f3-0.14.0`, queue `qa-reviews-f3-v2`, parent `qa.review.f3.v2`, and child `qa.openai.combined.f3.v2`. Change them deliberately when recovery compatibility changes.
+- DBOS system storage remains separate from the application resource store. Use schema-8 application storage. Schema-7 upgrades require the explicit backed-up upgrade command with the application stopped and no pending work. Never silently migrate or reset storage.
+- Current identities are application `foundation-f3-0.15.0`, review queue `qa-reviews-f3-v2`, review parent `qa.review.f3.v2`, review child `qa.openai.combined.f3.v2`, and classification queue `qa-finding-classifications-v1`. Change them deliberately when recovery compatibility changes.
 - External provider success can occur before a local checkpoint. Do not claim exactly-once billing.
 - A pack reference names what a run composes. Live report QA composes `published` only; `backend/packs.py` refuses a draft reference on the live path. A `draft:<workspace>` pack is stamped `draft:<workspace>@<pack-hash>` and can never be read as a release.
 - `skill_workspaces`, `playground_runs` and `playground_attempts` are additive and isolated. A playground run is written only to those tables; it never enters `review_records`, `review_results` or `observations`, and analytics, feedback, outcomes and review history never read them.

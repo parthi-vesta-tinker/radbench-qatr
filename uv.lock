@@ -1591,12 +1591,13 @@ wheels = [
 
 [[package]]
 name = "vesta-report-qa"
-version = "0.14.0"
+version = "0.15.0"
 source = { virtual = "." }
 dependencies = [
     { name = "dbos" },
     { name = "dbos-openai-agents" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "openai-agents" },
     { name = "python-dotenv" },
     { name = "socksio" },
@@ -1605,7 +1606,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "pytest" },
 ]
 
@@ -1614,6 +1614,7 @@ requires-dist = [
     { name = "dbos", specifier = "==2.31.1" },
     { name = "dbos-openai-agents", specifier = "==0.3.0" },
     { name = "fastapi", specifier = "==0.141.1" },
+    { name = "httpx", specifier = ">=0.28,<1" },
     { name = "openai-agents", specifier = "==0.22.2" },
     { name = "python-dotenv", specifier = ">=1,<2" },
     { name = "socksio", specifier = ">=1,<2" },
@@ -1621,10 +1622,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "httpx", specifier = ">=0.28,<1" },
-    { name = "pytest", specifier = ">=8,<10" },
-]
+dev = [{ name = "pytest", specifier = ">=8,<10" }]
 
 [[package]]
 name = "watchfiles"

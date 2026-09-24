@@ -1,6 +1,6 @@
 # Current prototype documentation
 
-This directory contains the current application contract and generated artifacts for application **0.14.0** / foundation **F3** / schema **7**. Older plans, screenshots, and design studies are under `../design-history/` and are not implementation authority.
+This directory contains the current application contract and generated artifacts for application **0.15.0** / foundation **F3** / schema **8**. Older plans, screenshots, and design studies are under `../design-history/` and are not implementation authority.
 
 ## Read by task
 

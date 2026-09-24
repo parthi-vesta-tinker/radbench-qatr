@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { act } from 'react';
 import App from '../src/App';
+import { FindingClassification } from '../src/FindingClassification';
 import { api, ApiError } from '../src/api';
 import type { Review } from '../src/types';
 import type { Analytics, KnowledgeCatalog, KnowledgeDetail, KnowledgeDraftInput } from '../src/types';
@@ -308,4 +309,26 @@ test('collapsed tooltips appear on focus and dismiss with Escape',async()=>{
   await act(async()=>{document.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));});
   assert.equal(button('Skills').getAttribute('aria-describedby'),null);
   assert.equal(document.activeElement,button('Skills'));
+});
+
+test('critical review shows JEV labels and an urgency verification cue',async()=>{
+  const source = {...review('qr-critical','Findings: Acute right pneumothorax. Impression: Same.'),
+    execution_status:'completed',result:{critical_comments:[{observation_id:'obs-critical',comment:'Acute right pneumothorax.'}]}} as unknown as Review;
+  const labels = {finding_group:'thoracic',polarity:'affirmed',certainty:'definite',temporal_status:'not_stated',urgency:'minutes'};
+  const fields = Object.fromEntries(Object.entries(labels).map(([field,label])=>[field,{label,raw_probabilities:{[label]:1},
+    provider_confidence:1,top_probability:1,margin:1,calibrated_probabilities:null,review_reasons:[]}])) as any;
+  api.classificationConfig=async()=>({enabled:true,ready:true,reason:null,model:'jev-1.13.0',rubric_id:'finding-rubric-v1',
+    rubric_hash:'hash',calibration_status:'uncalibrated',labels:Object.fromEntries(Object.entries(labels).map(([field,label])=>[field,[label]]))}) as any;
+  api.classificationsForReview=async()=>[{id:'jc-1',object:'finding_classification',review_id:'qr-critical',input_version:1,
+    observation_id:'obs-critical',input_hash:'hash',input:{finding_text:'Acute right pneumothorax.',qa_comment:'Acute right pneumothorax.',report_quotes:[]},
+    source_status:'current',execution_status:'completed',steps:[],result:{fields,calibration_status:'uncalibrated',calibrator_id:null,human_review_required:true,usage:null,duration_ms:2},
+    error:null,provenance:{model:'jev-1.13.0',rubric_id:'finding-rubric-v1',rubric_hash:'hash',workflow_version:'qa.finding.classify.v1'},
+    created_at:new Date().toISOString(),updated_at:new Date().toISOString()}] as any;
+  let feedback:any;
+  api.classificationFeedback=async(_id,input)=>{feedback=input;return {} as any;};
+  await act(async()=>{root.render(<FindingClassification review={source} stale={false}/>);});
+  assert.match(document.body.textContent!,/Finding group.*Thoracic/);
+  assert.match(document.body.textContent!,/Verify the suggested communication priority/);
+  await click('Accept labels');
+  assert.equal(feedback.action,'accept');
 });

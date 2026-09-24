@@ -1301,3 +1301,21 @@ button.primary:hover:not(:disabled) {background:var(--muted);border-color:var(--
   .review-history-table td[data-label="Description"]::before { vertical-align:top; }
   .history-description { display:inline-block; width:calc(100% - 110px); }
 }
+.jev-section { margin-top: 24px; }
+.jev-observation { border-top: 1px solid var(--line, #ddd); padding: 12px 0; }
+.jev-observation > p { margin: 0 0 10px; }
+.jev-card { margin: 10px 0; padding: 12px; border: 1px solid var(--line, #ddd); border-radius: 8px; }
+.jev-finding { white-space: pre-wrap; overflow-wrap: anywhere; font-weight: 500; }
+.jev-labels, .jev-details dl { display: grid; gap: 8px; margin: 12px 0; }
+.jev-labels > div, .jev-details dl > div { display: flex; justify-content: space-between; gap: 12px; }
+.jev-labels dt, .jev-details dt { color: var(--muted, #62666a); }
+.jev-labels dd, .jev-details dd { margin: 0; text-align: right; }
+.jev-details { margin: 12px 0; }
+.jev-details summary { cursor: pointer; }
+.jev-distribution { padding: 10px 0; border-top: 1px solid var(--line, #ddd); }
+.jev-distribution ul { margin: 6px 0; padding-left: 20px; font-size: 12px; }
+.jev-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.jev-actions button { min-height: 32px; }
+.jev-feedback { display: grid; gap: 10px; margin-top: 12px; }
+.jev-feedback label { display: grid; gap: 4px; font-size: 12px; }
+.jev-feedback select, .jev-feedback input { width: 100%; min-width: 0; }

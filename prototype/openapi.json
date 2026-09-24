@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Vesta Report QA API",
-    "version": "0.14.0"
+    "version": "0.15.0"
   },
   "paths": {
     "/api/v1/config": {
@@ -2853,6 +2853,805 @@
           "skills:read"
         ]
       }
+    },
+    "/api/v1/classifications/config": {
+      "get": {
+        "summary": "Classification Config",
+        "description": "Requires reviews:read. JEV classifications are separate from report QA. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
+        "operationId": "classification_config_api_v1_classifications_config_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-22",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "reviews:read"
+        ]
+      }
+    },
+    "/api/v1/classifications": {
+      "post": {
+        "summary": "Create Classification",
+        "description": "Requires reviews:read and reviews:write. JEV classifications are separate from report QA. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
+        "operationId": "create_classification_api_v1_classifications_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^\\S+$",
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-22",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassificationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "reviews:read",
+          "reviews:write"
+        ]
+      }
+    },
+    "/api/v1/reviews/{review_id}/classifications": {
+      "get": {
+        "summary": "Review Classifications",
+        "description": "Requires reviews:read. JEV classifications are separate from report QA. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
+        "operationId": "review_classifications_api_v1_reviews__review_id__classifications_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Review Id"
+            }
+          },
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-22",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClassificationResource"
+                  },
+                  "title": "Response Review Classifications Api V1 Reviews  Review Id  Classifications Get"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "reviews:read"
+        ]
+      }
+    },
+    "/api/v1/classifications/{classification_id}": {
+      "get": {
+        "summary": "Read Classification",
+        "description": "Requires reviews:read. JEV classifications are separate from report QA. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
+        "operationId": "read_classification_api_v1_classifications__classification_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "classification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Classification Id"
+            }
+          },
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-22",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "reviews:read"
+        ]
+      }
+    },
+    "/api/v1/classifications/{classification_id}/feedback": {
+      "post": {
+        "summary": "Classification Feedback",
+        "description": "Requires reviews:read and feedback:write. JEV classifications are separate from report QA. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
+        "operationId": "classification_feedback_api_v1_classifications__classification_id__feedback_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "classification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Classification Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^\\S+$",
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-22",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassificationFeedbackInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationFeedbackResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "reviews:read",
+          "feedback:write"
+        ]
+      },
+      "get": {
+        "summary": "Classification Feedback History",
+        "description": "Requires reviews:read and feedback:read. JEV classifications are separate from report QA. Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access. Explicit public mode permits unauthenticated remote access to the shared Vesta tenant with all scopes.",
+        "operationId": "classification_feedback_history_api_v1_classifications__classification_id__feedback_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "classification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Classification Id"
+            }
+          },
+          {
+            "name": "QA-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "2026-09-22",
+              "title": "Qa-Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationFeedbackList"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "x-required-scopes": [
+          "reviews:read",
+          "feedback:read"
+        ]
+      }
     }
   },
   "components": {
@@ -3047,6 +3846,567 @@
           "items"
         ],
         "title": "Catalog"
+      },
+      "ClassificationConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "rubric_id": {
+            "type": "string",
+            "title": "Rubric Id"
+          },
+          "rubric_hash": {
+            "type": "string",
+            "title": "Rubric Hash"
+          },
+          "calibration_status": {
+            "type": "string",
+            "enum": [
+              "uncalibrated",
+              "research_calibration"
+            ],
+            "title": "Calibration Status"
+          },
+          "labels": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Labels"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "ready",
+          "model",
+          "rubric_id",
+          "rubric_hash",
+          "calibration_status",
+          "labels"
+        ],
+        "title": "ClassificationConfig"
+      },
+      "ClassificationFeedbackInput": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "accept",
+              "edit",
+              "reject"
+            ],
+            "title": "Action"
+          },
+          "final_labels": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassificationLabels"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "ClassificationFeedbackInput"
+      },
+      "ClassificationFeedbackList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationFeedbackResource"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ClassificationFeedbackList"
+      },
+      "ClassificationFeedbackResource": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "classification_id": {
+            "type": "string",
+            "title": "Classification Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "accept",
+              "edit",
+              "reject"
+            ],
+            "title": "Action"
+          },
+          "predicted_labels": {
+            "$ref": "#/components/schemas/ClassificationLabels"
+          },
+          "final_labels": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassificationLabels"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "actor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Name"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "classification_id",
+          "action",
+          "predicted_labels",
+          "final_labels",
+          "reason",
+          "actor_name",
+          "created_at"
+        ],
+        "title": "ClassificationFeedbackResource"
+      },
+      "ClassificationField": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "raw_probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Raw Probabilities"
+          },
+          "provider_confidence": {
+            "type": "number",
+            "title": "Provider Confidence"
+          },
+          "top_probability": {
+            "type": "number",
+            "title": "Top Probability"
+          },
+          "margin": {
+            "type": "number",
+            "title": "Margin"
+          },
+          "calibrated_probabilities": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calibrated Probabilities"
+          },
+          "review_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Review Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "raw_probabilities",
+          "provider_confidence",
+          "top_probability",
+          "margin"
+        ],
+        "title": "ClassificationField"
+      },
+      "ClassificationInput": {
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Review Id"
+          },
+          "input_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Input Version"
+          },
+          "observation_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Observation Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "review_id",
+          "input_version",
+          "observation_id"
+        ],
+        "title": "ClassificationInput"
+      },
+      "ClassificationLabels": {
+        "properties": {
+          "finding_group": {
+            "type": "string",
+            "enum": [
+              "neurological",
+              "vascular_cardiac",
+              "thoracic",
+              "abdominal_pelvic",
+              "gu_obstetric",
+              "musculoskeletal",
+              "device_procedural",
+              "other",
+              "insufficient_context"
+            ],
+            "title": "Finding Group"
+          },
+          "polarity": {
+            "type": "string",
+            "enum": [
+              "affirmed",
+              "negated",
+              "unclear"
+            ],
+            "title": "Polarity"
+          },
+          "certainty": {
+            "type": "string",
+            "enum": [
+              "definite",
+              "probable",
+              "suspicious",
+              "equivocal",
+              "not_stated",
+              "not_applicable"
+            ],
+            "title": "Certainty"
+          },
+          "temporal_status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "worsening",
+              "stable",
+              "improving",
+              "historical",
+              "not_stated"
+            ],
+            "title": "Temporal Status"
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "minutes",
+              "hours",
+              "days",
+              "routine",
+              "cannot_determine"
+            ],
+            "title": "Urgency"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "finding_group",
+          "polarity",
+          "certainty",
+          "temporal_status",
+          "urgency"
+        ],
+        "title": "ClassificationLabels"
+      },
+      "ClassificationPublicInput": {
+        "properties": {
+          "finding_text": {
+            "type": "string",
+            "title": "Finding Text"
+          },
+          "qa_comment": {
+            "type": "string",
+            "title": "Qa Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "finding_text",
+          "qa_comment"
+        ],
+        "title": "ClassificationPublicInput"
+      },
+      "ClassificationResource": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "object": {
+            "type": "string",
+            "const": "finding_classification",
+            "title": "Object",
+            "default": "finding_classification"
+          },
+          "classification_schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Classification Schema Version",
+            "default": "1.0"
+          },
+          "review_id": {
+            "type": "string",
+            "title": "Review Id"
+          },
+          "input_version": {
+            "type": "integer",
+            "title": "Input Version"
+          },
+          "observation_id": {
+            "type": "string",
+            "title": "Observation Id"
+          },
+          "input_hash": {
+            "type": "string",
+            "title": "Input Hash"
+          },
+          "input": {
+            "$ref": "#/components/schemas/ClassificationPublicInput"
+          },
+          "source_status": {
+            "type": "string",
+            "enum": [
+              "current",
+              "superseded",
+              "unavailable"
+            ],
+            "title": "Source Status"
+          },
+          "execution_status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "failed"
+            ],
+            "title": "Execution Status"
+          },
+          "steps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassificationResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provenance": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Provenance"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "review_id",
+          "input_version",
+          "observation_id",
+          "input_hash",
+          "input",
+          "source_status",
+          "execution_status",
+          "steps",
+          "provenance",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ClassificationResource"
+      },
+      "ClassificationResult": {
+        "properties": {
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ClassificationField"
+            },
+            "type": "object",
+            "title": "Fields"
+          },
+          "calibration_status": {
+            "type": "string",
+            "enum": [
+              "uncalibrated",
+              "research_calibration"
+            ],
+            "title": "Calibration Status"
+          },
+          "calibrator_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calibrator Id"
+          },
+          "human_review_required": {
+            "type": "boolean",
+            "const": true,
+            "title": "Human Review Required",
+            "default": true
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fields",
+          "calibration_status"
+        ],
+        "title": "ClassificationResult"
       },
       "ConfigResource": {
         "properties": {

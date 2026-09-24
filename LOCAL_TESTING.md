@@ -1,6 +1,6 @@
 # Local setup and verification
 
-These instructions apply to application **0.14.0**, foundation **F3**, API **2026-09-22**, and schema **7**.
+These instructions apply to application **0.15.0**, foundation **F3**, API **2026-09-22**, and schema **8**.
 
 ## Prerequisites
 
@@ -35,7 +35,7 @@ npm run demo
 
 The launcher builds the frontend when it is missing or stale, starts the combined local app, and uses `QA_MODE=demo`. It does not prompt for or call OpenAI. `.env.example` uses a fresh `.qa-data-local` folder so it does not reuse an older database. Set optional `QA_LOCAL_OPERATOR_NAME` there to display a local submitter in Review History.
 
-Use schema-7 storage. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are never automatically migrated or deleted.
+Use schema-8 storage. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are never automatically migrated or deleted.
 
 ## Live provider session
 
@@ -44,6 +44,14 @@ npm run live
 ```
 
 The launcher prompts for `OPENAI_API_KEY` without storing it. Rotate any key exposed in chat before use.
+
+For optional JEV classification of completed reviews with critical comments, run
+`uv run python scripts/run_local.py --mode demo --jev` or add `--jev` to a live OpenAI
+session. The launcher prompts for `TYPESAFE_API_KEY` when it is absent. Use local or
+API-key access mode; public access mode disables JEV. JEV uses the draft research rubric,
+keeps suggestions separate from report QA, and never calls the provider for a review
+without critical comments. See `evals/classification/README.md` for the local evaluation
+workflow. A key shared in chat should be rotated after testing.
 
 `frontend/dist` is generated and never committed, so a pull that changes the UI leaves the previous
 bundle on disk. The launcher compares the build against the frontend sources and rebuilds when they
@@ -149,7 +157,7 @@ uv run python verify_bundle.py
 - Open `http://127.0.0.1:8000`.
 - New reports use the four real phases: input validation, combined report review, output validation, and comment assembly.
 - Completed output has independent general and critical copy groups plus full-template copy when observations exist.
-- Review history, feedback, analytics, stakeholder outcomes, and Skills Studio remain tenant scoped.
+- Review history, feedback, analytics, classification, and Skills Studio remain tenant scoped.
 - The health panel performs a provider metadata check only when explicitly requested; startup does not make an inference call.
 
 Current executed evidence and limitations are recorded in [prototype/IMPLEMENTATION_STATUS.md](prototype/IMPLEMENTATION_STATUS.md).
@@ -161,12 +169,14 @@ Then run (substitute the actual QA_DATA_DIR):
 
 ```sh
 .venv/bin/python scripts/upgrade_review_storage.py --data-dir .qa-data-foundation-v5
+.venv/bin/python scripts/upgrade_classification_storage.py --data-dir .qa-data-foundation-v5
 npm --prefix frontend run build
 ```
 
-The upgrade writes a timestamped SQLite backup, preserves existing review rows and feedback,
-and checks foreign keys before committing schema 7. It refuses pending work and other schema
-versions. Restart the application normally and refresh the browser. Existing separate reviews
+Each upgrade writes a timestamped SQLite backup, preserves existing review rows and feedback,
+and checks foreign keys before committing schema 7 then 8. Both refuse pending work and other
+schema versions. For a schema-7 store, run only `upgrade_classification_storage.py`.
+Restart the application normally and refresh the browser. Existing separate reviews
 are not guessed or merged. Future Review again submissions replace the selected review.
 API clients must use QA-Version 2026-09-22 and the generated replacement/feedback contracts.
 

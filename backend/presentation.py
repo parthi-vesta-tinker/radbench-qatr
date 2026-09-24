@@ -33,6 +33,21 @@ def pick(data, fields):
     return {k: v for k, v in data.items() if k in fields}
 
 
+def classification(item, source_status):
+    """Public JEV resource; stored grounded anchors and rubric content remain private."""
+    return dict(id=item["id"], object="finding_classification", classification_schema_version="1.0",
+                review_id=item["review_id"], input_version=item["input_version"],
+                observation_id=item["observation_id"], input_hash=item["input_hash"],
+                input=pick(item["input"], {"finding_text", "qa_comment"}), source_status=source_status,
+                execution_status=item["execution_status"], steps=item["steps"],
+                result=item["result"], error=item["error"],
+                provenance=dict(model=item["config"]["model"],
+                                rubric_id=item["config"]["rubric"]["id"],
+                                rubric_hash=item["config"]["rubric_hash"],
+                                workflow_version=item["config"]["workflow_version"]),
+                created_at=item["created_at"], updated_at=item["updated_at"])
+
+
 def review(record, version=API_VERSION):
     if version != API_VERSION:
         raise ValueError("Unsupported API version")

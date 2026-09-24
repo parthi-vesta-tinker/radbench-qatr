@@ -1,6 +1,7 @@
 import type { Review, ReviewInput, Config, FeedbackPayload, FeedbackRecord, ReviewSummary, ReviewComments, Page, FeedbackInboxItem, Analytics } from "./types";
 import type { KnowledgeCatalog, KnowledgeDetail, KnowledgeDraft, KnowledgeDraftInput } from './types';
 import type { PlaygroundCatalog, PlaygroundRun, PlaygroundRunInput } from './types';
+import type { ClassificationConfig, ClassificationInput, ClassificationResource, ClassificationFeedbackInput, ClassificationFeedbackResource, ClassificationFeedbackList } from './types';
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -43,6 +44,17 @@ export function describeError(error: unknown): string {
   return error instanceof Error ? error.message : "The QA service request failed.";
 }
 export const api = {
+  classificationConfig: () => request<ClassificationConfig>('/api/v1/classifications/config'),
+  classificationsForReview: (id: string) => request<ClassificationResource[]>('/api/v1/reviews/' + encodeURIComponent(id) + '/classifications'),
+  classification: (id: string) => request<ClassificationResource>('/api/v1/classifications/' + encodeURIComponent(id)),
+  classify: (payload: ClassificationInput, key: string) => request<ClassificationResource>('/api/v1/classifications', {
+    method: 'POST', headers: {'Content-Type': 'application/json', 'Idempotency-Key': key}, body: JSON.stringify(payload),
+  }),
+  classificationFeedback: (id: string, payload: ClassificationFeedbackInput, key: string) => request<ClassificationFeedbackResource>(
+    '/api/v1/classifications/' + encodeURIComponent(id) + '/feedback', {
+      method: 'POST', headers: {'Content-Type': 'application/json', 'Idempotency-Key': key}, body: JSON.stringify(payload),
+    }),
+  classificationFeedbackHistory: (id: string) => request<ClassificationFeedbackList>('/api/v1/classifications/' + encodeURIComponent(id) + '/feedback'),
   playground: () => request<PlaygroundCatalog>('/api/v1/playground'),
   startPlaygroundRun: (payload: PlaygroundRunInput, key: string) =>
     request<PlaygroundRun>('/api/v1/playground/runs', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': key }, body: JSON.stringify(payload) }),

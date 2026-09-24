@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 ROOT = Path(__file__).resolve().parents[1]
 DATA = Path(os.environ.get("QA_DATA_DIR", str(ROOT / ".qa-data-foundation-v5"))).resolve()
-APP_VERSION = "foundation-f3-0.14.0"
+APP_VERSION = "foundation-f3-0.15.0"
 
 
 def runtime_config(tenant_id="vesta") -> dict:
@@ -69,6 +69,8 @@ def runtime_config(tenant_id="vesta") -> dict:
         model_max_output_tokens=max_output,
         model_reasoning_effort=effort,
         workflow_version=APP_VERSION,
+        jev_enabled_at_acceptance=(os.environ.get("QA_JEV_ENABLED", "false").lower() == "true"
+                                   and os.environ.get("QA_AUTH_MODE", "local") != "public"),
         policy_text=policy,
         policy_status="supplied_unvalidated" if policy else "provisional_no_manual",
         policy_version=hashlib.sha256(policy.encode()).hexdigest() if policy else None,

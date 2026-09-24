@@ -13,7 +13,9 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 from dbos import DBOS
 from agents import set_tracing_disabled
-from . import store, presentation, reporting, knowledge, playground
+from . import store, presentation, reporting, knowledge, playground, classification_store
+from .classification import ClassificationProblem, configuration as jev_configuration, snapshot as jev_snapshot
+from .classification_workflow import dispatch as dispatch_classification
 from .access import AccessError, Principal, require, validate_access_config
 from .contracts import (
     ReviewProblem,
@@ -29,6 +31,12 @@ from .contracts import (
     FeedbackInbox,
     AnalyticsResource,
     REASONS,
+    ClassificationInput,
+    ClassificationResource,
+    ClassificationConfig,
+    ClassificationFeedbackInput,
+    ClassificationFeedbackResource,
+    ClassificationFeedbackList,
 )
 from .settings import APP_VERSION, DATA, ROOT, runtime_config
 from .workflow import dispatch, workflow_id
@@ -81,6 +89,42 @@ def reconcile():
                 )
         except Exception:
             log.error("outbox.reconcile_failed tenant=%s review=%s", tenant, rid)
+    for tenant, rid, workflow in classification_store.pending():
+        try:
+            status = DBOS.get_workflow_status(workflow)
+            if status is None:
+                dispatch_classification(tenant, rid)
+            elif status.status in ("ERROR", "CANCELLED", "MAX_RECOVERY_ATTEMPTS_EXCEEDED"):
+                claim = classification_store.attempt(tenant, rid)
+                if claim and claim["outcome"] == "claimed":
+                    classification_store.mark_unknown(tenant, rid)
+                unknown = claim and claim["outcome"] in ("claimed", "unknown")
+                current = classification_store.get(tenant, rid)
+                active = next((s["step_id"] for s in current["steps"] if s["status"] == "running"),
+                              "input_validation")
+                classification_store.update(
+                    tenant, rid, step=active, step_status="failed", status="failed",
+                    error=dict(code="MODEL_OUTCOME_UNKNOWN" if unknown else "EXECUTION_STOPPED",
+                               message="Classification stopped before completion. No automatic provider retry will occur.",
+                               retryable=False),
+                )
+        except Exception:
+            log.error("classification.reconcile_failed tenant=%s classification=%s", tenant, rid)
+    try:
+        cfg = jev_snapshot()
+    except (ClassificationProblem, ValueError, OSError, KeyError):
+        return
+    for tenant, review_id, input_version, observation_id in classification_store.pending_automatic():
+        try:
+            payload = ClassificationInput(review_id=review_id, input_version=input_version,
+                                          observation_id=observation_id)
+            saved, created = classification_store.reserve(tenant, "", payload, cfg, automatic=True)
+            if created:
+                dispatch_classification(tenant, saved["body"]["id"])
+        except ClassificationProblem:
+            continue  # A concurrent replacement made this candidate stale.
+        except Exception:
+            log.error("classification.auto_dispatch_deferred tenant=%s review=%s", tenant, review_id)
 
 
 async def reconciliation_loop():
@@ -157,7 +201,7 @@ ERROR_RESPONSES = {
 }
 app = FastAPI(
     title="Vesta Report QA API",
-    version="0.14.0",
+    version="0.15.0",
     lifespan=lifespan,
     dependencies=[Depends(api_version)],
     responses=ERROR_RESPONSES,
@@ -278,6 +322,13 @@ FeedbackWrite = Annotated[Principal, Depends(require("feedback:write"))]
 Version = Annotated[str, Depends(api_version)]
 SkillsRead = Annotated[Principal, Depends(require("skills:read"))]
 SkillsWrite = Annotated[Principal, Depends(require("skills:write"))]
+
+
+def classification_error(request, exc: ClassificationProblem):
+    status = (404 if exc.code.endswith("NOT_FOUND") else
+              409 if exc.code == "REVIEW_CONFLICT" else
+              503 if exc.code == "JEV_NOT_CONFIGURED" else 422)
+    return error(request, status, exc.code, exc.message, exc.retryable)
 
 
 def respond(receipt, replayed=False):
@@ -634,6 +685,69 @@ def read_playground_run(run_id: str, p: SkillsRead):
     return playground.read_run(p.tenant_id, run_id)
 
 
+@app.get("/api/v1/classifications/config", response_model=ClassificationConfig)
+def classification_config(request: Request, p: Read):
+    try:
+        return jev_configuration()[0]
+    except (ValueError, OSError, KeyError) as exc:
+        record_failure("classification.configuration_invalid", exc, request_id=request.state.request_id)
+        return error(request, 503, "JEV_CONFIGURATION_INVALID", "JEV configuration is invalid.")
+
+
+@app.post("/api/v1/classifications", status_code=202, response_model=ClassificationResource)
+def create_classification(request: Request, payload: ClassificationInput, idempotency_key: Key,
+                          p: Write, read_access: Read, version: Version):
+    saved = store.replay(p.tenant_id, classification_store.CREATE, idempotency_key,
+                         payload.model_dump(), version)
+    if saved:
+        return respond(saved, True)
+    try:
+        cfg = jev_snapshot()
+        saved, created = classification_store.reserve(p.tenant_id, idempotency_key, payload, cfg, p.actor_name)
+    except ClassificationProblem as exc:
+        return classification_error(request, exc)
+    except (ValueError, OSError, KeyError) as exc:
+        record_failure("classification.configuration_invalid", exc, request_id=request.state.request_id)
+        return error(request, 503, "JEV_CONFIGURATION_INVALID", "JEV configuration is invalid.")
+    if created:
+        try:
+            dispatch_classification(p.tenant_id, saved["body"]["id"])
+        except Exception:
+            log.error("classification.dispatch_deferred request_id=%s tenant=%s", request.state.request_id, p.tenant_id)
+    return respond(saved, not created)
+
+
+@app.get("/api/v1/reviews/{review_id}/classifications", response_model=list[ClassificationResource])
+def review_classifications(request: Request, review_id: str, p: Read):
+    review = store.get(p.tenant_id, review_id)
+    if review is None:
+        return error(request, 404, "REVIEW_NOT_FOUND", "Review not found.")
+    return classification_store.for_review(p.tenant_id, review_id, review["input_version"])
+
+
+@app.get("/api/v1/classifications/{classification_id}", response_model=ClassificationResource)
+def read_classification(request: Request, classification_id: str, p: Read):
+    value = classification_store.get(p.tenant_id, classification_id)
+    return value if value else error(request, 404, "CLASSIFICATION_NOT_FOUND", "Classification not found.")
+
+
+@app.post("/api/v1/classifications/{classification_id}/feedback", status_code=201,
+          response_model=ClassificationFeedbackResource)
+def classification_feedback(request: Request, classification_id: str, payload: ClassificationFeedbackInput,
+                            idempotency_key: Key, p: FeedbackWrite, read_access: Read, version: Version):
+    try:
+        saved, created = classification_store.feedback(p.tenant_id, classification_id, idempotency_key, payload, p.actor_name)
+    except ClassificationProblem as exc:
+        return classification_error(request, exc)
+    return respond(saved, not created)
+
+
+@app.get("/api/v1/classifications/{classification_id}/feedback", response_model=ClassificationFeedbackList)
+def classification_feedback_history(request: Request, classification_id: str, p: FeedbackRead, read_access: Read):
+    items = classification_store.feedback_history(p.tenant_id, classification_id)
+    return {"items": items} if items is not None else error(request, 404, "CLASSIFICATION_NOT_FOUND", "Classification not found.")
+
+
 class BuiltUI(StaticFiles):
     """Serve the built UI with cache headers that match how Vite names its output.
 
@@ -684,6 +798,15 @@ for route in app.routes:
         route.description = ("Requires " + " and ".join(rights) + ". Isolated test runs against the "
                              "published pack. Playground output is never a review and never enters "
                              "review history, feedback, analytics or outcomes.")
+    if path.startswith("/api/v1/classifications") or path.endswith("/classifications"):
+        if "/feedback" in path:
+            rights = ["reviews:read", "feedback:write" if "POST" in methods else "feedback:read"]
+        elif "POST" in methods:
+            rights = ["reviews:read", "reviews:write"]
+        else:
+            rights = ["reviews:read"]
+        route.openapi_extra = {"x-required-scopes": rights}
+        route.description = "Requires " + " and ".join(rights) + ". JEV classifications are separate from report QA."
     route.description += (
         " Scope requirements apply in api_key mode. Local mode permits Vesta-only loopback access."
         " Explicit public mode permits unauthenticated remote access to the shared Vesta tenant"

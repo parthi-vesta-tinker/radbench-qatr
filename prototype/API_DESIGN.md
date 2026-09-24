@@ -57,6 +57,18 @@ npm --prefix frontend run build
 
 Do not hand-edit generated files or add a compatibility projection without an explicit version decision.
 
+## Critical finding classification (0.15.0)
+
+A completed review with critical comments can produce separate JEV finding
+classifications. `GET /api/v1/classifications/config` reports readiness;
+`POST /api/v1/classifications` admits a single critical observation with the current
+review ID and input version. `GET /api/v1/classifications/{id}` and
+`GET /api/v1/reviews/{review_id}/classifications` expose status and immutable
+suggestions. Classification feedback has its own POST and GET routes under the
+classification ID. Automatic admission occurs only for completed critical reviews
+accepted while JEV was configured. API version remains 2026-09-22; application
+storage is schema 8 with an explicit backed-up schema-7 upgrade.
+
 ## Same-review replacement (0.14.0)
 
 `PUT /api/v1/reviews/{id}` accepts `report_text`, `expected_input_version` and an

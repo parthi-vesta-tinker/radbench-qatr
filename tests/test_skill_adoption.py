@@ -142,11 +142,11 @@ def test_two_copy_groups_match_result_and_hide_internal_mapping(client):
     d = finish(client, post(client))
     r = d["result"]
     assert (
-        "General Comments:" in r["general_copy_text"]
+        "PACS comments:" in r["general_copy_text"]
         and "Critical Findings" not in r["general_copy_text"]
     )
     assert (
-        "General Comments" not in r["critical_copy_text"]
+        "PACS comments" not in r["critical_copy_text"]
         and "Cannot determine" in r["critical_copy_text"]
     )
     assert "_candidate_mapping" not in r

@@ -59,7 +59,8 @@ def db():
         conn.close()
 
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
+REVIEW_RECORD_SCHEMA_VERSION = 7
 
 
 def init():
@@ -76,6 +77,8 @@ def init():
         exists = conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchone()
         if version == 6:
             raise RuntimeError("Schema 6 requires an explicit upgrade. Stop the application, finish pending work with the prior build, then run scripts/upgrade_review_storage.py --data-dir <QA_DATA_DIR>. Existing records are preserved.")
+        if version == 7:
+            raise RuntimeError("Schema 7 requires an explicit backed-up upgrade. Stop the application, finish pending work, then run scripts/upgrade_classification_storage.py --data-dir <QA_DATA_DIR>.")
         if version != SCHEMA_VERSION and (version != 0 or exists):
             raise RuntimeError("Incompatible database schema. Choose a fresh QA_DATA_DIR for application and DBOS storage; existing records are preserved.")
         if version == 0:
@@ -353,7 +356,7 @@ def save_feedback(tenant, rid, key, data, version=presentation.API_VERSION):
         )
         conn.execute(
             "INSERT INTO feedback(tenant_id,id,review_id,document,schema_version) VALUES(?,?,?,?,?)",
-            (tenant, doc["feedback_id"], rid, canonical(doc), SCHEMA_VERSION),
+            (tenant, doc["feedback_id"], rid, canonical(doc), REVIEW_RECORD_SCHEMA_VERSION),
         )
         saved = receipt(201, presentation.feedback(doc, version))
         remember(conn, tenant, operation, key, payload, version, saved)

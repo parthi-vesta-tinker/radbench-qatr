@@ -1,4 +1,5 @@
 import type { Review } from "./types";
+import { FindingClassification } from "./FindingClassification";
 // Guidance is advice for the reader, not tracked progress: no state is stored per step.
 function guidance(review: Review | null, stale: boolean): string[] {
   if (stale)
@@ -60,6 +61,8 @@ export function Studio({
           ))}
         </ol>
       </section>
+      {review?.execution_status === "completed" && review.result?.critical_comments.length ?
+        <FindingClassification key={`${review.id}:${review.input_version}`} review={review} stale={stale}/> : null}
     </aside>
   );
 }

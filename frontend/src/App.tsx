@@ -126,7 +126,7 @@ export default function App() {
             <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Playground" aria-pressed={view === "playground"} onClick={() => {setPlaygroundVisited(true);setView("playground"); panels.close();}}><FlaskConical/><span className="tool-label">Playground</span></TooltipButton>
           </nav>
         </div>
-        <div id="studio-details" className="studio-details" hidden={studioCollapsed || view !== "current"}><Studio review={qa.review} stale={qa.disconnected}/></div>
+        <div id="studio-details" className="studio-details" hidden={studioCollapsed || view !== "current"}><Studio review={qa.review} stale={qa.stale || qa.disconnected}/></div>
       </aside>
     </div>
   </>;

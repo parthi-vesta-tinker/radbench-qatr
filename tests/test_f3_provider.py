@@ -58,9 +58,8 @@ def test_invalid_input_uses_zero_calls(client,monkeypatch):
     monkeypatch.setenv('OPENAI_MODEL','controlled-sdk-test')
     monkeypatch.setattr(reviewer,'make_model',lambda *args: pytest.fail('Invalid input reached provider'))
     receipt = client.post('/api/v1/reviews',json={'report_text':'No identifiable report sections'},headers={'Idempotency-Key':uuid.uuid4().hex})
-    assert receipt.status_code == 202, receipt.text
-    result = finish(client,receipt)
-    assert result['execution_status'] == 'needs_input'
+    assert receipt.status_code == 422, receipt.text
+    assert receipt.json()['error']['code'] == 'MISSING_SECTIONS'
 
 
 def test_concurrent_post_replay_uses_one_attempt(client,monkeypatch):

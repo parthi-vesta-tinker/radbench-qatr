@@ -1,8 +1,23 @@
 # Implementation status
 
-Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API **2026-09-22**, SQLite schema **7**.
+Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API **2026-09-22**, SQLite schema **8**.
 
 ## Implemented
+
+- **JEV critical finding classification (0.15.0):** A completed review with critical comments
+  starts one separate five-field JEV classification per critical observation when JEV is configured
+  at admission. Reviews without critical comments make no JEV call. QA Studio shows the immutable
+  suggestion and records accept, edit, or reject feedback without changing report QA. One provider
+  attempt has a durable checkpoint; ambiguous outcomes fail without automatic retry. The draft
+  research rubric and local evaluation commands do not establish clinical accuracy. Schema 8
+  requires an explicit backed-up upgrade from schema 7. A synthetic demo review completed with
+  one critical comment and one successful live JEV classification on 24 September 2026.
+  Verification: 28 targeted Python tests passed; the full Python run had 158 passes and one
+  outdated PACS copy-label assertion, which was corrected and passed on focused rerun.
+  26 frontend DOM tests, production build, generated OpenAPI check and documentation check
+  passed. The live synthetic result suggested minutes without an explicit communication
+  instruction; the UI now flags any nondefault priority for verification. No qualified
+  clinical assessment or process crash test was performed.
 
 - **Analytics copy cleanup:** removed the explanatory text below Review findings and
   the report-text/clinical-accuracy footer at the user's request. Verification on

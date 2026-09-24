@@ -1,4 +1,4 @@
--- Foundation schema 7. Fresh bootstrap only: never migrate or overwrite old data.
+-- Foundation schema 8. Fresh bootstrap only: never migrate or overwrite old data.
 CREATE TABLE tenants (id TEXT PRIMARY KEY, active_release TEXT);
 CREATE TABLE review_snapshots (
  tenant_id TEXT NOT NULL REFERENCES tenants(id), id TEXT NOT NULL,
@@ -140,3 +140,40 @@ CREATE TABLE model_attempts (
 CREATE TRIGGER attempt_response_immutable BEFORE UPDATE ON model_attempts
 WHEN OLD.outcome='response'
 BEGIN SELECT RAISE(ABORT,'Provider response checkpoint is immutable'); END;
+
+-- JEV research classifications are immutable snapshots linked to a review generation.
+-- Review replacement does not delete these rows or change their captured input.
+CREATE TABLE finding_classifications (
+ tenant_id TEXT NOT NULL, id TEXT NOT NULL, review_id TEXT NOT NULL,
+ input_version INTEGER NOT NULL, observation_id TEXT NOT NULL,
+ input_hash TEXT NOT NULL, input TEXT NOT NULL CHECK(json_valid(input)),
+ config TEXT NOT NULL CHECK(json_valid(config)), workflow_id TEXT NOT NULL,
+ automatic INTEGER NOT NULL DEFAULT 0 CHECK(automatic IN (0,1)),
+ execution_status TEXT NOT NULL CHECK(execution_status IN ('queued','running','completed','failed')),
+ steps TEXT NOT NULL CHECK(json_valid(steps)),
+ result TEXT CHECK(result IS NULL OR json_valid(result)),
+ error TEXT CHECK(error IS NULL OR json_valid(error)),
+ created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+ PRIMARY KEY(tenant_id,id), UNIQUE(id), UNIQUE(workflow_id),
+ FOREIGN KEY(tenant_id,review_id) REFERENCES review_records(tenant_id,id)
+);
+CREATE INDEX classification_dispatch ON finding_classifications(execution_status,tenant_id,id);
+CREATE INDEX classification_source ON finding_classifications(tenant_id,review_id,input_version,observation_id,created_at);
+CREATE UNIQUE INDEX classification_automatic_source ON finding_classifications(tenant_id,review_id,input_version,observation_id) WHERE automatic=1;
+CREATE TABLE jev_classification_attempts (
+ tenant_id TEXT NOT NULL, classification_id TEXT NOT NULL,
+ claim_id TEXT NOT NULL UNIQUE, outcome TEXT NOT NULL CHECK(outcome IN ('claimed','response','known_failure','unknown')),
+ http_status INTEGER, response_body TEXT, duration_ms INTEGER,
+ PRIMARY KEY(tenant_id,classification_id),
+ FOREIGN KEY(tenant_id,classification_id) REFERENCES finding_classifications(tenant_id,id)
+);
+CREATE TRIGGER jev_attempt_terminal_immutable BEFORE UPDATE ON jev_classification_attempts
+WHEN OLD.outcome IN ('response','known_failure','unknown')
+BEGIN SELECT RAISE(ABORT,'JEV attempt outcome is immutable'); END;
+CREATE TABLE classification_feedback (
+ tenant_id TEXT NOT NULL, id TEXT NOT NULL, classification_id TEXT NOT NULL,
+ document TEXT NOT NULL CHECK(json_valid(document)), created_at TEXT NOT NULL,
+ PRIMARY KEY(tenant_id,id), UNIQUE(id),
+ FOREIGN KEY(tenant_id,classification_id) REFERENCES finding_classifications(tenant_id,id)
+);
+CREATE INDEX classification_feedback_history ON classification_feedback(tenant_id,classification_id,created_at,id);

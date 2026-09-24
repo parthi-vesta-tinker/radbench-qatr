@@ -419,6 +419,120 @@ class ReviewResource(BaseModel):
     submitted_by: str | None = None
 
 
+# JEV is a separate, review-gated research resource. Its labels never modify QA results.
+FindingGroup = Literal[
+    "neurological", "vascular_cardiac", "thoracic", "abdominal_pelvic",
+    "gu_obstetric", "musculoskeletal", "device_procedural", "other",
+    "insufficient_context",
+]
+Polarity = Literal["affirmed", "negated", "unclear"]
+Certainty = Literal["definite", "probable", "suspicious", "equivocal", "not_stated", "not_applicable"]
+TemporalStatus = Literal["new", "worsening", "stable", "improving", "historical", "not_stated"]
+Urgency = Literal["minutes", "hours", "days", "routine", "cannot_determine"]
+
+
+class ClassificationInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    review_id: str = Field(min_length=1, max_length=100)
+    input_version: int = Field(ge=1)
+    observation_id: str = Field(min_length=1, max_length=100)
+
+
+class ClassificationLabels(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    finding_group: FindingGroup
+    polarity: Polarity
+    certainty: Certainty
+    temporal_status: TemporalStatus
+    urgency: Urgency
+
+
+class ClassificationField(BaseModel):
+    label: str
+    raw_probabilities: dict[str, float]
+    provider_confidence: float
+    top_probability: float
+    margin: float
+    calibrated_probabilities: dict[str, float] | None = None
+    review_reasons: list[str] = Field(default_factory=list)
+
+
+class ClassificationResult(BaseModel):
+    fields: dict[str, ClassificationField]
+    calibration_status: Literal["uncalibrated", "research_calibration"]
+    calibrator_id: str | None = None
+    human_review_required: Literal[True] = True
+    usage: dict[str, int] | None = None
+    duration_ms: int | None = None
+
+
+class ClassificationPublicInput(BaseModel):
+    finding_text: str
+    qa_comment: str
+
+
+class ClassificationResource(BaseModel):
+    id: str
+    object: Literal["finding_classification"] = "finding_classification"
+    classification_schema_version: Literal["1.0"] = "1.0"
+    review_id: str
+    input_version: int
+    observation_id: str
+    input_hash: str
+    input: ClassificationPublicInput
+    source_status: Literal["current", "superseded", "unavailable"]
+    execution_status: Literal["queued", "running", "completed", "failed"]
+    steps: list[dict]
+    result: ClassificationResult | None = None
+    error: ReviewError | None = None
+    provenance: dict[str, str | None]
+    created_at: str
+    updated_at: str
+
+
+class ClassificationConfig(BaseModel):
+    enabled: bool
+    ready: bool
+    reason: str | None = None
+    model: str
+    rubric_id: str
+    rubric_hash: str
+    calibration_status: Literal["uncalibrated", "research_calibration"]
+    labels: dict[str, list[str]]
+
+
+class ClassificationFeedbackInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    action: Literal["accept", "edit", "reject"]
+    final_labels: ClassificationLabels | None = None
+    reason: str | None = Field(default=None, max_length=1000)
+
+    @model_validator(mode="after")
+    def valid_action(self):
+        if self.action == "accept" and (self.final_labels is not None or self.reason):
+            raise ValueError("Acceptance uses the original labels without a reason.")
+        if self.action == "edit" and (self.final_labels is None or not (self.reason or "").strip()):
+            raise ValueError("Correction requires five labels and a reason.")
+        if self.action == "reject" and (self.final_labels is not None or not (self.reason or "").strip()):
+            raise ValueError("Rejection requires a reason and no replacement labels.")
+        return self
+
+
+class ClassificationFeedbackResource(BaseModel):
+    id: str
+    classification_id: str
+    action: Literal["accept", "edit", "reject"]
+    predicted_labels: ClassificationLabels
+    final_labels: ClassificationLabels | None
+    reason: str | None
+    actor_name: str | None
+    created_at: str
+
+
+class ClassificationFeedbackList(BaseModel):
+    items: list[ClassificationFeedbackResource]
+
+
 class FeedbackResource(FeedbackInput):
     id: str
     object: Literal["qa_feedback"]

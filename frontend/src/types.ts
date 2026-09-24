@@ -7,5 +7,7 @@ export type {
   Document as KnowledgeDocument, Draft as KnowledgeDraft, Catalog as KnowledgeCatalog,
   Detail as KnowledgeDetail, DraftInput as KnowledgeDraftInput,
   PlaygroundCatalog, PlaygroundRun, PlaygroundRunInput, PlaygroundSample,
+  ClassificationConfig, ClassificationInput, ClassificationResource, ClassificationLabels,
+  ClassificationFeedbackInput, ClassificationFeedbackResource, ClassificationFeedbackList,
 } from './generated-api';
 export type Page<T> = { items: T[]; has_more: boolean; next_cursor: string | null };

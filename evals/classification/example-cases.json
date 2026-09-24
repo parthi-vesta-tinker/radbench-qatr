@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "cases": [
+    {
+      "case_id": "synthetic-critical-001",
+      "group_id": "synthetic-report-001",
+      "review_id": "replace-with-completed-review-id",
+      "input_version": 1,
+      "observation_id": "obs-1",
+      "reference": {
+        "finding_group": "thoracic",
+        "polarity": "affirmed",
+        "certainty": "definite",
+        "temporal_status": "not_stated",
+        "urgency": "cannot_determine"
+      },
+      "split": "development",
+      "cohort": "synthetic_fixture",
+      "label_status": "fixture",
+      "adjudication": "Software fixture only; no clinical adjudication"
+    }
+  ]
+}
