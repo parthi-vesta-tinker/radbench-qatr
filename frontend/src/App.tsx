@@ -14,6 +14,7 @@ import { TooltipButton } from "./TooltipButton";
 import { usePanels } from "./usePanels";
 import { PanelIcon } from "./PanelIcon";
 import { FeatureNotice } from "./FeatureNotice";
+import { assessReportText, precheck } from "./ReportReadiness";
 
 function railTime(value: string) {
   const date = new Date(value);
@@ -21,7 +22,6 @@ function railTime(value: string) {
     ? value
     : date.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
-
 export default function App() {
   const qa = useReview();
   const panels = usePanels();
@@ -42,6 +42,7 @@ export default function App() {
   const active = qa.rows.filter(r => ["queued", "running"].includes(r.execution_status)).slice(0, 20);
   const recent = qa.rows.filter(r => !["queued", "running"].includes(r.execution_status)).slice(0, 20);
   const [pasted, setPasted] = useState(false);
+  const reportPrecheck = precheck(assessReportText(qa.report), pasted);
   const [historyRefresh, setHistoryRefresh] = useState(0);
   const refreshWorkspace = () => { qa.refresh(); setHistoryRefresh(value => value + 1); };
   return <>
@@ -91,7 +92,7 @@ export default function App() {
       <main className="review-workspace" hidden={view !== "current"}>
         <div className="input-pane">
           <div className="section-heading"><h1>{qa.draft ? "New review" : "Report review"}</h1></div>
-          <ReviewContext review={qa.review} hasText={Boolean(qa.report.trim())} edited={qa.edited} disconnected={qa.disconnected} pasted={pasted} uncertain={qa.locked && !qa.busy} restore={qa.restore} error={qa.error}/>
+          <ReviewContext review={qa.review} hasText={Boolean(qa.report.trim())} edited={qa.edited} disconnected={qa.disconnected} pasted={pasted} uncertain={qa.locked && !qa.busy} restore={qa.restore} error={qa.error} precheck={reportPrecheck}/>
           <form className="input-section" onSubmit={e => {e.preventDefault(); if (qa.draft) void qa.submit(); else qa.reviewAgain();}}>
             <textarea id="report-text" aria-label="Report text" value={qa.report} readOnly={qa.locked || qa.busy} onPaste={() => setPasted(true)} onChange={e => {if (e.nativeEvent instanceof InputEvent && e.nativeEvent.inputType !== "insertFromPaste") setPasted(false); qa.editReport(e.target.value);}} maxLength={40000} rows={7} spellCheck={false} aria-describedby="input-help" placeholder="Paste your report, including Findings and Impression."/>
             <div className="input-actions"><ReviewJourney review={qa.review} edited={qa.edited} busy={qa.busy} disconnected={qa.disconnected}/>
