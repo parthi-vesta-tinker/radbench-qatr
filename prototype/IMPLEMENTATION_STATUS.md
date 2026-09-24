@@ -4,6 +4,10 @@ Current release: application **0.14.0**, bundle **1.20**, foundation **F3**, API
 
 ## Implemented
 
+- **Analytics copy cleanup:** removed the explanatory text below Review findings and
+  the report-text/clinical-accuracy footer at the user's request. Verification on
+  24 September 2026: frontend production build passed.
+
 - **Finding-first Analytics:** four saved-comment categories lead, with submitted/completed/failed
   counts secondary. One rolling period selector (1/6/12/24 hours, 7/30 days, all time) replaces
   the source control; the screen includes all review sources. The API adds finding counts while

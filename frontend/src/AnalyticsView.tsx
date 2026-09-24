@@ -48,7 +48,6 @@ export function AnalyticsView() {
     {data && <>
       <section className="analytics-findings" aria-label="Review findings">
         <h2>Review findings</h2>
-        <p className="meta">Comments from completed report-text reviews. One report can contribute multiple findings.</p>
         <dl className="analytics-metrics analytics-metrics-primary">
           <div><dt>Inconsistencies</dt><dd>{data.findings.inconsistencies}</dd></div>
           <div><dt>Critical findings</dt><dd>{data.findings.critical_findings}</dd></div>
@@ -69,7 +68,6 @@ export function AnalyticsView() {
           {inputNeeded > 0 && `${inputNeeded} need input`}
         </p>}
       </section>
-      <p className="analytics-boundary">These counts describe report text review comments. They do not measure clinical accuracy.</p>
     </>}
   </main>;
 }
