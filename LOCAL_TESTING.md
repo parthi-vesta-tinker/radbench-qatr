@@ -43,12 +43,22 @@ Use schema-8 storage. To isolate a run, point `QA_DATA_DIR` at a new empty direc
 npm run live
 ```
 
-The launcher prompts for `OPENAI_API_KEY` without storing it. Rotate any key exposed in chat before use.
+`npm run live` enables OpenAI review and JEV classification. Put the following values in
+the ignored `.env` file before starting it (replace the placeholders with your own keys):
 
-For optional JEV classification of completed reviews with critical comments, run
-`uv run python scripts/run_local.py --mode demo --jev` or add `--jev` to a live OpenAI
-session. The launcher prompts for `TYPESAFE_API_KEY` when it is absent. Use local or
-API-key access mode; public access mode disables JEV. JEV uses the draft research rubric,
+```dotenv
+OPENAI_API_KEY=your_openai_key
+TYPESAFE_API_KEY=your_typesafe_key
+```
+
+The launcher reads `.env` and does not prompt. It exits with a named missing-setting
+message if either key is absent. This local command overrides `QA_AUTH_MODE` to `local`
+for its process, so an existing public-mode `.env` remains unchanged. Other JEV launch
+commands require `local` or a configured `api_key` mode. Environment variables already
+set in the shell take precedence over `.env`. Rotate any key exposed in chat before use.
+
+For optional JEV classification of completed reviews with critical comments in demo mode,
+run `uv run python scripts/run_local.py --mode demo --jev`. JEV uses the draft research rubric,
 keeps suggestions separate from report QA, and never calls the provider for a review
 without critical comments. See `evals/classification/README.md` for the local evaluation
 workflow. A key shared in chat should be rotated after testing.

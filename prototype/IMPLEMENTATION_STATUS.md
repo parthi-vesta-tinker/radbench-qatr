@@ -4,6 +4,14 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 
 ## Implemented
 
+- **No-prompt local live startup:** `npm run live` enables OpenAI and JEV, forces local
+  access for that process, and reads both provider keys from the ignored `.env` or process
+  environment. Missing keys exit with a named setting instead of a prompt. The existing
+  `.qa-data-local` schema-7 store was backed up and explicitly upgraded to schema 8 with
+  no pending work or foreign-key errors. Verification on 24 September 2026: 9 launcher
+  and migration tests, documentation check, and a no-key `npm run live` check passed;
+  the latter made no provider request.
+
 - **JEV critical finding classification (0.15.0):** A completed review with critical comments
   starts one separate five-field JEV classification per critical observation when JEV is configured
   at admission. Reviews without critical comments make no JEV call. QA Studio shows the immutable

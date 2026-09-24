@@ -9,8 +9,8 @@
   "files": [
     {
       "path": ".env.example",
-      "bytes": 666,
-      "sha256": "c4951e4450bab402e74e2e15a49cf692158a77c6d830ad812d29266bb0fd423c"
+      "bytes": 792,
+      "sha256": "de3850147a481dfa06f566d1e0db92a04ed501ac065509be54906777003b47f8"
     },
     {
       "path": ".gitattributes",
@@ -34,13 +34,13 @@
     },
     {
       "path": "LOCAL_TESTING.md",
-      "bytes": 10355,
-      "sha256": "0ddbb36467112aa7aee33d7c500f4ddd826e543dd1e5a356fc306d6b32472ffb"
+      "bytes": 10790,
+      "sha256": "7ee2bf7db35f96917b9eac1e25e37cb55b62f31472746522d13b652d84a15cc1"
     },
     {
       "path": "README.md",
-      "bytes": 2944,
-      "sha256": "547014735279233f0b23118e2101914960522c4887fda926621fcb95488f0b60"
+      "bytes": 2993,
+      "sha256": "aa4983cc30e690013717b6c86be47daf0ad281a5f9d497b21c085870c65e51ea"
     },
     {
       "path": "RELEASE.json",
@@ -414,8 +414,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 393,
-      "sha256": "7ab9ef20cdcbe67d1cba1c00fe6dffd421d48965e2f94c6851f53bd44a79c67f"
+      "bytes": 430,
+      "sha256": "c79427ec8c6fb95a10dbf575ce6d9f4ed70a7d4fcd42116c530530f075df0725"
     },
     {
       "path": "prototype/ACCEPTANCE.md",
@@ -449,8 +449,8 @@
     },
     {
       "path": "prototype/FOUNDATION_CHANGELOG.md",
-      "bytes": 31778,
-      "sha256": "7ec84471b94667a713678ba6341270ab20180491889dc5c2593617de4c0c546e"
+      "bytes": 32509,
+      "sha256": "81a7999d38b849a4b182cc1ce8f22bc178bb3d64a8206021bf7b558c9ecf872a"
     },
     {
       "path": "prototype/FOUNDATION_PLAN.md",
@@ -459,8 +459,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 23483,
-      "sha256": "c43a0108b015285878b7dabcb6feed54db5c91ee33aa4d51b4907b2c56a83356"
+      "bytes": 24052,
+      "sha256": "4f766df5c9c53da611bcfb0b2b7c701f6a439395718909b00d03d854214e4397"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",
@@ -909,8 +909,8 @@
     },
     {
       "path": "scripts/run_local.py",
-      "bytes": 5080,
-      "sha256": "eb32570b6c48e7337ad93ab57321bd130fd927f58d33063185b6b077460ce299"
+      "bytes": 5723,
+      "sha256": "d4b96d5f97338b7ee0385545c10ff23f25d8c005815c3075c885236ed1ad9634"
     },
     {
       "path": "scripts/score_skill_evaluations.py",
@@ -994,8 +994,8 @@
     },
     {
       "path": "tests/test_local_launcher.py",
-      "bytes": 3842,
-      "sha256": "b46f525ceb817e9326aefbaf7fa1f2786181151112743d0d022637ef31b4f79e"
+      "bytes": 5725,
+      "sha256": "562a621d767867328b34bec3179d00feb39264707ea3e9f56fff9ca3ba6b26c3"
     },
     {
       "path": "tests/test_pack_reference.py",

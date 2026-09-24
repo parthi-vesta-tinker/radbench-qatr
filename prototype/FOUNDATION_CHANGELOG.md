@@ -1,5 +1,17 @@
 # Foundation implementation decisions and releases
 
+## Local live launch with both providers — 2026-09-24
+
+`npm run live` now enables OpenAI report review and JEV critical-finding
+classification together. It reads `OPENAI_API_KEY` and `TYPESAFE_API_KEY` from
+the ignored `.env` or the process environment and exits with a named missing
+setting instead of prompting. The command forces local access only for its
+process, preserving any public-mode setting in `.env` for other commands.
+The existing `.qa-data-local` application store was explicitly upgraded from
+schema 7 to 8 after confirming no pending work or open SQLite users; a dated
+backup was created. Nine launcher/migration tests and the no-key command check
+passed. No provider request was made for this startup change.
+
 ## Critical finding JEV classification — 2026-09-24
 
 Application 0.15.0, bundle 1.21, API 2026-09-22, schema 8. Completed report

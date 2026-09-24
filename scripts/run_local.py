@@ -80,12 +80,23 @@ def main():
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL") or "gpt-6-astra")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--jev", action="store_true", help="Enable live JEV classification of critical review findings")
+    parser.add_argument("--no-prompt", action="store_true", help="Require API keys from .env or the process environment")
+    parser.add_argument("--auth-mode", choices=("local", "public", "api_key"), help="Override QA_AUTH_MODE for this process")
     args = parser.parse_args()
+    if args.auth_mode:
+        os.environ["QA_AUTH_MODE"] = args.auth_mode
     ensure_frontend()
     os.environ["QA_MODE"] = args.mode
+    if args.jev:
+        os.environ["QA_JEV_ENABLED"] = "true"
+        from backend.access import auth_mode
+        if auth_mode() == "public":
+            raise SystemExit("JEV classification requires QA_AUTH_MODE=local or api_key in .env.")
     if args.mode == "openai":
         os.environ["OPENAI_MODEL"] = args.model
         if not os.environ.get("OPENAI_API_KEY"):
+            if args.no_prompt:
+                raise SystemExit("Set OPENAI_API_KEY in .env or the process environment before starting live review.")
             key = getpass.getpass(
                 "OpenAI API key (hidden; used only for this process): "
             ).strip()
@@ -96,11 +107,9 @@ def main():
     else:
         label = "Demo mode: controlled local examples; no OpenAI request"
     if args.jev:
-        os.environ["QA_JEV_ENABLED"] = "true"
-        from backend.access import auth_mode
-        if auth_mode() == "public":
-            raise SystemExit("JEV classification requires local or API-key access mode.")
         if not os.environ.get("TYPESAFE_API_KEY"):
+            if args.no_prompt:
+                raise SystemExit("Set TYPESAFE_API_KEY in .env or the process environment before enabling JEV.")
             key = getpass.getpass("TypeSafe JEV API key (hidden; used only for this process): ").strip()
             if not key:
                 raise SystemExit("A TypeSafe key is required when --jev is enabled.")

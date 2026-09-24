@@ -29,6 +29,43 @@ def test_demo_mode_never_prompts_for_an_api_key(monkeypatch, capsys):
     assert "Demo mode: controlled local examples; no OpenAI request" in capsys.readouterr().out
 
 
+def test_live_jev_no_prompt_loads_both_keys_from_env_file(monkeypatch, tmp_path):
+    (tmp_path / ".env").write_text(
+        "QA_AUTH_MODE=public\nOPENAI_API_KEY=controlled-openai\nTYPESAFE_API_KEY=controlled-jev\n"
+    )
+    monkeypatch.setattr(run_local, "ROOT", tmp_path)
+    monkeypatch.setattr(run_local, "ensure_frontend", lambda: None)
+    monkeypatch.setattr(sys, "argv", ["run_local.py", "--mode", "openai", "--jev", "--no-prompt", "--auth-mode", "local"])
+    for name in ("OPENAI_API_KEY", "TYPESAFE_API_KEY", "QA_AUTH_MODE"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setattr("getpass.getpass", lambda *_args, **_kwargs: pytest.fail("live mode prompted for a key"))
+    calls = []
+    monkeypatch.setattr("uvicorn.run", lambda *args, **kwargs: calls.append((args, kwargs)))
+
+    run_local.main()
+
+    assert os.environ["OPENAI_API_KEY"] == "controlled-openai"
+    assert os.environ["TYPESAFE_API_KEY"] == "controlled-jev"
+    assert os.environ["QA_AUTH_MODE"] == "local"
+    assert os.environ["QA_JEV_ENABLED"] == "true"
+    assert len(calls) == 1
+
+
+def test_live_no_prompt_names_missing_key(monkeypatch, tmp_path):
+    monkeypatch.setattr(run_local, "ROOT", tmp_path)
+    monkeypatch.setattr(run_local, "ensure_frontend", lambda: None)
+    monkeypatch.setattr(sys, "argv", ["run_local.py", "--mode", "openai", "--jev", "--no-prompt"])
+    monkeypatch.setenv("QA_AUTH_MODE", "local")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    monkeypatch.setattr("getpass.getpass", lambda *_args, **_kwargs: pytest.fail("live mode prompted for a key"))
+    with pytest.raises(SystemExit, match="OPENAI_API_KEY"):
+        run_local.main()
+    monkeypatch.setenv("OPENAI_API_KEY", "controlled-openai")
+    with pytest.raises(SystemExit, match="TYPESAFE_API_KEY"):
+        run_local.main()
+
+
 def test_missing_frontend_builds_with_windows_npm_launcher(monkeypatch, tmp_path):
     monkeypatch.setattr(run_local, "ROOT", tmp_path)
     monkeypatch.setattr(run_local, "npm_executable", lambda: r"C:\Program Files\nodejs\npm.cmd")

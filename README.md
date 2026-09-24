@@ -24,7 +24,7 @@ For a real provider review, run:
 npm run live
 ```
 
-It builds the browser app when needed and prompts for the OpenAI API key only for that process; it does not save the key. Set the optional `QA_LOCAL_OPERATOR_NAME` in `.env` when you want Review History to show who submitted local reviews. See [the live provider session instructions](LOCAL_TESTING.md#live-provider-session). Controlled tests and demo mode make no paid provider call.
+It builds the browser app when needed and uses both `OPENAI_API_KEY` and `TYPESAFE_API_KEY` from `.env` without prompting. This command uses local access for its process. Set the optional `QA_LOCAL_OPERATOR_NAME` in `.env` when you want Review History to show who submitted local reviews. See [the live provider session instructions](LOCAL_TESTING.md#live-provider-session). Controlled tests and demo mode make no paid provider call.
 
 ## Current architecture
 
