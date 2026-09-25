@@ -26,6 +26,17 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 
 ## Implemented
 
+- **Per-comment review feedback (2026-09-24):** PACS and critical comments now expose
+  thumbs up/down alongside retained whole-review feedback. One shared dialog captures the
+  selected comment, required down reason, optional explanation and suggested wording.
+  A shared history loader shows saved original comment context; feedback never changes the
+  result or copy text. Observation feedback requires an expected input version, checked in
+  the save transaction to prevent replacement races. Existing receipts replay before mutable
+  checks, and legacy whole-review submissions/read records remain supported. Feedback API
+  counts now include `by_target`; generated OpenAPI and TypeScript are updated. No schema
+  migration or provider change. Verification: 17 focused backend tests, 35 DOM tests and
+  frontend production build passed. Browser/visual and clinical validation were not run.
+
 - **Reports rail navigation (2026-09-24):** New review moved from QA Studio to
   the top of the reports rail, above the scrolling list, with a labeled mobile
   drawer action and a collapsed plus button with tooltip. Active and Recent are

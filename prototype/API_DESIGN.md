@@ -39,7 +39,7 @@ A result contains ordered server-validated observations, two display/copy groups
 
 ## Related resources
 
-- Per-review feedback POST/GET and the feedback inbox belong to the review, without a result-version or input-hash binding. Down feedback requires a reason.
+- Per-review feedback POST/GET and the feedback inbox belong to the review and survive replacement. Observation feedback requires `expected_input_version` and an observation ID; the version is checked atomically at save time. Whole-review feedback accepts an optional expected version. Down feedback requires a reason; explanation and `suggested_comment` are optional (2,000 characters each). Reads include optional original `target_comment` and expected version; legacy records may lack them. Idempotency replay precedes mutable completion/version checks. Feedback analytics separate event counts in `by_target` (`result`, `observation`, `missed_flag`).
 - Analytics returns operational and feedback aggregates. Clinical performance remains null until an independent adjudicated reference cohort exists.
 - Knowledge catalog/detail/draft/export routes expose verified installed content and tenant-scoped draft history. Draft writes use optimistic revision and source/package hash checks and never activate runtime instructions.
 - Config, health, status, and explicit diagnostics expose safe operational state. Provider diagnostics do not perform inference.

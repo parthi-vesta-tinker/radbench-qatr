@@ -327,6 +327,8 @@ def update(
 
 def save_feedback(tenant, rid, key, data, version=presentation.API_VERSION):
     payload = data.model_dump()
+    if data.expected_input_version is None:
+        payload.pop('expected_input_version')
     operation = feedback_scope(rid)
     with db() as conn:
         conn.execute("BEGIN IMMEDIATE")
@@ -339,6 +341,10 @@ def save_feedback(tenant, rid, key, data, version=presentation.API_VERSION):
         if row is None:
             raise KeyError("Review not found")
         review = json.loads(row["document"])
+        if review.get('execution_status') != 'completed' or not review.get('result'):
+            raise ReviewConflict('Feedback requires a completed result. Reload this review.')
+        if (data.target == 'observation' or data.expected_input_version is not None) and data.expected_input_version != review.get('input_version'):
+            raise ReviewConflict('The review has changed or its input version is missing. Reload this review before giving feedback.')
         target_comment = None
         if data.target == 'observation':
             target_comment = next((o['comment'] for group in ('general_comments', 'critical_comments')

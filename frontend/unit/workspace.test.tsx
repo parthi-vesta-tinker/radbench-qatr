@@ -2,7 +2,8 @@
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
-import { act } from 'react';
+import { act, useState } from 'react';
+import { ReviewOutput } from '../src/ReviewOutput';
 import App from '../src/App';
 import { useClassification } from '../src/useClassification';
 import { ReviewJourney } from '../src/ReviewJourney';
@@ -496,4 +497,48 @@ test('Recent keeps older pending reviews above recent results and selects only t
   assert.equal(document.querySelectorAll('.scope-nav .selected').length,1);
   await click('New review');assert.equal(text(),'Keep unfinished work');
   assert.equal(button('Current review').classList.contains('selected'),true);
+});
+
+
+test('comment feedback shares one dialog, sends version and optional wording, and leaves copy text intact', async () => {
+  const source = {...review('qr-comment-feedback','Findings: controlled. Impression: controlled.'), execution_status:'completed',
+    result:{outcome:'observations',general_comments:[{observation_id:'obs-1',comment:'General comment.'}],
+      critical_comments:[{observation_id:'obs-2',comment:'Critical comment.'}],comments_copy_text:'Original copy text.'}} as Review;
+  const originalFeedback = api.feedback, originalHistory = api.feedbackHistory;
+  const sent: any[] = [];
+  let historyReads = 0;
+  api.feedbackHistory = async () => {historyReads++; return {items:[],has_more:false,next_cursor:null};};
+  api.feedback = async (_id, payload, key) => {sent.push({payload,key}); return {} as any;};
+  function Output({disabled=false}: {disabled?:boolean}) {
+    const [open,setOpen] = useState(false);
+    return <ReviewOutput review={source} stale={disabled} disconnected={false} restore={()=>{}} feedbackOpen={open} setFeedbackOpen={setOpen}/>;
+  }
+  try {
+    await act(async()=>root.render(<Output/>));
+    assert.equal(historyReads,1);
+    assert.equal(document.querySelectorAll('.comment-feedback').length,2);
+    assert.equal(document.querySelectorAll('dialog').length,1);
+    await click('Mark comment obs-1 useful');
+    assert.deepEqual(sent[0].payload,{rating:'up',target:'observation',expected_input_version:1,observation_id:'obs-1'});
+    await click('Suggest improvement for comment obs-2');
+    assert.equal(document.querySelector('dialog blockquote')!.textContent,'Critical comment.');
+    await act(async()=>document.querySelector('form.feedback-form')!.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true})));
+    assert.equal(sent.length,1);
+    await act(async()=>{
+      const reason = document.querySelector('#feedback-reason') as HTMLSelectElement;
+      reason.value='unclear_wording'; reason.dispatchEvent(new window.Event('change',{bubbles:true}));
+      const wording = document.querySelector('#feedback-wording') as HTMLTextAreaElement;
+      Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value')!.set!.call(wording,'Proposed wording.');
+      wording.dispatchEvent(new window.Event('input',{bubbles:true}));
+    });
+    await act(async()=>document.querySelector('form.feedback-form')!.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true})));
+    assert.deepEqual(sent[1].payload,{rating:'down',target:'observation',expected_input_version:1,observation_id:'obs-2',reason:'unclear_wording',suggested_comment:'Proposed wording.'});
+    assert.equal(source.result!.comments_copy_text,'Original copy text.');
+    await click('Thumbs up');
+    assert.equal(sent[2].payload.target,'result');
+    assert.equal(sent[2].payload.observation_id,undefined);
+    await act(async()=>root.render(<Output disabled/>));
+    assert.ok(button('Mark comment obs-1 useful').disabled);
+    assert.ok(button('Suggest improvement for comment obs-2').disabled);
+  } finally {api.feedback=originalFeedback;api.feedbackHistory=originalHistory;}
 });

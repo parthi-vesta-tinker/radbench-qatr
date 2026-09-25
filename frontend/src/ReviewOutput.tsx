@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Copy } from "lucide-react";
 import type { Review } from "./types";
-import { Feedback } from "./Feedback";
+import { Feedback, CommentFeedback } from "./Feedback";
 export function ReviewOutput({
   review,
   stale,
@@ -55,7 +55,8 @@ export function ReviewOutput({
         </div>
       )}
       {result && (
-        <>
+        <Feedback key={`${review!.id}:${review!.input_version}`} review={review!}
+          open={feedbackOpen} setOpen={setFeedbackOpen} disabled={stale || disconnected}>
           {result.outcome === "no_observations" ? (
             <div className="empty clean">
               <h3>No actionable observations</h3>
@@ -67,7 +68,7 @@ export function ReviewOutput({
                 {result.general_comments.length ? (
                   <ul className="comment-list" role="list">
                     {result.general_comments.map((o) => (
-                      <li key={o.observation_id}>{o.comment}</li>
+                      <li key={o.observation_id}><span>{o.comment}</span><CommentFeedback observation={o}/></li>
                     ))}
                   </ul>
                 ) : (
@@ -79,7 +80,7 @@ export function ReviewOutput({
                 {result.critical_comments.length ? (
                   <ul className="comment-list" role="list">
                     {result.critical_comments.map((o) => (
-                      <li key={o.observation_id}>{o.comment}</li>
+                      <li key={o.observation_id}><span>{o.comment}</span><CommentFeedback observation={o}/></li>
                     ))}
                   </ul>
                 ) : (
@@ -103,14 +104,7 @@ export function ReviewOutput({
               rows={8}
             />
           )}
-          <Feedback
-            key={review!.id}
-            review={review!}
-            open={feedbackOpen}
-            setOpen={setFeedbackOpen}
-            disabled={stale || disconnected}
-          />
-        </>
+        </Feedback>
       )}
     </section>
   );

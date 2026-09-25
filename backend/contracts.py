@@ -61,6 +61,7 @@ class FeedbackInput(BaseModel):
     reason: REASONS | None = None
     explanation: str | None = Field(default=None, max_length=2000)
     suggested_comment: str | None = Field(default=None, max_length=2000)
+    expected_input_version: int | None = Field(default=None, ge=1, description="Required when submitting observation feedback; must match the displayed review input version. Optional on historical feedback reads.")
 
     @model_validator(mode="after")
     def valid_target(self):
@@ -573,6 +574,7 @@ class ClassificationFeedbackList(BaseModel):
 
 
 class FeedbackResource(FeedbackInput):
+    target_comment: str | None = None
     id: str
     object: Literal["qa_feedback"]
     tenant_id: str
@@ -630,6 +632,7 @@ class ClassificationOverview(BaseModel):
 
 
 class FeedbackCounts(BaseModel):
+    by_target: dict[str, int] = Field(default_factory=dict)
     total: int
     reviews: int
     up: int

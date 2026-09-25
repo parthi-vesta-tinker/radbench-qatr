@@ -13,7 +13,7 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 - **Typography:** system fonts, an 18px semibold application and work heading, 16px panel headings, 14px secondary sidebar headings, 13px tool labels and 15px report input. New drafts use the heading New review; the matching action at the top of the reports rail is also New review.
 - **Studio:** compact tools for Review history, Feedbacks, Analytics, Classification (when enabled), Skills, and Playground. Tool navigation preserves the current report draft and mounted editor state.
 - **Review panel:** review steps show real execution state. **Post-review Guidance** provides advice only after a completed, current review; it stores no per-step progress. See the post-review guidance contract below.
-- **Feedback:** thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.
+- **Feedback:** each PACS comment and critical finding has always-visible thumbs up/down. Whole-review thumbs remain for overall usefulness, omissions and empty results. One shared dialog shows the selected comment, requires a reason for down feedback, and accepts optional explanation and suggested wording (including for Other). Suggested wording never edits the result or copy text. Feedback is disabled for edited or disconnected results. See comment feedback below.
 - **Review results:** the output panel is headed **Review Results**. PACS comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.
 - **Side panels:** Report reviews and QA Studio collapse independently into 60px rails. Expand/collapse controls live in their headers. The collapsed Report reviews rail retains New review and Current review; the Studio rail retains its enabled tool icons in the same order. Every rail control has a visible hover/focus tooltip and an accessible name. Escape dismisses tooltips without moving focus. The entire Studio side panel, including guidance, collapses together.
 - **Skills placement:** equal Studio tiles in two columns: Review history, Feedbacks, Analytics, Classification (when enabled), Skills, and Playground. The destination heading and Playground link also use Skills; reference content remains available inside it.
@@ -214,3 +214,27 @@ with Queued or Reviewing labels and a neutral spinner. They remain independently
 fetched so older pending work is not lost behind the newest 20 terminal reviews.
 On completion, reports return to latest-submission ordering. Each review appears
 once; no Active heading or additional draft entries are introduced.
+
+
+## Comment feedback
+
+Comment controls submit `target=observation`, the observation ID and the displayed
+`expected_input_version`; whole-review controls submit `target=result` with the displayed
+version. A thumbs-up saves immediately and confirms beside that comment. A thumbs-down
+opens one shared dialog with the original comment as context. Cancel sends nothing.
+One shared history loader serves the review; do not fetch history per comment.
+Failed saves keep the form and reuse the same idempotency key for the same payload.
+
+The server checks version and completion atomically with saving. Observation IDs may be
+reused after replacement, so an observation ID alone is insufficient. Missing or mismatched
+versions on comment feedback conflict; an existing idempotency receipt replays before
+mutable completion/version checks. Whole-review API submissions without a version remain
+supported. Saved feedback survives review replacement and includes its original quoted
+comment and submitted version when available; historical records may lack these fields.
+Do not show old feedback as a rating of a replacement comment just because its ID matches.
+
+Suggested wording is optional, limited to 2,000 characters, displayed in saved feedback and
+the feedback inbox, and never used to overwrite comments or establish clinical ground truth.
+Classification-label feedback remains a separate interaction and resource. API feedback
+aggregates expose `by_target` counts for whole-review, observation and legacy flag feedback;
+these are feedback events, not adjudicated accuracy or unique reviewer votes.

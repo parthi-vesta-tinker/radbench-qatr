@@ -1533,3 +1533,8 @@ button.primary:hover:not(:disabled) {background:var(--muted);border-color:var(--
  .panel-workspace > .scope.drawer-open {overflow:visible;}
  .panel-workspace .scope.drawer-open .scope-nav {min-height:0;overflow-y:auto;}
 }
+
+.comment-feedback {display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap;}
+.comment-feedback .icon-button {width:30px;min-height:30px;height:30px;padding:5px;color:var(--muted);}
+.comment-feedback .meta {font-size:12px;}
+.feedback-target {margin:0;padding:10px 12px;border-left:2px solid var(--line);background:var(--soft);font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;}

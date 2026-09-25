@@ -1,5 +1,26 @@
 # Foundation implementation decisions and releases
 
+## Per-comment feedback and replacement fencing — 2026-09-24
+
+Expose thumbs on each PACS comment and critical finding, retaining whole-review thumbs
+for overall usefulness and omissions. One shared modal accepts the required down reason,
+optional explanation and optional suggested wording. Capture/show the original comment
+as feedback context without modifying results or copy text. Keep classification feedback
+separate. Expose feedback-event counts by target, not clinical accuracy measures.
+
+Observation feedback now requires `expected_input_version`; check it and completion inside
+`save_feedback`'s transaction. Whole-review submissions may omit it. Omit a missing version
+from receipt fingerprint inputs to preserve old whole-review receipt replay. Historical
+reads allow missing versions and comment quotes; new feedback returns original comment
+context. No application schema migration or provider request is introduced.
+
+Verification: 17 focused backend tests, 35 DOM tests and frontend build passed. Initial
+backend fixture attempted an invalid terminal-to-running transition; corrected it to use
+actual review replacement. Sandboxed test execution was inconclusive; successful runs used
+the local runtime outside the sandbox. No browser or clinical validation performed.
+
+
+
 ## Critical observation context for JEV — 2026-09-24
 
 Commit verification: all 40 classification, context and evaluation tests passed in

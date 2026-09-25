@@ -36,7 +36,7 @@ def seed(tenant="vesta", source="openai", status="completed", days=0, hours=0,
 
 def feedback(rid, tenant="vesta", rating="down", note="Please be concise.", target="result"):
     data = FeedbackInput( rating=rating, reason="unclear_wording" if rating == "down" else None,
-                         explanation=note, target=target, observation_id="obs-1" if target == "observation" else None)
+                         explanation=note, target=target, expected_input_version=1 if target == "observation" else None, observation_id="obs-1" if target == "observation" else None)
     return store.save_feedback(tenant, rid, uuid.uuid4().hex, data)[0]["body"]
 
 

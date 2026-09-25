@@ -99,8 +99,8 @@
     },
     {
       "path": "backend/contracts.py",
-      "bytes": 23621,
-      "sha256": "9ef4f635cf73e849018677935ddc1c72c5a1e308cf12f1dbd09da6f48e25a45e"
+      "bytes": 23934,
+      "sha256": "c7fbcdbbebc4f2f549c85389d017a1f06c9dca73bbb826d45111b4bcf770cbc6"
     },
     {
       "path": "backend/diagnostics.py",
@@ -119,8 +119,8 @@
     },
     {
       "path": "backend/main.py",
-      "bytes": 32206,
-      "sha256": "fa10e04dfca7a15b61587eff24e8f6ec855a1a51c5a088d0822abb154bc2b2c6"
+      "bytes": 32293,
+      "sha256": "0f4fb64510e54e07f7d0414e8d9b4f293c8d964d9a470db56a8ad52fdb523e44"
     },
     {
       "path": "backend/packs.py",
@@ -149,8 +149,8 @@
     },
     {
       "path": "backend/reporting.py",
-      "bytes": 8946,
-      "sha256": "dbd17038ec8354cb2d1a70e13971dd4d35c6e907584d4936df24c1ae0511d195"
+      "bytes": 9371,
+      "sha256": "8a589103fe324c261919f2ff5477f196e168e3ae09cac89408da5ab3f9b0b31e"
     },
     {
       "path": "backend/reviewer.py",
@@ -174,8 +174,8 @@
     },
     {
       "path": "backend/store.py",
-      "bytes": 23605,
-      "sha256": "af9ff64a51539c358232f48cb3965b3a8844fd1b19dddd4f229c4820cd97cb7d"
+      "bytes": 24159,
+      "sha256": "c063fe7143bb38b399406afc06859d5c7989714359549066f91d74af840a31ee"
     },
     {
       "path": "backend/workflow.py",
@@ -259,8 +259,8 @@
     },
     {
       "path": "frontend/src/Feedback.tsx",
-      "bytes": 8179,
-      "sha256": "57782f61d9d6e94d302bc25021e0f3afef7e61325a9a3beb88fc8d8d4a61bb7e"
+      "bytes": 11373,
+      "sha256": "a0bdc74ad3576d6a570a8eb9a704eb3957923da29e4cff48933243250077f3da"
     },
     {
       "path": "frontend/src/FeedbackInbox.tsx",
@@ -299,8 +299,8 @@
     },
     {
       "path": "frontend/src/ReviewOutput.tsx",
-      "bytes": 4208,
-      "sha256": "cba658ff42d433a5d61e196c899a9e4e8f36e31da04d7a99c199db007df7c66f"
+      "bytes": 4282,
+      "sha256": "0195e0b90889526b1ab8cefbd894c040bcc5861918a71abd6a9686e413102155"
     },
     {
       "path": "frontend/src/SettingsPanel.tsx",
@@ -344,8 +344,8 @@
     },
     {
       "path": "frontend/src/generated-api.ts",
-      "bytes": 13249,
-      "sha256": "171e68cce8ea0b264787262c45ccebaad102ce5fbda9697ff66d9666b499e99f"
+      "bytes": 13415,
+      "sha256": "860f54bd853584f74d5297abf520d761f27596108081c8b0e84f3cec720017e1"
     },
     {
       "path": "frontend/src/main.tsx",
@@ -364,8 +364,8 @@
     },
     {
       "path": "frontend/src/style.css",
-      "bytes": 76294,
-      "sha256": "fbfad68638d00ba223b52e729f6db22276672b18794108bbd89681610633c22f"
+      "bytes": 76695,
+      "sha256": "86822a53acd55d13f34185deed5074376d9e61752807cac240b8daf99c3f3916"
     },
     {
       "path": "frontend/src/types.ts",
@@ -454,8 +454,8 @@
     },
     {
       "path": "frontend/unit/workspace.test.tsx",
-      "bytes": 41130,
-      "sha256": "0a0d87e547c0e878ee7daa66390e2fe0b5b21f81096ceabf9247f7c14036ea3a"
+      "bytes": 44326,
+      "sha256": "0b00d411f60f4bb9e2093d4cf882411d311c5ba94b0a1711133c25b7817b42b9"
     },
     {
       "path": "frontend/vite.config.ts",
@@ -479,18 +479,18 @@
     },
     {
       "path": "prototype/API_DESIGN.md",
-      "bytes": 8483,
-      "sha256": "63843c80aac7af99ce799354e200ed2f1f2600fd2205ca8b7dcceb71623ba0a3"
+      "bytes": 8981,
+      "sha256": "6d9a549c1ebbe2ea9997adb20a1b9523db3e41d64ea4c2935029b1796f294017"
     },
     {
       "path": "prototype/BACKLOG.md",
-      "bytes": 3430,
-      "sha256": "58346e15093bf38f84051a74b09c108fe3fd5f81c2869e47329080ab0300cc4f"
+      "bytes": 3610,
+      "sha256": "379a36f16f119296938118102bf62f409d23142b93a2a153c7144e94b30ad038"
     },
     {
       "path": "prototype/BLUEPRINT.html",
-      "bytes": 166547,
-      "sha256": "c35c8ca8a8d9a62c54f3f0d4798e9dd6b86558601311c7d0a39b2e7a35a4ac95"
+      "bytes": 171674,
+      "sha256": "7f058ded0cc94aae1538cf914085aa6e8bf0f4bf819f9e00617333e6077c5dd2"
     },
     {
       "path": "prototype/DBOS_VALIDATION.md",
@@ -499,8 +499,8 @@
     },
     {
       "path": "prototype/FOUNDATION_CHANGELOG.md",
-      "bytes": 39596,
-      "sha256": "c379fb68aa4113694bd46b1668256962334152f1a6e4f16063d8b5ca359d9856"
+      "bytes": 40885,
+      "sha256": "b6fdfeae90b57b781fd68564ced971c072e7ae3081c42709d9ef0da9265fb4c0"
     },
     {
       "path": "prototype/FOUNDATION_PLAN.md",
@@ -509,8 +509,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 38313,
-      "sha256": "ff30494b82fb9d93edb14418ed09179a7c93c1d55664d3600aa5902ebf85c4c3"
+      "bytes": 39209,
+      "sha256": "042ddfde937a8af634175a6fe7b9f051a083152d77812b2184555d9e2c86bc35"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",
@@ -539,8 +539,8 @@
     },
     {
       "path": "prototype/WORKSPACE_SPEC.md",
-      "bytes": 19997,
-      "sha256": "54282c4faf7b5ee52d513f696bd0061d6a1b3af8a6df5c031a74a2a373c5b2e8"
+      "bytes": 21897,
+      "sha256": "79cee854bbcc4d3439fe68f6479fa6b51b30863018b91426913458a580cececd"
     },
     {
       "path": "prototype/assets/ui-research/after-analytics-desktop.png",
@@ -609,8 +609,8 @@
     },
     {
       "path": "prototype/openapi.json",
-      "bytes": 187439,
-      "sha256": "f0bc8a8661197acd3ae3749f5e53ed02ef62aab9b278c479198fbebab2742b95"
+      "bytes": 188793,
+      "sha256": "4f0a8d68452d8d0e0ce94703c669ddbbc3bfac68e91801901aacdde0c37d9486"
     },
     {
       "path": "prototype/render_blueprint.py",
@@ -1018,6 +1018,11 @@
       "sha256": "16d0ac0ac606b5c0e3d3e4f55dad4d1a8ae5d55f93d1b96efc513f0f602e6c22"
     },
     {
+      "path": "tests/test_comment_feedback.py",
+      "bytes": 3322,
+      "sha256": "ff1cee82d5571046bf48c8c0462867ad6713d6b21e4f07bda585dea489e5c25d"
+    },
+    {
       "path": "tests/test_content_foundation.py",
       "bytes": 6947,
       "sha256": "7114f41b498646f12ce9c711fcaad85a23b2a13ae9d094ae30c787b7d4564c98"
@@ -1074,8 +1079,8 @@
     },
     {
       "path": "tests/test_reporting.py",
-      "bytes": 13883,
-      "sha256": "ae00070ab951c614db9b269edeb15f055a15d72d4173653ebc054594c391bbd3"
+      "bytes": 13946,
+      "sha256": "80af195f45f5efb8292b4cf4953a8b0b63bef10679288e532a5a3cc01b152cac"
     },
     {
       "path": "tests/test_restore_review_history.py",

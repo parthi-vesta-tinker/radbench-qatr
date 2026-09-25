@@ -5560,6 +5560,13 @@
       },
       "FeedbackCounts": {
         "properties": {
+          "by_target": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Target"
+          },
           "total": {
             "type": "integer",
             "title": "Total"
@@ -5745,6 +5752,19 @@
               }
             ],
             "title": "Suggested Comment"
+          },
+          "expected_input_version": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Input Version",
+            "description": "Required when submitting observation feedback; must match the displayed review input version. Optional on historical feedback reads."
           }
         },
         "additionalProperties": false,
@@ -5871,6 +5891,30 @@
               }
             ],
             "title": "Suggested Comment"
+          },
+          "expected_input_version": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Input Version",
+            "description": "Required when submitting observation feedback; must match the displayed review input version. Optional on historical feedback reads."
+          },
+          "target_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Comment"
           },
           "id": {
             "type": "string",

@@ -158,6 +158,12 @@ def analytics(tenant, period="7d", source="openai", include_feedback=False):
                 feedback_values,
             ).fetchall()
             feedback = dict(summary) | {"reasons": {row["reason"] or "other": row["total"] for row in reasons}}
+            targets = conn.execute(
+                "SELECT coalesce(json_extract(f.document, '$.target'),'result') AS target, count(*) AS total"
+                + joined + " GROUP BY target", feedback_values,
+            ).fetchall()
+            feedback['by_target'] = {name: 0 for name in ('result', 'observation', 'missed_flag')}
+            feedback['by_target'].update({row['target']: row['total'] for row in targets})
     return dict(object="qa_analytics", tenant_id=tenant, checked_at=checked.isoformat(),
                 period=period, period_start=start, source=source,
                 reviews=totals | {"statuses": counts}, findings=findings, classification=classification, feedback=feedback,

@@ -567,7 +567,7 @@ def add_feedback(
         p.tenant_id,
         store.feedback_scope(review_id),
         idempotency_key,
-        payload.model_dump(),
+        payload.model_dump(exclude={"expected_input_version"} if payload.expected_input_version is None else set()),
         version,
     )
     if saved:

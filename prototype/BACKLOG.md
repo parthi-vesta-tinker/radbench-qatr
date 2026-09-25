@@ -4,6 +4,9 @@ F1–F3 are implemented. The following work remains deliberately outside the cur
 
 ## Near term
 
+- Per-comment feedback is now exposed alongside whole-review feedback; see the workspace
+  contract. Ratings and wording suggestions remain editorial signals, not clinical truth.
+
 - **F4 product acceptance:** integrated fresh-store walkthrough, accessibility/visual review, operator recovery guidance, and distributable handoff verification.
 - **F5 bounded evaluation:** explicitly authorized live-provider runs and separately governed clinical adjudication.
 - Add an intentional retained-data migration process only when prototype data becomes a product requirement; current schema cutovers use fresh stores.

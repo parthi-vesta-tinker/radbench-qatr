@@ -1,18 +1,54 @@
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { api, describeError } from "./api";
-import type { Review, FeedbackPayload, FeedbackRecord } from "./types";
+import type { Review, Observation, FeedbackPayload, FeedbackRecord } from "./types";
+type CommentFeedbackContextValue = {
+  disabled: boolean;
+  rate: (rating: "up" | "down", observation: Observation) => void;
+  notices: Record<string, string>;
+};
+const CommentFeedbackContext = createContext<CommentFeedbackContextValue | null>(null);
+
+export function CommentFeedback({ observation }: { observation: Observation }) {
+  const context = useContext(CommentFeedbackContext);
+  if (!context) return null;
+  return <div className="comment-feedback" role="group" aria-label="Comment feedback">
+    <button type="button" className="icon-button" disabled={context.disabled}
+      aria-label={`Mark comment ${observation.observation_id} useful`} title="Useful comment"
+      onClick={() => context.rate("up", observation)}><ThumbsUp size={15}/></button>
+    <button type="button" className="icon-button" disabled={context.disabled}
+      aria-label={`Suggest improvement for comment ${observation.observation_id}`} title="Needs improvement"
+      onClick={() => context.rate("down", observation)}><ThumbsDown size={15}/></button>
+    <span className="meta" role="status">{context.notices[observation.observation_id]}</span>
+  </div>;
+}
+
 export function Feedback({
   review,
   open,
   setOpen,
   disabled,
+  children,
 }: {
   review: Review;
   open: boolean;
   setOpen: (v: boolean) => void;
   disabled: boolean;
+  children?: ReactNode;
 }) {
+  const [target, setTarget] = useState<Observation | null>(null);
+  const [suggested, setSuggested] = useState("");
+  const [notices, setNotices] = useState<Record<string, string>>({});
+  const savingRef = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  function openForm(observation: Observation | null) {
+    setTarget(observation); setReason(""); setExplanation(""); setSuggested("");
+    setError(""); setMessage(""); setOpen(true);
+  }
   const [reason, setReason] = useState(""),
     [explanation, setExplanation] = useState("");
   const [saving, setSaving] = useState(false),
@@ -57,44 +93,55 @@ export function Feedback({
     node.addEventListener("close", sync);
     return () => node.removeEventListener("close", sync);
   }, [setOpen]);
-  const pending = useRef<{ payload: string; key: string } | null>(null);
-  async function save(rating: "up" | "down") {
-    if (disabled || saving) return;
+  const pending = useRef(new Map<string, string>());
+  async function save(rating: "up" | "down", observation: Observation | null = target) {
+    if (disabled || savingRef.current) return;
     if (rating === "down" && !reason) {
       setError("Select a reason.");
       return;
     }
     const payload: FeedbackPayload = {
       rating,
-      target: "result",
+      target: observation ? "observation" : "result",
+      expected_input_version: review.input_version,
+      ...(observation ? { observation_id: observation.observation_id } : {}),
     };
     if (rating === "down") {
       payload.reason = reason as NonNullable<FeedbackPayload["reason"]>;
       if (explanation.trim()) payload.explanation = explanation.trim();
+      if (suggested.trim()) payload.suggested_comment = suggested.trim();
     }
     const serialized = JSON.stringify(payload);
-    if (pending.current?.payload !== serialized)
-      pending.current = { payload: serialized, key: crypto.randomUUID() };
+    const key = pending.current.get(serialized) ?? crypto.randomUUID();
+    pending.current.set(serialized, key);
+    savingRef.current = true;
     setSaving(true);
     setError("");
     setMessage("");
     try {
-      await api.feedback(review.id, payload, pending.current.key);
-      pending.current = null;
-      setMessage("Feedback saved.");
+      await api.feedback(review.id, payload, key);
+      pending.current.delete(serialized);
+      if (!mounted.current) return;
+      if (observation) setNotices(old => ({...old, [observation.observation_id]: "Feedback saved."}));
+      else setMessage("Feedback saved.");
       setHistoryAttempt(n => n + 1);
       setOpen(false);
     } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : "Feedback could not be saved. Please retry.",
-      );
+      if (!mounted.current) return;
+      const detail = describeError(e);
+      setError(detail);
+      if (observation) setNotices(old => ({...old, [observation.observation_id]: detail}));
     } finally {
-      setSaving(false);
+      savingRef.current = false;
+      if (mounted.current) setSaving(false);
     }
   }
   return (
+    <CommentFeedbackContext.Provider value={{disabled: disabled || saving, notices, rate: (rating, observation) => {
+      if (rating === "up") void save("up", observation);
+      else openForm(observation);
+    }}}>
+    {children}
     <section
       className="feedback"
       id="feedback-area"
@@ -107,7 +154,7 @@ export function Feedback({
           className="icon-button"
           disabled={disabled || saving}
           aria-label="Thumbs up"
-          onClick={() => void save("up")}
+          onClick={() => void save("up", null)}
         >
           <ThumbsUp />
         </button>
@@ -118,8 +165,7 @@ export function Feedback({
           aria-label="Thumbs down"
           aria-expanded={open}
           onClick={() => {
-            setOpen(!open);
-            setMessage("");
+            openForm(null);
           }}
         >
           <ThumbsDown />
@@ -128,6 +174,7 @@ export function Feedback({
           {message}
         </span>
       </div>
+      {error && !open && <p className="error" role="alert">{error}</p>}
       <dialog
         className="feedback-dialog"
         ref={dialog}
@@ -140,7 +187,8 @@ export function Feedback({
             void save("down");
           }}
         >
-          <h3 id="feedback-dialog-title">What should we improve?</h3>
+          <h3 id="feedback-dialog-title">{target ? "Improve this comment" : "What should we improve?"}</h3>
+          {target && <blockquote className="feedback-target">{target.comment}</blockquote>}
           <label htmlFor="feedback-reason">
             What was wrong? <span className="required">Required</span>
           </label>
@@ -176,6 +224,9 @@ export function Feedback({
             onChange={(e) => setExplanation(e.target.value)}
             disabled={saving || disabled}
           />
+          <label htmlFor="feedback-wording">Suggested wording <span className="meta">Optional · Feedback only</span></label>
+          <textarea id="feedback-wording" rows={3} maxLength={2000} value={suggested}
+            onChange={event => setSuggested(event.target.value)} disabled={saving || disabled}/>
           {error && (
             <p className="error" role="alert">
               {error}
@@ -203,11 +254,13 @@ export function Feedback({
         <ol>{entries.map(entry => <li key={entry.id}>
           <div className="saved-feedback-heading"><strong>{entry.rating === "up" ? "Useful" : "Needs improvement"}</strong><time dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleString()}</time></div>
           <p className="meta">{entry.observation_id ? `Comment ${entry.observation_id.replace('obs-', '')}` : entry.target === 'result' ? 'Whole review' : 'Historical flag feedback'}{entry.reason ? ` · ${entry.reason.replaceAll('_', ' ')}` : ''}</p>
+          {entry.target_comment && <blockquote className="feedback-target">{entry.target_comment}</blockquote>}
           {entry.explanation && <p>{entry.explanation}</p>}
           {entry.suggested_comment && <p><strong>Suggested wording:</strong> {entry.suggested_comment}</p>}
         </li>)}</ol>
         {cursor && <button type="button" disabled={historyBusy} onClick={() => void loadMore()}>Load more feedback</button>}
       </details>
     </section>
+    </CommentFeedbackContext.Provider>
   );
 }
