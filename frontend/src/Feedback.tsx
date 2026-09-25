@@ -37,7 +37,6 @@ export function Feedback({
   children?: ReactNode;
 }) {
   const [target, setTarget] = useState<Observation | null>(null);
-  const [suggested, setSuggested] = useState("");
   const [notices, setNotices] = useState<Record<string, string>>({});
   const savingRef = useRef(false);
   const mounted = useRef(true);
@@ -46,7 +45,7 @@ export function Feedback({
     return () => { mounted.current = false; };
   }, []);
   function openForm(observation: Observation | null) {
-    setTarget(observation); setReason(""); setExplanation(""); setSuggested("");
+    setTarget(observation); setReason(""); setExplanation("");
     setError(""); setMessage(""); setOpen(true);
   }
   const [reason, setReason] = useState(""),
@@ -109,7 +108,6 @@ export function Feedback({
     if (rating === "down") {
       payload.reason = reason as NonNullable<FeedbackPayload["reason"]>;
       if (explanation.trim()) payload.explanation = explanation.trim();
-      if (suggested.trim()) payload.suggested_comment = suggested.trim();
     }
     const serialized = JSON.stringify(payload);
     const key = pending.current.get(serialized) ?? crypto.randomUUID();
@@ -224,9 +222,6 @@ export function Feedback({
             onChange={(e) => setExplanation(e.target.value)}
             disabled={saving || disabled}
           />
-          <label htmlFor="feedback-wording">Suggested wording <span className="meta">Optional · Feedback only</span></label>
-          <textarea id="feedback-wording" rows={3} maxLength={2000} value={suggested}
-            onChange={event => setSuggested(event.target.value)} disabled={saving || disabled}/>
           {error && (
             <p className="error" role="alert">
               {error}

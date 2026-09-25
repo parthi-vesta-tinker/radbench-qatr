@@ -527,12 +527,13 @@ test('comment feedback shares one dialog, sends version and optional wording, an
     await act(async()=>{
       const reason = document.querySelector('#feedback-reason') as HTMLSelectElement;
       reason.value='unclear_wording'; reason.dispatchEvent(new window.Event('change',{bubbles:true}));
-      const wording = document.querySelector('#feedback-wording') as HTMLTextAreaElement;
-      Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value')!.set!.call(wording,'Proposed wording.');
-      wording.dispatchEvent(new window.Event('input',{bubbles:true}));
+      const details = document.querySelector('#feedback-details') as HTMLTextAreaElement;
+      Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value')!.set!.call(details,'Please clarify this comment.');
+      details.dispatchEvent(new window.Event('input',{bubbles:true}));
     });
     await act(async()=>document.querySelector('form.feedback-form')!.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true})));
-    assert.deepEqual(sent[1].payload,{rating:'down',target:'observation',expected_input_version:1,observation_id:'obs-2',reason:'unclear_wording',suggested_comment:'Proposed wording.'});
+    assert.deepEqual(sent[1].payload,{rating:'down',target:'observation',expected_input_version:1,observation_id:'obs-2',reason:'unclear_wording',explanation:'Please clarify this comment.'});
+    assert.equal(document.querySelector('#feedback-wording'),null);
     assert.equal(source.result!.comments_copy_text,'Original copy text.');
     await click('Thumbs up');
     assert.equal(sent[2].payload.target,'result');
