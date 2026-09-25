@@ -1,5 +1,21 @@
 # Implementation status
 
+## Classification and model settings — 2026-09-25
+
+Classification Overview defaults on and Classification Analysis defaults off. JEV
+availability follows the saved overview setting and server Typesafe credentials; no
+`QA_JEV_ENABLED` environment switch is required, and missing credentials do not
+block other settings. Reasoning effort is a per-tenant setting beside the review model,
+defaulting to Medium. `.env.example` uses unprefixed runtime names and legacy
+`QA_DATA_DIR` remains a fallback for existing local data directories.
+
+Verification: nine focused settings-default and local-launcher tests passed; the
+frontend production build, OpenAPI/type generation checks, documentation checks and
+`git diff --check` passed. The complete settings suite was attempted but its first
+DBOS-backed TestClient startup stalled before reaching assertions; the focused tests
+that do not launch the app completed. No provider calls were made.
+
+
 ## JEV context update — 2026-09-24
 
 Commit verification: all 40 classification, context and evaluation tests passed in
@@ -21,17 +37,18 @@ were present during these runs and are separate from this context change. No liv
 JEV accuracy or clinical validation is claimed.
 
 
-
 Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API **2026-09-22**, SQLite schema **8**.
 
 ## Implemented
 
-- **Classification analysis visibility (2026-09-25):** a separate Settings switch
+- **Classification analysis visibility (2026-09-24):** a separate Settings switch
   defaults off for new settings and existing files missing the field. It hides the
   full-screen Classification tool and Full analysis link while preserving CF
   processing, progress and compact overview. Disabling it while open returns to
   the report without discarding the draft. Verified: production build, DOM suite,
-  28 controlled settings/API tests, and 3 isolated Chromium settings tests passed.
+  **28 controlled settings/API tests**, and **3 isolated Chromium settings tests**
+  passed. Desktop and 320px Settings screenshots inspected. Browser enable/disable
+  uses API doubles; persistence/default compatibility uses controlled backend tests.
   No provider calls or storage migration.
 
 - **Per-comment review feedback (2026-09-24):** PACS and critical comments now expose
@@ -235,7 +252,9 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 - Server-controlled tenant release binding with immutable complete content snapshots. Vesta can use `vesta-qatr-0.3.0`; other tenants use the generic profile unless explicitly configured.
 - Byte-pinned qatr source references, the 43-entry catalog, independently versioned skills, package manifests, reference hashes, and lock validation.
 - One combined tool-free structured provider request per admitted valid review. Local input rejection makes zero provider calls.
-- Durable DBOS dispatch claim and private response checkpoint. A claimed attempt without a durable response fails as `MODEL_OUTCOME_UNKNOWN` and never retries automatically.
+- Legacy classification v1 retains its durable claim and private response checkpoint.
+  A v1 claim without a durable response fails as `MODEL_OUTCOME_UNKNOWN`; v2 uses the
+  bounded retry policy documented below.
 - Complete output validation for skill coverage, candidate identity, check ownership, exact source anchors, report grounding, grouping, and server-derived copy.
 - Four truthful phases: input validation, combined report review, output validation, and comment assembly.
 - Atomic dispatch claims and durable response checkpoints. Admission is bounded by the context window only; spend authorization was removed on 2026-09-18 by explicit user decision.
@@ -481,3 +500,21 @@ checks passed, including row alignment at 1280, 390 and 320px in both themes.
 Settings footer now shows Close only while unchanged, or Save while modified.
 Reverting edits restores Close; successful Save closes the dialog. Build and four
 focused Chromium checks passed, including mutually exclusive footer actions.
+
+
+## Lean classification durability — 2026-09-25
+
+- New classification workflow v2 has one DBOS execution step. A controlled SQL trace
+  verified five application write transactions on normal success (previously eleven).
+- Immediate event-driven admission after review completion, startup reconciliation,
+  and a 30-second fallback preserve pending work without routine one-second scans.
+- Up to three JEV attempts, persisted across restart, with ownership fencing,
+  expiring leases, backoff/jitter and Retry-After. Durable responses resume validation;
+  completed results are reused. Old v1 execution and clinical-review retry policy stay intact.
+- 30 controlled classification tests passed. 112 affected integration/regression tests
+  passed, including six original clinical-review crash boundaries. Five classification
+  process kill/restart tests passed: after claim, response, checkpoint, final commit,
+  and repeated response-boundary crashes exhausting the three-attempt budget.
+- Documentation checks, generated API/TypeScript checks and whitespace checks passed.
+  Schema remains 8. No real-provider latency measurement, clinical assessment or public
+  deployment was performed. Existing rubric/feedback edits from concurrent work were preserved.

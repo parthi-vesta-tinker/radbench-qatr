@@ -7,8 +7,8 @@ const accessLabels = {local:'Local', public:'Public', api_key:'API key required'
 const featureLabels: {key:keyof Features; title:string; description:string}[] = [
   {key:'playground', title:'Playground', description:'Test reports'},
   {key:'skills', title:'Skills', description:'Edit instructions'},
-  {key:'classification', title:'CF classification', description:'Critical findings'},
-  {key:'classification_analysis', title:'Classification analysis', description:'Full screen'},
+  {key:'classification', title:'Classification Overview', description:'Critical findings'},
+  {key:'classification_analysis', title:'Classification Analysis', description:'Full screen'},
 ];
 
 export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppSettings)=>void}) {
@@ -27,15 +27,16 @@ export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppS
     api.settings().then(value=>{
       if(stopped)return;
       setSettings(value);
-      const {revision,run_mode,core_model,features}=value;
-      setDraft({revision,run_mode,core_model,features});
+      const {revision,run_mode,core_model,reasoning_effort,features}=value;
+      setDraft({revision,run_mode,core_model,reasoning_effort,features});
     }).catch(e=>{if(!stopped)setError(describeError(e));})
       .finally(()=>{if(!stopped)setLoading(false);});
     return()=>{stopped=true;};
   },[attempt]);
   function change(value:Partial<SettingsUpdate>){setDraft(old=>old?{...old,...value}:old);}
   const changed = !!(settings && draft && (draft.run_mode !== settings.run_mode ||
-    draft.core_model !== settings.core_model || featureLabels.some(({key}) => draft.features[key] !== settings.features[key])));
+    draft.core_model !== settings.core_model || draft.reasoning_effort !== settings.reasoning_effort ||
+    featureLabels.some(({key}) => draft.features[key] !== settings.features[key])));
   async function save(){
     if(!draft || busy || !settings?.can_edit || !changed)return;
     setBusy(true);setError('');
@@ -68,6 +69,12 @@ export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppS
               {settings.available_models.map(model=><option key={model} value={model}>{model}</option>)}
             </select>
           </label>
+          <label className="settings-field" htmlFor="settings-reasoning-effort">Reasoning effort
+            <select id="settings-reasoning-effort" aria-label="Reasoning effort" value={draft.reasoning_effort}
+              onChange={e=>change({reasoning_effort:e.target.value as SettingsUpdate['reasoning_effort']})}>
+              <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
+            </select>
+          </label>
           {!settings.openai_configured && <p className="meta">Live mode needs an OpenAI key configured on the server.</p>}
         </fieldset>
         <fieldset disabled={busy || !settings.can_edit}>
@@ -77,7 +84,7 @@ export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppS
             <input type="checkbox" role="switch" aria-label={feature.title} checked={Boolean(draft.features[feature.key])}
               onChange={e=>change({features:{...draft.features,[feature.key]:e.target.checked}})}/>
           </label>)}
-          {draft.features.classification && !settings.classification_configured && <p className="notice">Configure the JEV key on the server before enabling classification.</p>}
+          {draft.features.classification && !settings.classification_configured && <p className="notice">JEV classification will start when the Typesafe key is configured.</p>}
         </fieldset>
         <section className="settings-access" aria-label="Access"><span>Access</span><strong>{accessLabels[settings.access_mode]}</strong></section>
       </>}

@@ -1,5 +1,45 @@
 # Foundation implementation decisions and releases
 
+## Lean classification execution and bounded retries — 2026-09-25
+
+Explicit user approval scopes retryable uncertain outcomes to JEV classification.
+New snapshots use qa.finding.classify.v2 with one durable execution step; v1 stays
+registered for previously accepted configurations. The clinical review/Playground
+single-dispatch and MODEL_OUTCOME_UNKNOWN rules are unchanged. The normal path
+uses five application transactions instead of eleven; the existing attempt row now
+combines a durable three-attempt budget, expiring ownership token and response
+checkpoint. No schema-8 migration or terminal-trigger change is required.
+
+Completed reviews signal an event-driven admission/enqueue worker; startup and a
+30-second sweep recover missed signals or enqueue failures. Clinical-review outbox
+polling remains one second. Retry-After, backoff and jitter apply to HTTP 408/429,
+5xx and transport uncertainty. Invalid input/output and permanent HTTP failures
+remain terminal. This intentionally allows duplicate inference with bounded usage;
+it does not claim exactly-once billing. Phase records, saved results, request receipts,
+tenant/source-version boundaries and feedback remain intact.
+
+Controlled evidence: 30 classification tests; 112 affected integration/regression
+tests including six clinical-review process-recovery cases; five JEV kill/restart
+cases, including budget exhaustion across three crashes. Providers were mocked;
+no latency benchmark, clinical evaluation or public deployment is implied.
+
+
+## Classification and model settings — 2026-09-25
+
+Classification Overview defaults on and Classification Analysis defaults off. JEV
+availability follows the saved overview setting and server Typesafe credentials; no
+`QA_JEV_ENABLED` environment switch is required, and missing JEV credentials do not
+block other settings. Reasoning effort is a per-tenant setting beside the review model,
+defaulting to Medium. Local `.env.example` names use `DATA_DIR`, `MAX_OUTPUT_TOKENS`,
+`LOCAL_OPERATOR_NAME`, and `JEV_CALIBRATION_PATH`; `DATA_DIR` still honors legacy
+`QA_DATA_DIR` to keep existing local data in place.
+
+Verification: nine focused settings-default and local-launcher tests passed; the
+frontend production build, generated API/type checks, documentation checks and diff
+whitespace validation passed. The complete settings suite stalled during DBOS-backed
+TestClient startup; no provider calls were made.
+
+
 ## Per-comment feedback and replacement fencing — 2026-09-24
 
 Expose thumbs on each PACS comment and critical finding, retaining whole-review thumbs
@@ -18,7 +58,6 @@ Verification: 17 focused backend tests, 35 DOM tests and frontend build passed. 
 backend fixture attempted an invalid terminal-to-running transition; corrected it to use
 actual review replacement. Sandboxed test execution was inconclusive; successful runs used
 the local runtime outside the sandbox. No browser or clinical validation performed.
-
 
 
 ## Critical observation context for JEV — 2026-09-24
@@ -611,7 +650,8 @@ pending reviews first with Queued/Reviewing indicators. Corrected Current review
 selection while viewing saved reports. Draft reuse, persistence, and API behavior
 are unchanged. Production build, 34 DOM tests and four controlled browser tests passed.
 
-### 25 September 2026 — Optional full-screen classification analysis
+
+### 24 September 2026 — Optional full-screen classification analysis
 
 Added a default-off Classification analysis visibility setting, independent of CF
 classification processing. Both full-screen entry points are hidden until enabled;

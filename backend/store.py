@@ -76,11 +76,11 @@ def init():
         version = conn.execute("PRAGMA user_version").fetchone()[0]
         exists = conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchone()
         if version == 6:
-            raise RuntimeError("Schema 6 requires an explicit upgrade. Stop the application, finish pending work with the prior build, then run scripts/upgrade_review_storage.py --data-dir <QA_DATA_DIR>. Existing records are preserved.")
+            raise RuntimeError("Schema 6 requires an explicit upgrade. Stop the application, finish pending work with the prior build, then run scripts/upgrade_review_storage.py --data-dir <DATA_DIR>. Existing records are preserved.")
         if version == 7:
-            raise RuntimeError("Schema 7 requires an explicit backed-up upgrade. Stop the application, finish pending work, then run scripts/upgrade_classification_storage.py --data-dir <QA_DATA_DIR>.")
+            raise RuntimeError("Schema 7 requires an explicit backed-up upgrade. Stop the application, finish pending work, then run scripts/upgrade_classification_storage.py --data-dir <DATA_DIR>.")
         if version != SCHEMA_VERSION and (version != 0 or exists):
-            raise RuntimeError("Incompatible database schema. Choose a fresh QA_DATA_DIR for application and DBOS storage; existing records are preserved.")
+            raise RuntimeError("Incompatible database schema. Choose a fresh DATA_DIR for application and DBOS storage; existing records are preserved.")
         if version == 0:
             # executescript implicitly commits: execute complete statements individually
             # so bootstrap and its version marker remain one atomic transaction.
@@ -100,7 +100,7 @@ def init():
             conn.execute("INSERT INTO tenants(id,active_release) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET active_release=excluded.active_release", (tenant, profile(tenant, entry)[0]))
         for row in conn.execute("SELECT config FROM reviews WHERE json_extract(document,'$.execution_status') IN ('queued','running')"):
             if json.loads(row["config"]).get("workflow_version") != APP_VERSION:
-                raise RuntimeError("Pending workflow version mismatch. Use the matching application or a fresh QA_DATA_DIR.")
+                raise RuntimeError("Pending workflow version mismatch. Use the matching application or a fresh DATA_DIR.")
 
 
 def receipt(status, body, headers=None):

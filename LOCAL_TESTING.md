@@ -33,9 +33,9 @@ Run canned demo behavior without a provider call:
 npm run demo
 ```
 
-The launcher builds the frontend when it is missing or stale, starts the combined local app, and uses `RUN_MODE=demo`. It does not prompt for or call OpenAI. `.env.example` uses a fresh `.qa-data-local` folder so it does not reuse an older database. Set optional `QA_LOCAL_OPERATOR_NAME` there to display a local submitter in Review History.
+The launcher builds the frontend when it is missing or stale, starts the combined local app, and uses `RUN_MODE=demo`. It does not prompt for or call OpenAI. `.env.example` uses a fresh `.qa-data-local` folder so it does not reuse an older database. Set optional `LOCAL_OPERATOR_NAME` there to display a local submitter in Review History.
 
-Use schema-8 storage. To isolate a run, point `QA_DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Older or mismatched stores fail closed and are never automatically migrated or deleted.
+Use schema-8 storage. To isolate a run, point `DATA_DIR` at a new empty directory; the application and DBOS database inside it must move together. Existing `.env` files using `QA_DATA_DIR` continue to resolve the same data folder; rename it to `DATA_DIR` when convenient. Older or mismatched stores fail closed and are never automatically migrated or deleted.
 
 ## Live provider session
 
@@ -44,22 +44,21 @@ npm run live
 ```
 
 `npm run live` selects Live core review and requires `OPENAI_API_KEY` in the ignored
-`.env` or process environment. It does not prompt. JEV is optional and requires
-`TYPESAFE_API_KEY` when enabled. Access defaults to local; `ACCESS_MODE` controls it.
+`.env` or process environment. It does not prompt. Classification Overview is enabled
+by default and requires `TYPESAFE_API_KEY` to run. Access defaults to local; `ACCESS_MODE` controls it.
 Shell environment variables take precedence over `.env`.
 
-Top-right Settings controls run mode, core model and optional features. `RUN_MODE=demo|live`,
-`OPENAI_MODEL` and `QA_JEV_ENABLED` supply initial defaults. Saved per-tenant settings in
-`QA_DATA_DIR/settings/` take precedence. Explicit `--run-mode`, `--model` and `--jev`
+Top-right Settings controls run mode, core model, reasoning effort and user features.
+Reasoning effort defaults to Medium. `RUN_MODE=demo|live` and `OPENAI_MODEL` supply initial defaults. Saved per-tenant settings in
+`DATA_DIR/settings/` take precedence. Explicit `--run-mode` and `--model`
 launcher flags update saved choices at startup; subsequent UI changes apply to new runs
 without restarting. `CORE_REVIEW_MODELS` controls the model allowlist. Access mode is
 server-only, independent of run mode, and requires a restart to change.
 
-For optional JEV classification of completed reviews with critical comments in demo mode,
-run `uv run python scripts/run_local.py --run-mode demo --jev`. JEV uses the draft research rubric,
-keeps suggestions separate from report QA, and never calls the provider for a review
-without critical comments. See `evals/classification/README.md` for the local evaluation
-workflow. A key shared in chat should be rotated after testing.
+Classification runs for completed reviews with critical comments in either mode when the
+TypeSafe key is configured. It keeps suggestions separate from report QA and makes no
+provider call when a review has no critical comments. See `evals/classification/README.md`
+for the local evaluation workflow. A key shared in chat should be rotated after testing.
 
 `frontend/dist` is generated and never committed, so a pull that changes the UI leaves the previous
 bundle on disk. The launcher compares the build against the frontend sources and rebuilds when they
@@ -173,7 +172,7 @@ Current executed evidence and limitations are recorded in [prototype/IMPLEMENTAT
 ## Upgrade existing schema-6 storage
 
 Stop the application and finish pending live/playground work with the previous build.
-Then run (substitute the actual QA_DATA_DIR):
+Then run (substitute the actual DATA_DIR):
 
 ```sh
 .venv/bin/python scripts/upgrade_review_storage.py --data-dir .qa-data-foundation-v5
@@ -190,7 +189,7 @@ API clients must use QA-Version 2026-09-22 and the generated replacement/feedbac
 
 ### Recover history from another schema-7 folder
 
-If a changed `QA_DATA_DIR` makes older reviews disappear, first locate the previous
+If a changed `DATA_DIR` makes older reviews disappear, first locate the previous
 folder. Do not replace the current folder with the old one: that would hide newer work.
 For an explicit import of finished reviews, stop all applications using either folder,
 ensure neither store has queued/running reviews or Playground runs, then run:
@@ -208,5 +207,5 @@ Column order differences from an explicit schema-7 upgrade are supported.
 
 DBOS workflows, Studio drafts and Playground records are not imported. The source folder
 remains intact. Keep the backups and the original folder. Restart using the same destination
-`QA_DATA_DIR`; if the API key was entered interactively, enter it again at the launcher’s
+`DATA_DIR`; if the API key was entered interactively, enter it again at the launcher’s
 hidden prompt. Verify Review history, Load more reviews, and reopening an older review.

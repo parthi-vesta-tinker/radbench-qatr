@@ -24,7 +24,7 @@ class Server:
             | {
                 "RUN_MODE": "demo",
                 "ACCESS_MODE": "local",
-                "QA_DATA_DIR": str(root / "data"),
+                "DATA_DIR": str(root / "data"),
                 "QA_POLICY_PATH": "",
                 "QA_TEST_HOOK_DIR": str(root / "hooks"),
             }

@@ -16,6 +16,11 @@ review_queue = Queue("qa-reviews-f3-v2", concurrency=REVIEW_CONCURRENCY)
 @DBOS.step(name="qa.resource.state.f3.v2")
 def state(tenant, rid, **values):
     store.update(tenant, rid, **values)
+    if values.get("execution_status") == "completed":
+        # Wake the outbox worker without adding DBOS events to the review workflow.
+        # The durable completed source remains discoverable if this wakeup is lost.
+        from .classification_workflow import classification_ready
+        classification_ready.set()
 
 
 @DBOS.step(name="qa.validate.f3.v2")

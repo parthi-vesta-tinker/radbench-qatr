@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import pytest
 from fastapi.testclient import TestClient
 from backend import main, preferences, store, workflow
-from backend.access import Principal, SCOPES
+from backend.access import AccessError, Principal, SCOPES
 from backend.settings import runtime_config
 
 
@@ -16,7 +16,6 @@ def settings_client(monkeypatch, tmp_path):
     monkeypatch.setattr(store, 'DATA', tmp_path)
     monkeypatch.setenv('RUN_MODE', 'demo')
     monkeypatch.setenv('ACCESS_MODE', 'local')
-    monkeypatch.setenv('QA_JEV_ENABLED', 'false')
     monkeypatch.setenv('OPENAI_MODEL', 'gpt-6-astra')
     monkeypatch.setenv('CORE_REVIEW_MODELS', 'gpt-6-astra,controlled-second-model')
     monkeypatch.setenv('OPENAI_API_KEY', 'controlled-no-network')
@@ -29,7 +28,7 @@ def settings_client(monkeypatch, tmp_path):
 
 def update(client, **changes):
     value = client.get('/api/v1/settings').json()
-    data = {k:value[k] for k in ('revision','run_mode','core_model','features')}
+    data = {k:value[k] for k in ('revision','run_mode','core_model','reasoning_effort','features')}
     data.update(changes)
     return client.put('/api/v1/settings', json=data)
 
@@ -46,9 +45,27 @@ def test_save_persists_and_runtime_uses_new_model(settings_client):
     cfg=runtime_config('vesta')
     assert cfg['mode']=='openai' and cfg['run_mode']=='live'
     assert cfg['model']=='controlled-second-model'
+    assert cfg['model_reasoning_effort']=='medium'
     public=client.get('/api/v1/config').json()
     assert public['run_mode']=='live' and 'mode' not in public
     assert 'OPENAI_API_KEY' not in saved.text and 'controlled-no-network' not in saved.text
+
+
+def test_reasoning_effort_is_a_saved_user_setting_and_legacy_put_preserves_it(settings_client):
+    client = settings_client
+    saved = update(client, reasoning_effort='high')
+    assert saved.status_code == 200, saved.text
+    assert saved.json()['reasoning_effort'] == 'high'
+    assert runtime_config()['model_reasoning_effort'] == 'high'
+
+    # Older clients may omit the new field. Updating another preference must not
+    # silently reset the tenant's chosen reasoning effort.
+    public = saved.json()
+    body = {key: public[key] for key in ('revision', 'run_mode', 'core_model', 'features')}
+    body['features']['skills'] = False
+    response = client.put('/api/v1/settings', json=body)
+    assert response.status_code == 200, response.text
+    assert response.json()['reasoning_effort'] == 'high'
 
 
 def test_revision_conflict_and_retry(settings_client):
@@ -67,11 +84,14 @@ def test_models_credentials_and_access_are_validated(settings_client,monkeypatch
     monkeypatch.delenv('OPENAI_API_KEY')
     assert update(client,run_mode='live').status_code==422
     monkeypatch.delenv('TYPESAFE_API_KEY')
-    assert update(client,features={'playground':True,'skills':True,'classification':True}).status_code==422
+    enabled = update(client,features={'playground':True,'skills':True,'classification':True})
+    assert enabled.status_code == 200, enabled.text
+    assert client.get('/api/v1/classifications/config').json()['enabled']
+    assert not client.get('/api/v1/classifications/config').json()['ready']
     monkeypatch.setenv('ACCESS_MODE','public')
     assert not client.get('/api/v1/settings').json()['can_edit']
     assert update(client).status_code==403
-    assert preferences.read('vesta').revision==0
+    assert preferences.read('vesta').revision==1
 
 
 def test_feature_gates_preserve_receipts_and_accepted_configuration(settings_client):
@@ -161,3 +181,33 @@ def test_classification_analysis_defaults_off_for_existing_settings(settings_cli
     value['classification_analysis'] = False
     assert update(client, features=value).status_code == 200
     assert runtime_config()['jev_enabled_at_acceptance']
+
+
+def test_classification_overview_defaults_on_analysis_off(monkeypatch, tmp_path):
+    monkeypatch.setattr(store, 'DATA', tmp_path)
+    value = preferences.defaults('vesta')
+    assert value.features.classification is True
+    assert value.features.classification_analysis is False
+    assert preferences.Features().classification is True
+    assert preferences.Features().classification_analysis is False
+    saved = value.model_copy(update={'revision': 1, 'features': value.features.model_copy(update={'classification': False})})
+    path = preferences.location('vesta')
+    path.parent.mkdir(parents=True)
+    path.write_text(saved.model_dump_json(), encoding='utf-8')
+    assert preferences.read('vesta').features.classification is False
+
+
+def test_default_overview_without_key_does_not_block_settings_changes(monkeypatch, tmp_path):
+    monkeypatch.setattr(store, 'DATA', tmp_path)
+    monkeypatch.setenv('ACCESS_MODE', 'local')
+    monkeypatch.delenv('TYPESAFE_API_KEY')
+    actor = Principal('vesta', SCOPES)
+    initial = preferences.defaults('vesta')
+    assert initial.features.classification is True
+    changed = initial.model_copy(update={'features': initial.features.model_copy(update={'skills': False})})
+    saved = preferences.save(actor, changed)
+    assert saved.features.classification is True
+    assert saved.features.skills is False
+    assert preferences.read('vesta').features.classification is True
+    assert not saved.classification_configured
+    assert not preferences.public(actor).classification_configured

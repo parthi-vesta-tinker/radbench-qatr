@@ -5,7 +5,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 ROOT = Path(__file__).resolve().parents[1]
-DATA = Path(os.environ.get("QA_DATA_DIR", str(ROOT / ".qa-data-foundation-v5"))).resolve()
+# Keep existing local installations on their current database when they still use
+# the previous variable name. New configurations should use DATA_DIR.
+DATA = Path(
+    os.environ.get("DATA_DIR")
+    or os.environ.get("QA_DATA_DIR")
+    or str(ROOT / ".qa-data-foundation-v5")
+).resolve()
 APP_VERSION = "foundation-f3-0.15.0"
 
 
@@ -49,8 +55,8 @@ def runtime_config(tenant_id="vesta") -> dict:
         )
         for stage in snapshot["stages"]
     }
-    max_output = int(os.environ.get("QA_MAX_OUTPUT_TOKENS", "6000"))
-    effort = os.environ.get("QA_REASONING_EFFORT", "medium")
+    max_output = int(os.environ.get("MAX_OUTPUT_TOKENS", "6000"))
+    effort = preferences.reasoning_effort
     if not 1000 <= max_output <= 16000 or effort not in ("low", "medium", "high"):
         raise ValueError("Invalid model output limit or reasoning effort")
     config = dict(

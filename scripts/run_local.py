@@ -79,7 +79,6 @@ def main():
     parser.add_argument("--run-mode", choices=("demo", "live"), default=None)
     parser.add_argument("--model", default=None)
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument("--jev", action="store_true", help="Enable live JEV classification of critical review findings")
     parser.add_argument("--no-prompt", action="store_true", help="Require API keys from .env or the process environment")
     parser.add_argument("--access-mode", choices=("local", "public", "api_key"), help="Override ACCESS_MODE for this process")
     args = parser.parse_args()
@@ -90,15 +89,8 @@ def main():
     current = read('vesta')
     run_mode = args.run_mode or current.run_mode
     model = args.model or current.core_model
-    jev_enabled = args.jev or current.features.classification
+    jev_enabled = current.features.classification
     os.environ["RUN_MODE"] = run_mode
-    if args.jev:
-        os.environ["QA_JEV_ENABLED"] = "true"
-    if jev_enabled:
-        os.environ["QA_JEV_ENABLED"] = "true"
-        from backend.access import access_mode
-        if access_mode() == "public":
-            raise SystemExit("JEV classification requires ACCESS_MODE=local or api_key in .env.")
     if run_mode == "live":
         os.environ["OPENAI_MODEL"] = model
         if not os.environ.get("OPENAI_API_KEY"):
@@ -113,24 +105,15 @@ def main():
         label = f"Live OpenAI: {model}"
     else:
         label = "Demo mode: controlled local examples; no OpenAI request"
-    if jev_enabled:
-        if not os.environ.get("TYPESAFE_API_KEY"):
-            if args.no_prompt:
-                raise SystemExit("Set TYPESAFE_API_KEY in .env or the process environment before enabling JEV.")
-            key = getpass.getpass("TypeSafe JEV API key (hidden; used only for this process): ").strip()
-            if not key:
-                raise SystemExit("A TypeSafe key is required when --jev is enabled.")
-            os.environ["TYPESAFE_API_KEY"] = key
+    if jev_enabled and os.environ.get("TYPESAFE_API_KEY"):
         from backend.classification import configuration as jev_configuration
         jev_status = jev_configuration(accepted=True)[0]
-        if not jev_status.ready:
-            raise SystemExit(jev_status.reason or "JEV classification is unavailable.")
-        label += " + live JEV classification"
-    apply_launch_overrides(run_mode=args.run_mode, core_model=args.model,
-                           classification=True if args.jev else None)
+        if jev_status.ready:
+            label += " + live JEV classification"
+    apply_launch_overrides(run_mode=args.run_mode, core_model=args.model)
     print(f"Open http://127.0.0.1:{args.port} - {label}", flush=True)
     print(f"Component status: http://127.0.0.1:{args.port}/api/v1/status", flush=True)
-    print("Stop with Ctrl+C. Reports and feedback persist locally in QA_DATA_DIR.")
+    print("Stop with Ctrl+C. Reports and feedback persist locally in DATA_DIR.")
     import uvicorn
 
     uvicorn.run("backend.main:app", host="127.0.0.1", port=args.port, access_log=False)

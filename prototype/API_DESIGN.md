@@ -109,11 +109,14 @@ captured `jev_enabled_at_acceptance` flag for truthful asynchronous progress.
 `GET /api/v1/settings` returns tenant settings, revision, approved model choices, feature
 switches, access mode and credential-presence booleans (never credentials).
 `PUT /api/v1/settings` requires local access or `settings:write`, rejects stale revisions,
-and validates model allowlisting and required provider configuration. Public access is read-only.
-Settings persist in an atomic tenant sidecar under `QA_DATA_DIR/settings`; no schema migration.
+and validates model allowlisting and required OpenAI configuration for Live mode. Public access is read-only.
+Settings persist in an atomic tenant sidecar under `DATA_DIR/settings`; no schema migration.
 Config and Playground catalog expose `run_mode: demo|live`. Accepted execution snapshots
 retain their provider `mode` for recovery compatibility. Feature gates preserve idempotent
 receipt replay and existing accepted work. Skills gating affects editorial tools only.
+Reasoning effort (`low`, `medium`, or `high`) is saved per tenant and defaults to `medium`.
+JEV classification follows the Classification Overview setting and requires `TYPESAFE_API_KEY`
+at execution time; missing credentials do not block unrelated settings changes.
 
 
 ### Classification overview in history and analytics
@@ -127,7 +130,19 @@ observations. History pagination does not limit analytics. No additional classif
 fields, inputs or rubric details are projected into these surfaces. This is additive
 under the existing API version and reads already-persisted records without migration.
 
+
+Classification execution v2 preserves the existing endpoints, receipts and response
+shapes. New snapshots report workflow_version `qa.finding.classify.v2`; accepted v1
+snapshots remain v1. V2 transient failures can retry up to three times automatically;
+exhausted transport uncertainty is JEV_RETRIES_EXHAUSTED. Phase detail is committed
+at running/terminal boundaries rather than every local transition. See
+[DBOS_VALIDATION.md](DBOS_VALIDATION.md) for ownership, retry and recovery semantics.
+
+
 `Features.classification_analysis` is an additive boolean defaulting to false in
 settings and configuration. It controls full-screen analysis visibility only; it
 neither disables classification processing nor changes access to saved API results.
 Existing settings files without this field remain valid and default to hidden.
+Classification Overview defaults enabled for settings without a saved value. Without a
+Typesafe key it remains operationally unavailable; changing the setting does not require
+credentials, and unrelated settings remain saveable.

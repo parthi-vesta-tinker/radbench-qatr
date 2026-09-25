@@ -1,6 +1,7 @@
 """Tenant-scoped immutable JEV runs, dispatch claims, and reviewer feedback."""
 
 import json
+import time
 import re
 
 from . import store
@@ -89,7 +90,8 @@ def reserve(tenant, key, payload, config, actor=None, automatic=False):
         rid = store.new_id("jc")
         created = store.now()
         input_hash = store.digest(store.canonical(input_data))
-        workflow_id = f"qa:classification:v1:{tenant}:{rid}"
+        version = "v2" if config.get("workflow_version") == "qa.finding.classify.v2" else "v1"
+        workflow_id = f"qa:classification:{version}:{tenant}:{rid}"
         steps = [dict(step_id=step, status="pending", started_at=None, completed_at=None) for step in STEPS]
         conn.execute("""INSERT INTO finding_classifications
             (tenant_id,id,review_id,input_version,observation_id,input_hash,input,config,workflow_id,
@@ -171,7 +173,7 @@ def overviews(conn, tenant, *, review_ids=None, period_start=None, period_end=No
     return grouped
 
 
-def pending_automatic():
+def pending_automatic(tenant=None, review_id=None):
     """Only current critical findings from reviews admitted with JEV enabled."""
     with store.db() as conn:
         return [(row["tenant_id"], row["review_id"], row["input_version"], row["id"])
@@ -182,7 +184,8 @@ def pending_automatic():
                       AND json_extract(r.provenance,'$.jev_enabled_at_acceptance')=1
                       AND NOT EXISTS (SELECT 1 FROM finding_classifications c WHERE c.tenant_id=o.tenant_id
                         AND c.review_id=o.review_id AND c.input_version=r.input_version AND c.observation_id=o.id)
-                    ORDER BY r.created_at,o.position LIMIT 100""")]
+                    AND (? IS NULL OR o.tenant_id=?) AND (? IS NULL OR o.review_id=?)
+                    ORDER BY r.created_at,o.position LIMIT 100""", (tenant, tenant, review_id, review_id))]
 
 
 def job(tenant, rid):
@@ -191,7 +194,7 @@ def job(tenant, rid):
         return (json.loads(row["input"]), json.loads(row["config"])) if row else None
 
 
-def update(tenant, rid, *, step=None, step_status=None, status=None, result=None, error=None):
+def update(tenant, rid, *, step=None, step_status=None, status=None, result=None, error=None, phases=None):
     with store.db() as conn:
         conn.execute("BEGIN IMMEDIATE")
         row = conn.execute("SELECT execution_status,steps,result FROM finding_classifications WHERE tenant_id=? AND id=?",
@@ -206,7 +209,7 @@ def update(tenant, rid, *, step=None, step_status=None, status=None, result=None
             return
         if status == "completed" and result is None:
             raise ValueError("Completion needs validated result")
-        steps = json.loads(row["steps"])
+        steps = phases if phases is not None else json.loads(row["steps"])
         if step:
             entry = next(item for item in steps if item["step_id"] == step)
             entry["status"] = step_status
@@ -298,3 +301,51 @@ def feedback_history(tenant, rid):
         rows = conn.execute("SELECT document FROM classification_feedback WHERE tenant_id=? AND classification_id=? ORDER BY created_at,id",
                             (tenant, rid)).fetchall()
         return [json.loads(row["document"]) for row in rows]
+
+
+# Schema-8 claim_id is opaque internal text. V2 stores its bounded retry counter
+# and lease here; legacy v1 claims retain their existing representation and policy.
+MAX_JEV_ATTEMPTS = 3
+ATTEMPT_LEASE_SECONDS = 60
+
+
+def acquire_retry_attempt(tenant, rid, previous):
+    """CAS ownership and durable budget before dispatch. Never steal a live lease."""
+    with store.db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        row = conn.execute("SELECT * FROM jev_classification_attempts WHERE tenant_id=? AND classification_id=?",
+                           (tenant, rid)).fetchone()
+        row = dict(row) if row else None
+        if row != previous:
+            return None
+        metadata = json.loads(row["claim_id"]) if row else {"version": 2, "count": 0}
+        if metadata.get("version") != 2:
+            raise ValueError("Legacy classification claim cannot use retry execution")
+        if row and (row["outcome"] == "response" or metadata.get("not_before", 0) > time.time()):
+            return None
+        if metadata["count"] >= MAX_JEV_ATTEMPTS:
+            return None
+        token = store.canonical(dict(version=2, count=metadata["count"] + 1,
+                                     not_before=time.time() + ATTEMPT_LEASE_SECONDS,
+                                     token=store.new_id("ja")))
+        conn.execute("""INSERT INTO jev_classification_attempts
+            (tenant_id,classification_id,claim_id,outcome) VALUES(?,?,?,'claimed')
+            ON CONFLICT(tenant_id,classification_id) DO UPDATE SET
+            claim_id=excluded.claim_id,outcome='claimed',http_status=NULL,response_body=NULL,duration_ms=NULL""",
+            (tenant, rid, token))
+        return token
+
+
+def checkpoint_retry_attempt(tenant, rid, token, *, status=None, body=None, duration_ms=None,
+                             retry_at=0, transport_error=False, retry_allowed=True, retry_pending=False):
+    metadata = json.loads(token)
+    metadata["not_before"] = retry_at
+    metadata["retry_allowed"] = retry_allowed
+    outcome = "claimed" if retry_pending else "unknown" if transport_error else "response" if status and 200 <= status < 300 and body is not None else "known_failure"
+    with store.db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        if conn.execute("""UPDATE jev_classification_attempts
+            SET claim_id=?,outcome=?,http_status=?,response_body=?,duration_ms=?
+            WHERE tenant_id=? AND classification_id=? AND claim_id=? AND outcome='claimed'""",
+            (store.canonical(metadata), outcome, status, body, duration_ms, tenant, rid, token)).rowcount != 1:
+            raise RuntimeError("Classification attempt ownership changed")

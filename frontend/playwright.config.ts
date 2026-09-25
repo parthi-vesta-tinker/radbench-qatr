@@ -24,10 +24,9 @@ export default defineConfig({
       RUN_MODE: "demo",
       OPENAI_API_KEY: "",
       TYPESAFE_API_KEY: "",
-      QA_JEV_ENABLED: "false",
       CORE_REVIEW_MODELS: "gpt-6-astra,controlled-second-model",
       ACCESS_MODE: "local",
-      QA_DATA_DIR:
+      DATA_DIR:
         process.env.QA_BROWSER_DATA_DIR || ".qa-browser-test-data-v0.5",
       QA_POLICY_PATH: "",
     },

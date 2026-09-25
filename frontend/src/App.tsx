@@ -32,7 +32,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [savedSettings, setSavedSettings] = useState<AppSettings | null>(null);
   const [settingsRevision, setSettingsRevision] = useState(0);
-  const features = {playground:true, skills:true, classification:false, classification_analysis:false, ...qa.config?.features, ...savedSettings?.features};
+  const features = {playground:true, skills:true, classification:true, classification_analysis:false, ...qa.config?.features, ...savedSettings?.features};
   function settingsSaved(value: AppSettings) {
     setSavedSettings(value); setSettingsRevision(n => n + 1); qa.retryConfiguration();
     if ((view === 'skills' && !value.features.skills) || (view === 'playground' && !value.features.playground) || (view === 'classification' && (!value.features.classification || !value.features.classification_analysis))) setView('current');

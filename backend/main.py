@@ -15,7 +15,7 @@ from dbos import DBOS
 from agents import set_tracing_disabled
 from . import store, presentation, reporting, knowledge, playground, classification_store
 from .classification import ClassificationProblem, configuration as jev_configuration, snapshot as jev_snapshot
-from .classification_workflow import dispatch as dispatch_classification
+from .classification_workflow import dispatch as dispatch_classification, dispatch_automatic, classification_ready
 from .access import AccessError, Principal, require, validate_access_config
 from .contracts import (
     ReviewProblem,
@@ -56,7 +56,7 @@ configure_logging()
 log = logging.getLogger("qa.api")
 
 
-def reconcile():
+def reconcile(*, include_classifications=True):
     for tenant, rid in store.pending():
         try:
             doc = store.get(tenant, rid)
@@ -91,49 +91,52 @@ def reconcile():
                 )
         except Exception:
             log.error("outbox.reconcile_failed tenant=%s review=%s", tenant, rid)
+    if include_classifications:
+        reconcile_classifications()
+
+
+def reconcile_classifications():
     for tenant, rid, workflow in classification_store.pending():
         try:
             status = DBOS.get_workflow_status(workflow)
             if status is None:
                 dispatch_classification(tenant, rid)
             elif status.status in ("ERROR", "CANCELLED", "MAX_RECOVERY_ATTEMPTS_EXCEEDED"):
+                v2 = classification_store.job(tenant, rid)[1].get("workflow_version") == "qa.finding.classify.v2"
                 claim = classification_store.attempt(tenant, rid)
-                if claim and claim["outcome"] == "claimed":
+                if not v2 and claim and claim["outcome"] == "claimed":
                     classification_store.mark_unknown(tenant, rid)
-                unknown = claim and claim["outcome"] in ("claimed", "unknown")
+                unknown = not v2 and claim and claim["outcome"] in ("claimed", "unknown")
                 current = classification_store.get(tenant, rid)
                 active = next((s["step_id"] for s in current["steps"] if s["status"] == "running"),
                               "input_validation")
                 classification_store.update(
                     tenant, rid, step=active, step_status="failed", status="failed",
-                    error=dict(code="MODEL_OUTCOME_UNKNOWN" if unknown else "EXECUTION_STOPPED",
-                               message="Classification stopped before completion. No automatic provider retry will occur.",
+                    error=dict(code="JEV_EXECUTION_STOPPED" if v2 else "MODEL_OUTCOME_UNKNOWN" if unknown else "EXECUTION_STOPPED",
+                               message="Classification stopped before completion. Start a new request to try again.",
                                retryable=False),
                 )
         except Exception:
             log.error("classification.reconcile_failed tenant=%s classification=%s", tenant, rid)
-    for tenant, review_id, input_version, observation_id in classification_store.pending_automatic():
-        try:
-            accepted = store.job(tenant, review_id)[1]
-            cfg = accepted.get('jev_config_at_acceptance') or jev_snapshot(tenant, accepted=True)
-            payload = ClassificationInput(review_id=review_id, input_version=input_version,
-                                          observation_id=observation_id)
-            saved, created = classification_store.reserve(tenant, "", payload, cfg, automatic=True)
-            if created:
-                dispatch_classification(tenant, saved["body"]["id"])
-        except ClassificationProblem:
-            continue  # A concurrent replacement made this candidate stale.
-        except Exception:
-            log.error("classification.auto_dispatch_deferred tenant=%s review=%s", tenant, review_id)
+    dispatch_automatic()
 
 
 async def reconciliation_loop():
+    import time
+    last_classification_scan = time.monotonic()
     while True:
-        await asyncio.sleep(1)
         try:
-            await asyncio.to_thread(reconcile)
+            signaled = await asyncio.to_thread(classification_ready.wait, 1)
+            if signaled:
+                classification_ready.clear()
+                await asyncio.to_thread(dispatch_automatic)
+            fallback_due = time.monotonic() - last_classification_scan >= 30
+            await asyncio.to_thread(reconcile, include_classifications=fallback_due)
+            if fallback_due:
+                last_classification_scan = time.monotonic()
         except Exception:
             log.error("outbox.scan_failed; reconciliation will retry")
+            await asyncio.sleep(1)
 
 
 @asynccontextmanager

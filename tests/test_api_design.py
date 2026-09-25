@@ -386,7 +386,7 @@ def test_old_database_is_rejected_without_changing_rows(tmp_path, monkeypatch, v
     conn.execute(f"PRAGMA user_version={version}")
     conn.commit()
     conn.close()
-    with pytest.raises(RuntimeError, match="fresh QA_DATA_DIR"):
+    with pytest.raises(RuntimeError, match="fresh DATA_DIR"):
         store.init()
     conn = sqlite3.connect(tmp_path / "reviews.sqlite")
     assert conn.execute("SELECT * FROM old_records").fetchall() == [("original", "unchanged")]

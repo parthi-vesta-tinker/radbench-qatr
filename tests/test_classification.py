@@ -7,7 +7,8 @@ import uuid
 import httpx
 import pytest
 
-from backend import jev, store, classification_store
+from backend import jev, store, classification_store, preferences
+from backend.access import Principal, SCOPES
 from backend.classification import ClassificationProblem, snapshot
 from backend.contracts import ClassificationInput
 from backend.reviewer import SAMPLES
@@ -17,10 +18,19 @@ from backend.reviewer import SAMPLES
 def workspace(client, monkeypatch, tmp_path):
     monkeypatch.setattr(store, "DATA", tmp_path / "data")
     store.init()
-    monkeypatch.setenv("QA_JEV_ENABLED", "false")
     monkeypatch.setenv("TYPESAFE_API_KEY", "controlled-test-key")
-    monkeypatch.setenv("QA_JEV_MODEL", "jev-1.13.0")
+    current = preferences.defaults("vesta")
+    disabled = current.model_copy(update={"features": current.features.model_copy(update={"classification": False})})
+    path = preferences.location("vesta")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(disabled.model_dump_json(), encoding="utf-8")
     return client
+
+
+def enable_classification():
+    current = preferences.read("vesta")
+    enabled = current.model_copy(update={"features": current.features.model_copy(update={"classification": True})})
+    preferences.save(Principal("vesta", SCOPES), enabled, server=True)
 
 
 def responses(monkeypatch, outcome="valid"):
@@ -84,7 +94,7 @@ def settle(client, rid):
 def test_critical_review_uses_one_five_question_jev_request(workspace, monkeypatch):
     calls = responses(monkeypatch)
     source = review(workspace)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     accepted = classify(workspace, source)
     assert accepted.status_code == 202, accepted.text
     run = settle(workspace, accepted.json()["id"])
@@ -105,7 +115,7 @@ def test_critical_review_uses_one_five_question_jev_request(workspace, monkeypat
 
 def test_noncritical_review_never_calls_jev(workspace, monkeypatch):
     calls = responses(monkeypatch)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     source = review(workspace, "clean")
     payload = {"review_id": source["id"], "input_version": source["input_version"], "observation_id": "obs-1"}
     denied = workspace.post("/api/v1/classifications", json=payload,
@@ -117,7 +127,7 @@ def test_noncritical_review_never_calls_jev(workspace, monkeypatch):
 def test_urgent_suggestion_requires_visible_review_cue(workspace, monkeypatch):
     responses(monkeypatch, "urgent")
     source = review(workspace)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     run = settle(workspace, classify(workspace, source).json()["id"])
     assert run["execution_status"] == "completed"
     urgency = run["result"]["fields"]["urgency"]
@@ -128,7 +138,7 @@ def test_urgent_suggestion_requires_visible_review_cue(workspace, monkeypatch):
 def test_receipt_replay_and_feedback_are_immutable(workspace, monkeypatch):
     responses(monkeypatch)
     source = review(workspace)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     key = str(uuid.uuid4())
     first = classify(workspace, source, key)
     assert first.status_code == 202, first.text
@@ -152,22 +162,22 @@ def test_receipt_replay_and_feedback_are_immutable(workspace, monkeypatch):
 
 
 @pytest.mark.parametrize("outcome,code", [("bad_distribution", "JEV_INVALID_OUTPUT"),
-                                          ("timeout", "MODEL_OUTCOME_UNKNOWN"),
+                                          ("timeout", "JEV_RETRIES_EXHAUSTED"),
                                           ("busy", "JEV_BUSY")])
 def test_provider_failures_never_become_empty_success(workspace, monkeypatch, outcome, code):
     calls = responses(monkeypatch, outcome)
     source = review(workspace)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     accepted = classify(workspace, source)
     run = settle(workspace, accepted.json()["id"])
     assert run["execution_status"] == "failed", run
     assert run["result"] is None and run["error"]["code"] == code
-    assert len(calls) == 1
+    assert len(calls) == (1 if outcome == "bad_distribution" else 3)
 
 
 def test_automatic_classification_only_after_critical_review(workspace, monkeypatch):
     calls = responses(monkeypatch)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     source = review(workspace)
     found = []
     for _ in range(200):
@@ -183,7 +193,7 @@ def test_automatic_classification_only_after_critical_review(workspace, monkeypa
 def test_claimed_attempt_is_unknown_on_recovery_without_a_second_request(workspace, monkeypatch):
     calls = responses(monkeypatch)
     source = review(workspace)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     payload = ClassificationInput(review_id=source["id"], input_version=source["input_version"],
                                   observation_id=source["result"]["critical_comments"][0]["observation_id"])
     accepted, created = classification_store.reserve("vesta", str(uuid.uuid4()), payload, snapshot())
@@ -202,7 +212,7 @@ def test_claimed_attempt_is_unknown_on_recovery_without_a_second_request(workspa
 def test_replaced_review_does_not_attach_old_classification(workspace, monkeypatch):
     responses(monkeypatch)
     source = review(workspace)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     run = settle(workspace, classify(workspace, source).json()["id"])
     clean = next(item["report_text"] for item in SAMPLES if item["id"] == "clean")
     replacement = workspace.put(f'/api/v1/reviews/{source["id"]}',
@@ -218,7 +228,7 @@ def test_replaced_review_does_not_attach_old_classification(workspace, monkeypat
 def test_analysis_uses_saved_request_and_excludes_private_metadata(workspace, monkeypatch):
     calls = responses(monkeypatch)
     source = review(workspace)
-    monkeypatch.setenv("QA_JEV_ENABLED", "true")
+    enable_classification()
     run = settle(workspace, classify(workspace, source).json()["id"])
     # Inspection remains possible without current provider readiness or current rubric.
     monkeypatch.delenv("TYPESAFE_API_KEY")

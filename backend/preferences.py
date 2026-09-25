@@ -19,7 +19,7 @@ class Features(BaseModel):
     model_config = ConfigDict(extra='forbid')
     playground: bool = True
     skills: bool = True
-    classification: bool = False
+    classification: bool = True
     classification_analysis: bool = False
 
 
@@ -28,10 +28,12 @@ class SettingsUpdate(BaseModel):
     revision: int = Field(ge=0)
     run_mode: Literal['demo', 'live']
     core_model: str = Field(min_length=1, max_length=120)
+    reasoning_effort: Literal['low', 'medium', 'high'] = 'medium'
     features: Features
 
 
 class AppSettings(SettingsUpdate):
+    reasoning_effort: Literal['low', 'medium', 'high']
     access_mode: Literal['local', 'public', 'api_key']
     available_models: list[str]
     can_edit: bool
@@ -53,7 +55,7 @@ def defaults(tenant):
         raise ValueError('RUN_MODE must be demo or live.')
     return SettingsUpdate(revision=0, run_mode=mode,
                           core_model=entry.get('model', os.environ.get('OPENAI_MODEL', '').strip()) or 'gpt-6-astra',
-                          features=Features(classification=os.environ.get('QA_JEV_ENABLED', 'false').lower() == 'true'))
+                          reasoning_effort='medium', features=Features())
 
 
 def allowed_models(tenant):
@@ -126,9 +128,10 @@ def save(principal, payload, *, server=False):
             raise AccessError(422, 'MODEL_NOT_ALLOWED', 'Select a server-approved core review model.')
         if payload.run_mode == 'live' and not os.environ.get('OPENAI_API_KEY'):
             raise AccessError(422, 'MODEL_NOT_CONFIGURED', 'Configure OPENAI_API_KEY on the server before selecting Live.')
-        if payload.features.classification and not os.environ.get('TYPESAFE_API_KEY'):
-            raise AccessError(422, 'JEV_NOT_CONFIGURED', 'Configure TYPESAFE_API_KEY on the server before enabling classification.')
-        saved = payload.model_copy(update={'revision': current.revision + 1})
+        updates = {'revision': current.revision + 1}
+        if 'reasoning_effort' not in payload.model_fields_set:
+            updates['reasoning_effort'] = current.reasoning_effort
+        saved = payload.model_copy(update=updates)
         descriptor, name = tempfile.mkstemp(dir=path.parent, prefix='.settings-', suffix='.tmp')
         try:
             with os.fdopen(descriptor, 'w', encoding='utf-8') as stream:

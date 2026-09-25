@@ -4204,6 +4204,15 @@
             "minLength": 1,
             "title": "Core Model"
           },
+          "reasoning_effort": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Reasoning Effort"
+          },
           "features": {
             "$ref": "#/components/schemas/Features"
           },
@@ -4242,6 +4251,7 @@
           "revision",
           "run_mode",
           "core_model",
+          "reasoning_effort",
           "features",
           "access_mode",
           "available_models",
@@ -5551,7 +5561,7 @@
           "classification": {
             "type": "boolean",
             "title": "Classification",
-            "default": false
+            "default": true
           },
           "classification_analysis": {
             "type": "boolean",
@@ -6908,6 +6918,16 @@
             "maxLength": 120,
             "minLength": 1,
             "title": "Core Model"
+          },
+          "reasoning_effort": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Reasoning Effort",
+            "default": "medium"
           },
           "features": {
             "$ref": "#/components/schemas/Features"

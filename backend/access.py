@@ -107,7 +107,7 @@ def principal(
             raise AccessError(
                 401, "AUTH_MODE_MISMATCH", "Bearer credentials require api_key mode."
             )
-        actor_name = os.environ.get("QA_LOCAL_OPERATOR_NAME", "").strip() or None
+        actor_name = os.environ.get("LOCAL_OPERATOR_NAME", "").strip() or None
         p = Principal("vesta", SCOPES, actor_name)
     else:
         if not credentials or credentials.scheme.lower() != "bearer":

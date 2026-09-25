@@ -12,8 +12,10 @@ test('settings save model and feature choices, persist across reload, and enforc
   await expect(panel.getByRole('button',{name:'Save',exact:true})).toHaveCount(0);
   await expect(panel.getByRole('button',{name:'Close',exact:true})).toBeVisible();
   await expect(panel.getByLabel('Run mode',{exact:true})).toHaveValue('demo');
+  await expect(panel.getByLabel('Reasoning effort',{exact:true})).toHaveValue('medium');
   await expect(panel.getByText('Local',{exact:true})).toBeVisible();
   await panel.getByLabel('Clinical review model',{exact:true}).selectOption('controlled-second-model');
+  await panel.getByLabel('Reasoning effort',{exact:true}).selectOption('high');
   await expect(panel.getByRole('button',{name:'Save',exact:true})).toBeVisible();
   await expect(panel.getByRole('button',{name:'Close',exact:true})).toHaveCount(0);
   await panel.getByLabel('Clinical review model',{exact:true}).selectOption(initial.core_model);
@@ -36,6 +38,7 @@ test('settings save model and feature choices, persist across reload, and enforc
   await expect(page.getByRole('button',{name:'Playground',exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:'Settings',exact:true}).click();
   await expect(panel.getByLabel('Clinical review model',{exact:true})).toHaveValue('controlled-second-model');
+  await expect(panel.getByLabel('Reasoning effort',{exact:true})).toHaveValue('high');
   for(const width of [1536,390,320]){
    await page.setViewportSize({width,height:900});
    const box=(await panel.boundingBox())!;expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(width);
@@ -51,7 +54,7 @@ test('settings save model and feature choices, persist across reload, and enforc
   expect(errors).toEqual([]);
  }finally {
   const current=await (await request.get('/api/v1/settings')).json();
-  const result=await request.put('/api/v1/settings',{data:{revision:current.revision,run_mode:initial.run_mode,core_model:initial.core_model,features:initial.features}});
+  const result=await request.put('/api/v1/settings',{data:{revision:current.revision,run_mode:initial.run_mode,core_model:initial.core_model,reasoning_effort:initial.reasoning_effort,features:initial.features}});
   expect(result.status()).toBe(200);
  }
 });
@@ -90,14 +93,14 @@ test('full-screen Classification is opt-in and hiding it returns to the report',
  await page.getByRole('button',{name:'Settings',exact:true}).click();
  let panel=page.getByRole('dialog',{name:'Settings',exact:true});
  await expect(panel.getByRole('switch',{name:'Classification Overview',exact:true})).toBeChecked();
- await expect(panel.getByRole('switch',{name:'Classification analysis',exact:true})).not.toBeChecked();
+ await expect(panel.getByRole('switch',{name:'Classification Analysis',exact:true})).not.toBeChecked();
  await page.screenshot({path:'/tmp/qa-analysis-setting-default.png'});
- await panel.getByRole('switch',{name:'Classification analysis',exact:true}).check();
+ await panel.getByRole('switch',{name:'Classification Analysis',exact:true}).check();
  await panel.getByRole('button',{name:'Save',exact:true}).click();
  await tool.click();await expect(page.locator('.classification-pane')).toBeVisible();
  await page.getByRole('button',{name:'Settings',exact:true}).click();
  panel=page.getByRole('dialog',{name:'Settings',exact:true});
- await panel.getByRole('switch',{name:'Classification analysis',exact:true}).uncheck();
+ await panel.getByRole('switch',{name:'Classification Analysis',exact:true}).uncheck();
  await panel.getByRole('button',{name:'Save',exact:true}).click();
  await expect(tool).toHaveCount(0);
  await expect(page.locator('.classification-pane')).toHaveCount(0);

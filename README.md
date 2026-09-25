@@ -18,21 +18,22 @@ If `.env` does not exist, create it from the example (`cp .env.example .env` on 
 
 | Mode | Command | Provider use |
 | --- | --- | --- |
-| Demo | `npm run demo` | Controlled local examples; no OpenAI request. Turn off JEV in Settings for provider-free demo use. |
+| Demo | `npm run demo` | Controlled local examples; no OpenAI request. Turn off Classification Overview in Settings for provider-free demo use. |
 | Live | `npm run live` | Real OpenAI report review. JEV classifies a finding only after the review produces a critical comment. |
 
 For **live mode**, configure `OPENAI_API_KEY` in the ignored repository-root `.env`.
-Optional JEV classification requires `TYPESAFE_API_KEY`; enable it in Settings for either Demo or Live.
+Classification Overview is enabled by default; JEV classification runs when `TYPESAFE_API_KEY`
+is configured. It can be turned off in Settings for either Demo or Live.
 `npm run live` selects Live without prompting. Access defaults to local and follows `ACCESS_MODE`.
 Existing shell environment variables take precedence over `.env`. Never commit `.env`.
 
-Open **Settings** in the top right to choose Demo/Live, the core review model, and Playground,
-Skills and JEV classification. Model choices come from the server's `CORE_REVIEW_MODELS`
+Open **Settings** in the top right to choose Demo/Live, the core review model, reasoning effort,
+and Playground, Skills, Classification Overview and Classification Analysis. Model choices come from the server's `CORE_REVIEW_MODELS`
 comma-separated list (default: `OPENAI_MODEL`). Settings persist per tenant and apply to new runs.
 Turning off Skills hides its editing tools; published review instructions remain active.
 Access is configured separately on the server with `ACCESS_MODE=local|public|api_key`.
 
-Both commands build the browser app when needed and print its address, normally `http://127.0.0.1:8000`. If that port is occupied, use `npm run live -- --port 8900` (or `npm run demo -- --port 8900`); npm passes the argument after the first `--` to the launcher. Stop with Ctrl+C. You can set `QA_LOCAL_OPERATOR_NAME` in `.env` to show a local submitter in Review History. See [local testing and storage upgrade instructions](LOCAL_TESTING.md) for more detail.
+Both commands build the browser app when needed and print its address, normally `http://127.0.0.1:8000`. If that port is occupied, use `npm run live -- --port 8900` (or `npm run demo -- --port 8900`); npm passes the argument after the first `--` to the launcher. Stop with Ctrl+C. You can set `LOCAL_OPERATOR_NAME` in `.env` to show a local submitter in Review History. Select the model and reasoning effort in Settings. See [local testing and storage upgrade instructions](LOCAL_TESTING.md) for more detail.
 
 ## Current architecture
 

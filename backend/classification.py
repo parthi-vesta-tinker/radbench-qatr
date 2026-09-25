@@ -37,9 +37,7 @@ def configuration(tenant_id="vesta", *, accepted=False):
     content, rubric_hash = rubric()
     from .preferences import read
     enabled = accepted or read(tenant_id).features.classification
-    model = os.environ.get("QA_JEV_MODEL", MODEL).strip()
-    if model != MODEL:
-        raise ValueError(f"QA_JEV_MODEL must be pinned to {MODEL}")
+    model = MODEL
     from .access import access_mode
     reason = None
     if not enabled:
@@ -48,7 +46,7 @@ def configuration(tenant_id="vesta", *, accepted=False):
         reason = "JEV classification requires local or API-key access."
     elif not os.environ.get("TYPESAFE_API_KEY"):
         reason = "Configure TYPESAFE_API_KEY to classify findings."
-    calibration_path = os.environ.get("QA_JEV_CALIBRATION_PATH", "").strip()
+    calibration_path = os.environ.get("JEV_CALIBRATION_PATH", "").strip()
     calibration = None
     if calibration_path:
         from .classification_calibration import load_artifact
@@ -67,7 +65,7 @@ def snapshot(tenant_id="vesta", *, accepted=False):
     if not status.ready:
         raise ClassificationProblem("JEV_NOT_CONFIGURED", status.reason or "JEV is unavailable.")
     return dict(model=status.model, rubric=content, rubric_hash=status.rubric_hash,
-                calibration=calibration, workflow_version="qa.finding.classify.v1")
+                calibration=calibration, workflow_version="qa.finding.classify.v2")
 
 
 def request_body(input_data: dict, config: dict):

@@ -223,7 +223,6 @@ def test_classification_counts_multiple_findings_without_page_or_readiness_depen
     for _ in range(21):
         seed()
     monkeypatch.delenv('TYPESAFE_API_KEY', raising=False)
-    monkeypatch.setenv('QA_JEV_ENABLED','false')
     history = reporting_db.get('/api/v1/reviews', params={'q':rid}).json()['items'][0]
     assert history['classification_overview'] == [
         {'finding_group':'thoracic','communication_priority':'cannot_determine'},
