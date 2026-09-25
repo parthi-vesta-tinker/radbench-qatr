@@ -2,7 +2,7 @@ import { SettingsPanel } from "./SettingsPanel";
 import type { AppSettings } from "./types";
 import { ReviewJourney } from "./ReviewJourney";
 import { useEffect, useState } from "react";
-import { FileText, History, Plus, MessageSquare, ChartNoAxesColumn, BookOpen, FlaskConical, Moon, Sun, X, Share2, Settings, RefreshCw, Tags } from "lucide-react";
+import { FileText, History, Plus, MessageSquare, ChartNoAxesColumn, BookOpen, FlaskConical, Moon, Sun, X, Share2, Settings, RefreshCw, Tags, LoaderCircle } from "lucide-react";
 import { useReview } from "./useReview";
 import { ReviewOutput } from "./ReviewOutput";
 import { SystemStatus } from "./SystemStatus";
@@ -53,8 +53,11 @@ export default function App() {
   const open = (id: string) => { qa.openReview(id); setView("current"); panels.close(); };
   const showCurrent = () => { if (qa.drafts[0]) qa.openReview(qa.drafts[0].id); setView("current"); panels.close(); };
   const create = () => { qa.newReview(); setView("current"); panels.close(); };
-  const active = qa.rows.filter(r => ["queued", "running"].includes(r.execution_status)).slice(0, 20);
-  const recent = qa.rows.filter(r => !["queued", "running"].includes(r.execution_status)).slice(0, 20);
+  const pending = (status: string) => ["queued", "running"].includes(status);
+  const newestFirst = (a: typeof qa.rows[number], b: typeof qa.rows[number]) => b.created_at.localeCompare(a.created_at) || b.id.localeCompare(a.id);
+  const recent = [...qa.rows.filter(r => pending(r.execution_status)).sort(newestFirst),
+    ...qa.rows.filter(r => !pending(r.execution_status)).sort(newestFirst).slice(0, 20)];
+  const currentSelected = view === "current" && Boolean(qa.draft);
   const [pasted, setPasted] = useState(false);
   const [historyRefresh, setHistoryRefresh] = useState(0);
   const refreshWorkspace = () => { qa.refresh(); qa.retryConfiguration(); setSavedSettings(null); setHistoryRefresh(value => value + 1); };
@@ -87,11 +90,12 @@ export default function App() {
             {panels.size === "mobile" ? <X size={18}/> : <PanelIcon side="left" collapsed={reportsCollapsed}/>}
           </TooltipButton>
         </div>
-        {reportsCollapsed && <TooltipButton className={view === "current" ? "selected rail-button" : "rail-button"} label="Current review" side="right" onClick={showCurrent}><FileText size={18}/></TooltipButton>}
+        <div className="reports-actions"><TooltipButton className={reportsCollapsed ? "rail-button" : "new-review-button"} side={panels.size === "mobile" ? "bottom" : "right"} label="New review" onClick={create}><Plus size={18}/>{!reportsCollapsed && <span>New review</span>}</TooltipButton></div>
+        {reportsCollapsed && <TooltipButton className={currentSelected ? "selected rail-button" : "rail-button"} label="Current review" side="right" onClick={showCurrent}><FileText size={18}/></TooltipButton>}
         <div id="reports-content" className="reports-content" hidden={reportsCollapsed}>
         <nav className="scope-nav" aria-label="Report reviews">
-          <button className={view === "current" ? "selected" : ""} onClick={showCurrent}><FileText size={17}/>Current review</button>
-          {[["Active", active], ["Recent", recent]] .map(([title, items]) => <section key={title as string}><p className="report-group-label">{title as string}</p>{(items as typeof qa.rows).map(r => <button className={"report-row " + (qa.selected === r.id && view === "current" ? "selected" : "")} key={r.id} onClick={() => open(r.id)} title={`${r.display_id} · ${r.execution_status.replaceAll("_", " ")} · ${r.preview}`}><span className="rail-preview"><b className="rail-id">{r.display_id}</b><span className="rail-summary">{r.preview}</span></span><time className="rail-time" dateTime={r.created_at}>{railTime(r.created_at)}</time></button>)}</section>)}
+          <button className={currentSelected ? "selected" : ""} aria-current={currentSelected ? "page" : undefined} onClick={showCurrent}><FileText size={17}/>Current review</button>
+          <section><p className="report-group-label">Recent</p>{recent.map(r => <button className={"report-row " + (qa.selected === r.id && view === "current" ? "selected" : "")} aria-current={qa.selected === r.id && view === "current" ? "page" : undefined} key={r.id} onClick={() => open(r.id)} title={`${r.display_id} · ${r.execution_status.replaceAll("_", " ")} · ${r.preview}`}><span className="rail-preview"><b className="rail-id">{r.display_id}</b><span className="rail-summary">{r.preview}</span></span>{pending(r.execution_status) ? <span className="rail-progress"><LoaderCircle size={12} className="journey-spinner" aria-hidden="true"/>{r.execution_status === "queued" ? "Queued" : "Reviewing"}</span> : <time className="rail-time" dateTime={r.created_at}>{railTime(r.created_at)}</time>}</button>)}</section>
         </nav>
         {qa.listError && <p className="error" role="status">Report list unavailable. Reconnecting…</p>}
         <p className="scope-footer">Unsubmitted text stays in this tab.<br/>Submitted reviews are saved.</p>
@@ -131,7 +135,6 @@ export default function App() {
           </div>
           <FeatureNotice hidden={studioCollapsed}/>
           <nav id="studio-content" className="studio-tools" aria-label="QA Studio tools">
-            <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="New review" onClick={create}><Plus/><span className="tool-label">New review</span></TooltipButton>
             <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Review history" aria-pressed={view === "history"} onClick={() => {setView("history"); panels.close();}}><History/><span className="tool-label">Review history</span></TooltipButton>
             <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Feedbacks" aria-pressed={view === "feedback"} onClick={() => {setView("feedback"); panels.close();}}><MessageSquare/><span className="tool-label">Feedbacks</span></TooltipButton>
             <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Analytics" aria-pressed={view === "analytics"} onClick={() => {setView("analytics"); panels.close();}}><ChartNoAxesColumn/><span className="tool-label">Analytics</span></TooltipButton>

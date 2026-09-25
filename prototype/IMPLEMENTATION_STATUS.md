@@ -4,6 +4,18 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 
 ## Implemented
 
+- **Reports rail navigation (2026-09-24):** New review moved from QA Studio to
+  the top of the reports rail, above the scrolling list, with a labeled mobile
+  drawer action and a collapsed plus button with tooltip. Active and Recent are
+  combined under Recent; queued/running reviews stay first with compact status
+  labels, followed by the latest 20 terminal reviews. Independent pending-work
+  fetching and unfinished-draft reuse are preserved. Current review highlights
+  only its draft, avoiding duplicate selection with saved report rows. Verification:
+  production build, **34 DOM tests**, and **4 isolated demo Chromium regressions**
+  passed. Desktop expanded/collapsed and mobile drawer screenshots were inspected;
+  tests cover older pending work, draft retention, selection, focus, tooltips,
+  panel resizing, and saved history retention. No provider calls were made.
+
 - **Stage-linked review feedback (2026-09-24):** the single contextual message now sits
   below the review journey and is associated with Input, Validate, AI review, Results or
   Classification. Failure callouts point to the failed stage and omit technical request

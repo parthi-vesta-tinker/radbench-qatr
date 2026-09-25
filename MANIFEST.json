@@ -244,8 +244,8 @@
     },
     {
       "path": "frontend/src/App.tsx",
-      "bytes": 14724,
-      "sha256": "75a9f107226fdc94c99e9670778736660e865b8ac1d9dc82e80de0793b3067e8"
+      "bytes": 15326,
+      "sha256": "cb4a109a28c4467f4a8fa274ce8919555ca7d0b7d8d44731df648904f4e15db9"
     },
     {
       "path": "frontend/src/ClassificationView.tsx",
@@ -364,8 +364,8 @@
     },
     {
       "path": "frontend/src/style.css",
-      "bytes": 75633,
-      "sha256": "0b16cac39e35d130ba0a04fe4045415d075b47f3cac486cb56f2a5c2e8d5ab20"
+      "bytes": 76294,
+      "sha256": "fbfad68638d00ba223b52e729f6db22276672b18794108bbd89681610633c22f"
     },
     {
       "path": "frontend/src/types.ts",
@@ -394,8 +394,8 @@
     },
     {
       "path": "frontend/tests/classification.spec.ts",
-      "bytes": 14247,
-      "sha256": "1d2aa39d6ac70a604edbcf21a69b2e98b53221e61b37a990a7e7976bc01ed6e7"
+      "bytes": 14296,
+      "sha256": "837fab80f4edd17935996d649bb4cbaddfc3c3fbcda4e89e67b5b471e6b5c6b7"
     },
     {
       "path": "frontend/tests/diagnostics.spec.ts",
@@ -419,8 +419,8 @@
     },
     {
       "path": "frontend/tests/panels.spec.ts",
-      "bytes": 6873,
-      "sha256": "d4e946739fc58d31dbd454f76129404f2c8ddfca2e7d7eecc92d4a7c384f5059"
+      "bytes": 7331,
+      "sha256": "e8b7d5257753194a0449ae82631b1b8589a93c5549d518798dae383e4227ee55"
     },
     {
       "path": "frontend/tests/playground-browser.spec.ts",
@@ -454,8 +454,8 @@
     },
     {
       "path": "frontend/unit/workspace.test.tsx",
-      "bytes": 39159,
-      "sha256": "dec19575eb923317cdef39751bdbbf3376d25bea1b0990e232421148c830a530"
+      "bytes": 41130,
+      "sha256": "0a0d87e547c0e878ee7daa66390e2fe0b5b21f81096ceabf9247f7c14036ea3a"
     },
     {
       "path": "frontend/vite.config.ts",
@@ -489,8 +489,8 @@
     },
     {
       "path": "prototype/BLUEPRINT.html",
-      "bytes": 159941,
-      "sha256": "9b238062a8ea7c1edb12c4b2a21700888cefffd06a3392590f748dd8d28e3669"
+      "bytes": 162456,
+      "sha256": "4f8ade179d9ac5d737f01be38207c74bd74a03c8853a9454d58d9231f673e2d3"
     },
     {
       "path": "prototype/DBOS_VALIDATION.md",
@@ -499,8 +499,8 @@
     },
     {
       "path": "prototype/FOUNDATION_CHANGELOG.md",
-      "bytes": 37107,
-      "sha256": "1dc8e3a676a4beabad1fb29aa3ae6f34b26b3502ea76464460b1331aa0975dad"
+      "bytes": 37571,
+      "sha256": "15316d0b2bb2ac20964898e8089bb524de09421bc9ae5af36077606e65c28df1"
     },
     {
       "path": "prototype/FOUNDATION_PLAN.md",
@@ -509,8 +509,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 36199,
-      "sha256": "556b9b5d4bb21316c8528cb25cd60d680068e4b2ae737f1c4216b616226aad1c"
+      "bytes": 37081,
+      "sha256": "c8992d0d90a0e70fd8a038966651993ceae60b0ea039cdd445a5bf40e620e024"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",
@@ -539,8 +539,8 @@
     },
     {
       "path": "prototype/WORKSPACE_SPEC.md",
-      "bytes": 18834,
-      "sha256": "7b13725885307a7a1e0ce84bfa74ca233ca455250457d6cd5a5e58393f56ca95"
+      "bytes": 19821,
+      "sha256": "63ef4dd854288948852c82eeb5a132d99655bf2b5962511ad53b35106c45777e"
     },
     {
       "path": "prototype/assets/ui-research/after-analytics-desktop.png",

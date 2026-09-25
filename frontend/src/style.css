@@ -1521,3 +1521,15 @@ button.primary:hover:not(:disabled) {background:var(--muted);border-color:var(--
 @media(max-width:600px) {.analytics-classification-groups {grid-template-columns:1fr;gap:4px;}}
 /* Mobile Studio tools already show their labels; duplicate tooltips cover adjacent actions. */
 @media(max-width:650px) {.studio-tools .control-tooltip {display:none;}}
+
+/* Report creation stays above the independently scrolling review list. */
+.reports-actions {flex:none;margin-bottom:12px;}
+.reports-actions > .tooltip-control {display:block;}
+.new-review-button {width:100%;min-height:40px;justify-content:flex-start;gap:8px;font-size:13px;font-weight:500;}
+.rail-progress {display:flex;align-items:center;gap:4px;color:var(--muted);font-size:11px;white-space:nowrap;}
+@media(max-width:650px) {
+ .new-review-button {min-height:44px;}
+ .reports-actions .control-tooltip {display:none;}
+ .panel-workspace > .scope.drawer-open {overflow:visible;}
+ .panel-workspace .scope.drawer-open .scope-nav {min-height:0;overflow-y:auto;}
+}

@@ -48,7 +48,7 @@ for (const width of [1536, 390]) {
     await page.goto('/');
     await expect(page).toHaveTitle(/Vesta/);
     async function tool(name: string) {
-      if (width < 700) await page.getByRole('button',{name:'Open QA Studio',exact:true}).click();
+      if (width < 700) await page.getByRole('button',{name: name === 'New review' ? 'Open Report reviews' : 'Open QA Studio',exact:true}).click();
       await page.getByRole('button',{name,exact:true}).click();
     }
     await tool('Classification');

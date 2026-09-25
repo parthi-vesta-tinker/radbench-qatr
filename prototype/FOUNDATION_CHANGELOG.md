@@ -548,3 +548,12 @@ more-content actions to Studio previews, reduced label emphasis, and renamed the
 classification feedback entry point to Something wrong?. History and Analytics now
 project only saved finding group and communication priority, sharing current-version
 and latest-attempt filtering. No provider dispatch, rubric or storage schema change.
+
+
+### 24 September 2026 — Reports rail navigation
+
+Moved New review to the left reports rail and removed its Studio duplicate.
+Combined Active and Recent into a single Recent list, keeping independently fetched
+pending reviews first with Queued/Reviewing indicators. Corrected Current review
+selection while viewing saved reports. Draft reuse, persistence, and API behavior
+are unchanged. Production build, 34 DOM tests and four controlled browser tests passed.

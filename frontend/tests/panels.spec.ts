@@ -7,6 +7,9 @@ test('desktop panels resize independently and collapsed tools have hover and foc
   await expect(page).toHaveTitle(/Vesta/);
   await page.getByLabel('Report text', {exact:true}).fill('Preserve this draft');
   const input = page.getByLabel('Report text', {exact:true});
+  await expect(page.locator('#reports-panel').getByRole('button',{name:'New review',exact:true})).toBeVisible();
+  await expect(page.locator('#studio-panel').getByRole('button',{name:'New review',exact:true})).toHaveCount(0);
+  await expect(page.locator('.report-group-label')).toHaveText(['Recent']);
   const fullWidth = (await input.boundingBox())!.width;
   const studioHeadingX = (await page.getByRole('heading',{name:'QA Studio',exact:true}).boundingBox())!.x;
   await page.screenshot({path:'/tmp/radbench-panels-expanded.png'});
@@ -84,7 +87,9 @@ test('compact panels open one at a time and mobile drawers trap and restore focu
   await page.getByRole('button',{name:'Open Report reviews',exact:true}).click();
   const reports = page.getByRole('dialog',{name:'Report reviews',exact:true});
   await expect(reports).toBeVisible();
-  await page.getByRole('button',{name:'Current review',exact:true}).click();
+  await expect(reports.getByRole('button',{name:'New review',exact:true})).toBeVisible();
+  await page.screenshot({path:'/tmp/qa-reports-rail-mobile.png'});
+  await reports.getByRole('button',{name:'New review',exact:true}).click();
   await expect(reports).toBeHidden();
   await expect(page.getByLabel('Report text',{exact:true})).toHaveValue('Draft across widths');
   await page.screenshot({path:'/tmp/radbench-panels-mobile.png'});

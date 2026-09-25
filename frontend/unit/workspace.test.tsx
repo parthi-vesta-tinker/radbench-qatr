@@ -474,3 +474,26 @@ test('classification error stays under its stage without request diagnostics', a
   assert.doesNotMatch(message.textContent!,/JEV_UNAVAILABLE|HTTP 503|req_test/);
   assert.equal(message.querySelector('details'),null);
 });
+
+test('Recent keeps older pending reviews above recent results and selects only the opened report', async()=>{
+  const saved = Array.from({length:20}, (_, i) => ({...review(`qr_saved_${i}`, `Saved report ${i}`), created_at:new Date(2026,8,24,12,i).toISOString()}));
+  const queued = {...review('qr_queued','Older queued report'), execution_status:'queued' as const, created_at:'2026-09-01T00:00:00Z'};
+  const running = {...review('qr_running','Running report'), execution_status:'running' as const, created_at:'2026-09-02T00:00:00Z'};
+  [queued,running,...saved].forEach(r=>results.set(r.id,r));
+  const summary = (r:Review) => ({id:r.id,display_id:r.id,created_at:r.created_at,submitted_by:null,execution_status:r.execution_status,outcome:null,general_count:0,critical_count:0,feedback_count:0,preview:r.input.report_text,mode:'openai'});
+  api.history=async(query='')=>({items:(query.includes('status=running')?[running]:query.includes('status=queued')?[queued]:saved).map(summary),has_more:false,next_cursor:null});
+  await mount();await paste('Keep unfinished work');
+  assert.ok(button('New review').closest('#reports-panel'));
+  assert.equal(document.querySelector('#studio-panel [aria-label="New review"]'),null);
+  assert.deepEqual([...document.querySelectorAll('.report-group-label')].map(el=>el.textContent),['Recent']);
+  const rows=[...document.querySelectorAll('.report-row')];
+  assert.equal(rows.length,22);
+  assert.match(rows[0].textContent!,/qr_running.*Reviewing/);
+  assert.match(rows[1].textContent!,/qr_queued.*Queued/);
+  assert.match(rows[2].textContent!,/qr_saved_19/);
+  await act(async()=>{(rows[2] as HTMLButtonElement).click();});
+  assert.equal(button('Current review').classList.contains('selected'),false);
+  assert.equal(document.querySelectorAll('.scope-nav .selected').length,1);
+  await click('New review');assert.equal(text(),'Keep unfinished work');
+  assert.equal(button('Current review').classList.contains('selected'),true);
+});

@@ -10,13 +10,13 @@ The current interface is a responsive Scope–Work–Studio workspace for report
 
 - **Scope:** a slim reports column with independent in-tab drafts, active work, recent results, and history access. Selection does not jump when another review finishes.
 - **Work:** New review accepts pasted text without a scope badge or permanent instruction. Contextual feedback below the journey reports pasted text, unreviewed changes and submission uncertainty at the corresponding stage. Review again replaces the same saved review and clears the previous output atomically. An edit stays in the same input; before submission the earlier output is marked stale and cannot be copied. Exact text restoration restores its matching output.
-- **Typography:** system fonts, an 18px semibold application and work heading, 16px panel headings, 14px secondary sidebar headings, 13px tool labels and 15px report input. New drafts use the heading New review; the matching Studio action is also New review.
-- **Studio:** compact tools for New review, Review history, Feedbacks, Analytics, Skills, and Playground. Tool navigation preserves the current report draft and mounted editor state.
+- **Typography:** system fonts, an 18px semibold application and work heading, 16px panel headings, 14px secondary sidebar headings, 13px tool labels and 15px report input. New drafts use the heading New review; the matching action at the top of the reports rail is also New review.
+- **Studio:** compact tools for Review history, Feedbacks, Analytics, Classification (when enabled), Skills, and Playground. Tool navigation preserves the current report draft and mounted editor state.
 - **Review panel:** review steps show real execution state. **Post-review Guidance** provides advice only after a completed, current review; it stores no per-step progress. See the post-review guidance contract below.
 - **Feedback:** thumbs down opens a modal dialog with two fields, the required reason and an optional note. Feedback binds to the result, not to an individual comment.
 - **Review results:** the output panel is headed **Review Results**. PACS comments and critical findings are visible together with copy actions beside their respective content. Full-template copy is available only when a nonempty result exists. There is no comments tab.
-- **Side panels:** Report reviews and QA Studio collapse independently into 60px rails. Expand/collapse controls live in their headers. The collapsed Report reviews rail retains Current review; the Studio rail retains all six tool icons in the same order. Every rail control has a visible hover/focus tooltip and an accessible name. Escape dismisses tooltips without moving focus. The entire Studio side panel, including guidance, collapses together.
-- **Skills placement:** six equal Studio tiles in three rows: New review / Review history, Feedbacks / Analytics, Skills / Playground. The destination heading and Playground link also use Skills; reference content remains available inside it.
+- **Side panels:** Report reviews and QA Studio collapse independently into 60px rails. Expand/collapse controls live in their headers. The collapsed Report reviews rail retains New review and Current review; the Studio rail retains its enabled tool icons in the same order. Every rail control has a visible hover/focus tooltip and an accessible name. Escape dismisses tooltips without moving focus. The entire Studio side panel, including guidance, collapses together.
+- **Skills placement:** equal Studio tiles in two columns: Review history, Feedbacks, Analytics, Classification (when enabled), Skills, and Playground. The destination heading and Playground link also use Skills; reference content remains available inside it.
 - **Responsive behavior:** above 1120px both panels default expanded and remember independent browser-local collapse preferences. At 651–1120px both default to rails, with at most one expanded. At 650px and below, Report reviews and QA Studio buttons open modal side drawers over full-width work. Escape, close, backdrop, or navigation dismisses the drawer; focus is trapped while open and returned to its opener on dismissal. Desktop preferences survive viewport changes. Appearance supports light and dark themes.
 - **Preserved work:** collapsing panels does not remount editors or reset report input, selection, Skills edits or Playground state. When Studio is collapsed or a mobile drawer is closed, the center always retains the single review journey beside the Review button, with contextual feedback beneath its relevant stage.
 
@@ -197,3 +197,18 @@ and communication-priority labels for each current critical observation's latest
 completed attempt. Other classification fields remain in Classification. A newer
 pending/failed attempt suppresses previous labels; replaced review versions never
 appear. Existing saved classification records provide this read-only projection.
+
+### Reports rail navigation
+
+New review sits below the Report reviews heading, above the independently scrolling
+list; it remains a labeled button in the mobile drawer and a plus icon with an
+accessible name and tooltip when the desktop rail is collapsed. It is not duplicated
+in QA Studio. The existing one-unfinished-review behavior is unchanged.
+
+Current review returns to unfinished work and is selected only while that draft is
+shown. A selected saved report highlights its own row instead. Recent is the sole
+submitted-review section: queued and running reviews appear first, newest first,
+with Queued or Reviewing labels and a neutral spinner. They remain independently
+fetched so older pending work is not lost behind the newest 20 terminal reviews.
+On completion, reports return to latest-submission ordering. Each review appears
+once; no Active heading or additional draft entries are introduced.
