@@ -20,6 +20,7 @@ class Features(BaseModel):
     playground: bool = True
     skills: bool = True
     classification: bool = False
+    classification_analysis: bool = False
 
 
 class SettingsUpdate(BaseModel):

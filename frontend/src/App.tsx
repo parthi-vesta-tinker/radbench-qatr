@@ -32,17 +32,19 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [savedSettings, setSavedSettings] = useState<AppSettings | null>(null);
   const [settingsRevision, setSettingsRevision] = useState(0);
-  const features = {playground:true, skills:true, classification:false, ...qa.config?.features, ...savedSettings?.features};
+  const features = {playground:true, skills:true, classification:false, classification_analysis:false, ...qa.config?.features, ...savedSettings?.features};
   function settingsSaved(value: AppSettings) {
     setSavedSettings(value); setSettingsRevision(n => n + 1); qa.retryConfiguration();
-    if ((view === 'skills' && !value.features.skills) || (view === 'playground' && !value.features.playground) || (view === 'classification' && !value.features.classification)) setView('current');
+    if ((view === 'skills' && !value.features.skills) || (view === 'playground' && !value.features.playground) || (view === 'classification' && (!value.features.classification || !value.features.classification_analysis))) setView('current');
   }
   const classification = useClassification(qa.review, features.classification, qa.stale);
-  const openClassification = () => { setView("classification"); panels.close(); };
+  const analysisEnabled = features.classification && features.classification_analysis;
+  const openClassification = () => { if (analysisEnabled) { setView("classification"); panels.close(); } };
   const reportsCollapsed = panels.isCollapsed("reports");
   const studioCollapsed = panels.isCollapsed("studio");
   const modal = panels.size === "mobile" && panels.drawer !== null;
   const [view, setView] = useState<"current" | "history" | "feedback" | "analytics" | "skills" | "playground" | "classification">("current");
+  useEffect(() => { if (view === "classification" && !analysisEnabled) setView("current"); }, [view, analysisEnabled]);
   const [skillsVisited, setSkillsVisited] = useState(false);
   const [playgroundVisited, setPlaygroundVisited] = useState(false);
   const openSkills = () => { setSkillsVisited(true); setView("skills"); panels.close(); };
@@ -105,7 +107,7 @@ export default function App() {
       {view === "history" && <ReviewHistory busy={false} openReview={open} refreshToken={historyRefresh}/>}
       {view === "feedback" && <FeedbackInbox openReview={open}/>}
       {view === "analytics" && <AnalyticsView/>}
-      {view === "classification" && features.classification && <ClassificationView key={`${qa.selected}:${qa.review?.input_version}`} review={qa.review} stale={qa.stale} data={classification} backToReport={() => {setView("current"); panels.close();}}/>}
+      {view === "classification" && analysisEnabled && <ClassificationView key={`${qa.selected}:${qa.review?.input_version}`} review={qa.review} stale={qa.stale} data={classification} backToReport={() => {setView("current"); panels.close();}}/>}
       {skillsVisited && <SkillsKnowledge active={view === "skills" && features.skills}/>}
       {playgroundVisited && <Playground active={view === "playground" && features.playground} openSkills={openSkills} settingsRevision={settingsRevision} skillsEnabled={features.skills}/>}
       <main className="review-workspace" hidden={view !== "current"}>
@@ -138,12 +140,12 @@ export default function App() {
             <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Review history" aria-pressed={view === "history"} onClick={() => {setView("history"); panels.close();}}><History/><span className="tool-label">Review history</span></TooltipButton>
             <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Feedbacks" aria-pressed={view === "feedback"} onClick={() => {setView("feedback"); panels.close();}}><MessageSquare/><span className="tool-label">Feedbacks</span></TooltipButton>
             <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Analytics" aria-pressed={view === "analytics"} onClick={() => {setView("analytics"); panels.close();}}><ChartNoAxesColumn/><span className="tool-label">Analytics</span></TooltipButton>
-            {features.classification && <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Classification" aria-pressed={view === "classification"} onClick={openClassification}><Tags/><span className="tool-label">Classification</span></TooltipButton>}
+            {analysisEnabled && <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Classification" aria-pressed={view === "classification"} onClick={openClassification}><Tags/><span className="tool-label">Classification</span></TooltipButton>}
             {features.skills && <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Skills" aria-pressed={view === "skills"} onClick={openSkills}><BookOpen/><span className="tool-label">Skills</span></TooltipButton>}
             {features.playground && <TooltipButton side={panels.size === "mobile" ? "bottom" : "left"} label="Playground" aria-pressed={view === "playground"} onClick={() => {setPlaygroundVisited(true);setView("playground"); panels.close();}}><FlaskConical/><span className="tool-label">Playground</span></TooltipButton>}
           </nav>
         </div>
-        <div id="studio-details" className="studio-details" hidden={studioCollapsed || view !== "current"}><Studio classification={classification} openClassification={openClassification} classificationEnabled={features.classification} review={qa.review} stale={qa.stale || qa.disconnected}/></div>
+        <div id="studio-details" className="studio-details" hidden={studioCollapsed || view !== "current"}><Studio classification={classification} openClassification={analysisEnabled ? openClassification : undefined} classificationEnabled={features.classification} review={qa.review} stale={qa.stale || qa.disconnected}/></div>
       </aside>
     </div>
   </>;

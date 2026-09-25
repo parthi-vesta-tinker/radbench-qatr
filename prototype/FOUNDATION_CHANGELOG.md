@@ -610,3 +610,10 @@ Combined Active and Recent into a single Recent list, keeping independently fetc
 pending reviews first with Queued/Reviewing indicators. Corrected Current review
 selection while viewing saved reports. Draft reuse, persistence, and API behavior
 are unchanged. Production build, 34 DOM tests and four controlled browser tests passed.
+
+### 25 September 2026 — Optional full-screen classification analysis
+
+Added a default-off Classification analysis visibility setting, independent of CF
+classification processing. Both full-screen entry points are hidden until enabled;
+turning it off restores the report view. Existing settings default to hidden without
+migration. Build, DOM, 28 backend/API and three browser settings checks passed.

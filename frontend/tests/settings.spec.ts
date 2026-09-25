@@ -71,3 +71,40 @@ test('settings handles missing provider configuration and concurrent edits',asyn
  await expect(panel.getByRole('alert')).toContainText('changed elsewhere');
  await expect(panel.getByRole('switch',{name:'Skills',exact:true})).not.toBeChecked();
 });
+
+test('full-screen Classification is opt-in and hiding it returns to the report', async({page,request})=>{
+ const initial=await (await request.get('/api/v1/settings')).json();
+ const config=await (await request.get('/api/v1/config')).json();
+ let saved={...initial,classification_configured:true,features:{...initial.features,classification:true,classification_analysis:false}};
+ await page.route('**/api/v1/settings',async route=>{
+  if(route.request().method()==='PUT') saved={...saved,...route.request().postDataJSON(),revision:saved.revision+1};
+  await route.fulfill({json:saved});
+ });
+ await page.route('**/api/v1/config',async route=>{
+  await route.fulfill({json:{...config,features:saved.features}});
+ });
+ await page.goto('/');
+ await page.getByLabel('Report text',{exact:true}).fill('Preserve this unfinished report.');
+ const tool=page.locator('#studio-panel').getByRole('button',{name:'Classification',exact:true});
+ await expect(tool).toHaveCount(0);
+ await page.getByRole('button',{name:'Settings',exact:true}).click();
+ let panel=page.getByRole('dialog',{name:'Settings',exact:true});
+ await expect(panel.getByRole('switch',{name:'Classification Overview',exact:true})).toBeChecked();
+ await expect(panel.getByRole('switch',{name:'Classification analysis',exact:true})).not.toBeChecked();
+ await page.screenshot({path:'/tmp/qa-analysis-setting-default.png'});
+ await panel.getByRole('switch',{name:'Classification analysis',exact:true}).check();
+ await panel.getByRole('button',{name:'Save',exact:true}).click();
+ await tool.click();await expect(page.locator('.classification-pane')).toBeVisible();
+ await page.getByRole('button',{name:'Settings',exact:true}).click();
+ panel=page.getByRole('dialog',{name:'Settings',exact:true});
+ await panel.getByRole('switch',{name:'Classification analysis',exact:true}).uncheck();
+ await panel.getByRole('button',{name:'Save',exact:true}).click();
+ await expect(tool).toHaveCount(0);
+ await expect(page.locator('.classification-pane')).toHaveCount(0);
+ await expect(page.getByLabel('Report text',{exact:true})).toHaveValue('Preserve this unfinished report.');
+ expect(saved.features.classification).toBe(true);
+ await page.reload();
+ await expect(page.locator('.review-journey')).toContainText('Classification');
+ await expect(tool).toHaveCount(0);
+ await page.unrouteAll({behavior:'wait'});
+});

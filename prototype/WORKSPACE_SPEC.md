@@ -238,3 +238,12 @@ the feedback inbox, and never used to overwrite comments or establish clinical g
 Classification-label feedback remains a separate interaction and resource. API feedback
 aggregates expose `by_target` counts for whole-review, observation and legacy flag feedback;
 these are feedback events, not adjudicated accuracy or unique reviewer votes.
+
+### Classification analysis visibility
+
+Settings includes a separate Classification analysis switch (Full screen), off by
+default for new and existing settings that lack the field. It controls the QA Studio
+Classification tool and Full analysis link. CF classification continues to control
+processing, progress and the compact Classification Overview independently. Enabling
+analysis reveals the full-screen view only when CF classification is also enabled.
+Disabling analysis while viewing it returns to the report and preserves its draft.

@@ -10,7 +10,7 @@ for (const width of [1536, 390]) {
     await page.route('**/api/v1/config', async route => {
       const response = await route.fetch();
       const config = await response.json();
-      await route.fulfill({json: {...config, features: {...config.features, classification: true}}});
+      await route.fulfill({json: {...config, features: {...config.features, classification: true, classification_analysis: true}}});
     });
     const labels = {finding_group: 'thoracic', certainty: 'definite', urgency: 'cannot_determine', polarity: 'affirmed', temporal_status: 'not_stated'};
     const fields = Object.fromEntries(Object.entries(labels).map(([field, label]) => [field, {label, raw_probabilities: {[label]: .9, other: .1}, provider_confidence: .85, top_probability: .9, margin: .8, review_reasons: []}]));
@@ -150,7 +150,7 @@ for (const width of [1536, 390]) {
     await page.route('**/api/v1/config', async route => {
       const response = await route.fetch();
       const config = await response.json();
-      await route.fulfill({json:{...config,features:{...config.features,classification:true}}});
+      await route.fulfill({json:{...config,features:{...config.features,classification:true,classification_analysis:true}}});
     });
     await page.goto('/');
     await expect(page).toHaveTitle(/Vesta/);

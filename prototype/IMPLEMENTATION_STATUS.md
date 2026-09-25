@@ -26,6 +26,14 @@ Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API
 
 ## Implemented
 
+- **Classification analysis visibility (2026-09-25):** a separate Settings switch
+  defaults off for new settings and existing files missing the field. It hides the
+  full-screen Classification tool and Full analysis link while preserving CF
+  processing, progress and compact overview. Disabling it while open returns to
+  the report without discarding the draft. Verified: production build, DOM suite,
+  28 controlled settings/API tests, and 3 isolated Chromium settings tests passed.
+  No provider calls or storage migration.
+
 - **Per-comment review feedback (2026-09-24):** PACS and critical comments now expose
   thumbs up/down alongside retained whole-review feedback. One shared dialog captures the
   selected comment, required down reason, optional explanation and suggested wording.

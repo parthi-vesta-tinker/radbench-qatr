@@ -126,3 +126,8 @@ latest-attempt selector and include only completed classifications of current cr
 observations. History pagination does not limit analytics. No additional classification
 fields, inputs or rubric details are projected into these surfaces. This is additive
 under the existing API version and reads already-persisted records without migration.
+
+`Features.classification_analysis` is an additive boolean defaulting to false in
+settings and configuration. It controls full-screen analysis visibility only; it
+neither disables classification processing nor changes access to saved API results.
+Existing settings files without this field remain valid and default to hidden.

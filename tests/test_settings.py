@@ -140,3 +140,24 @@ def test_explicit_launcher_override_wins_once_and_features_survive(settings_clie
     assert not preferences.read('vesta').features.playground
     assert update(client,run_mode='live').status_code==200
     assert runtime_config()['run_mode']=='live'
+
+
+def test_classification_analysis_defaults_off_for_existing_settings(settings_client):
+    client = settings_client
+    assert not client.get('/api/v1/settings').json()['features']['classification_analysis']
+    # Existing settings files predate this UI preference, even when JEV is enabled.
+    legacy = preferences.read('vesta').model_dump()
+    legacy['features'].pop('classification_analysis')
+    legacy['features']['classification'] = True
+    path = preferences.location('vesta')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(legacy))
+    value = client.get('/api/v1/config').json()['features']
+    assert value['classification'] and not value['classification_analysis']
+    assert runtime_config()['jev_enabled_at_acceptance']
+    value['classification_analysis'] = True
+    assert update(client, features=value).status_code == 200
+    assert preferences.read('vesta').features.classification_analysis
+    value['classification_analysis'] = False
+    assert update(client, features=value).status_code == 200
+    assert runtime_config()['jev_enabled_at_acceptance']

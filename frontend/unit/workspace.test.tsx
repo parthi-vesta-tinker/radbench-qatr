@@ -42,7 +42,7 @@ async function choosePeriod(value:Analytics['period']) { await act(async()=>{con
 beforeEach(()=>{
   sessionStorage.clear();localStorage.clear();results.clear();requests=[];
   document.body.innerHTML='<div id="root"></div>';root=createRoot(document.getElementById('root')!);
-  api.config=async()=>({tenant_id:'vesta',api_version:'2026-09-22',run_mode:'live',features:{playground:true,skills:true,classification:true},ready:true,model:'configured-model',policy_status:'provisional_no_manual',samples:[]});
+  api.config=async()=>({tenant_id:'vesta',api_version:'2026-09-22',run_mode:'live',features:{playground:true,skills:true,classification:true,classification_analysis:true},ready:true,model:'configured-model',policy_status:'provisional_no_manual',samples:[]});
   api.status=async()=>({status:'ready',checked_at:new Date().toISOString(),readiness_scope:'Local checks only',components:{api:{status:'ok',message:'API responds'},dbos:{status:'ok',message:'Checkpoint store responds'},openai:{status:'configured',message:'Inference not verified'}}});
   api.history=async()=>({items:[],has_more:false,next_cursor:null});
   api.feedbackInbox=async()=>({items:[],has_more:false,next_cursor:null});
@@ -542,4 +542,13 @@ test('comment feedback shares one dialog, sends version and optional wording, an
     assert.ok(button('Mark comment obs-1 useful').disabled);
     assert.ok(button('Suggest improvement for comment obs-2').disabled);
   } finally {api.feedback=originalFeedback;api.feedbackHistory=originalHistory;}
+});
+
+test('full-screen classification defaults hidden while Classification Overview remains enabled', async()=>{
+  const originalConfig = api.config;
+  api.config=async()=>{const c=await originalConfig();return {...c,features:{...c.features,classification_analysis:false}};};
+  await mount();
+  assert.equal(document.querySelector('#studio-panel [aria-label="Classification"]'),null);
+  assert.equal(document.querySelector('.classification-pane'),null);
+  assert.match(document.querySelector('.review-journey')!.textContent!,/Classification/);
 });

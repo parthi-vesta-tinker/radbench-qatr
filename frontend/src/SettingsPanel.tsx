@@ -8,6 +8,7 @@ const featureLabels: {key:keyof Features; title:string; description:string}[] = 
   {key:'playground', title:'Playground', description:'Test reports'},
   {key:'skills', title:'Skills', description:'Edit instructions'},
   {key:'classification', title:'CF classification', description:'Critical findings'},
+  {key:'classification_analysis', title:'Classification analysis', description:'Full screen'},
 ];
 
 export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppSettings)=>void}) {
@@ -73,7 +74,7 @@ export function SettingsPanel({close, saved}: {close:()=>void; saved:(value:AppS
           <legend>Features</legend>
           {featureLabels.map(feature=><label className="settings-feature" key={feature.key}>
             <span><strong>{feature.title}</strong><span className="meta"> · {feature.description}</span></span>
-            <input type="checkbox" role="switch" aria-label={feature.title} checked={draft.features[feature.key]}
+            <input type="checkbox" role="switch" aria-label={feature.title} checked={Boolean(draft.features[feature.key])}
               onChange={e=>change({features:{...draft.features,[feature.key]:e.target.checked}})}/>
           </label>)}
           {draft.features.classification && !settings.classification_configured && <p className="notice">Configure the JEV key on the server before enabling classification.</p>}

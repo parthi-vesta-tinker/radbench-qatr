@@ -134,8 +134,8 @@
     },
     {
       "path": "backend/preferences.py",
-      "bytes": 6177,
-      "sha256": "c77827ed2d03306b155cdc2346d4f147829b75fc2db33410e12ea29fb7b71e44"
+      "bytes": 6219,
+      "sha256": "da42460a6d444f9bf6707c87c2d9acd638c94de0f9724f516eb3ee3be3fc9cae"
     },
     {
       "path": "backend/presentation.py",
@@ -244,8 +244,8 @@
     },
     {
       "path": "frontend/src/App.tsx",
-      "bytes": 15326,
-      "sha256": "cb4a109a28c4467f4a8fa274ce8919555ca7d0b7d8d44731df648904f4e15db9"
+      "bytes": 15648,
+      "sha256": "93f1ad333db0de95ff940c66afe4b27af98350471f73eb7372aa49c30cee5597"
     },
     {
       "path": "frontend/src/ClassificationView.tsx",
@@ -259,8 +259,8 @@
     },
     {
       "path": "frontend/src/Feedback.tsx",
-      "bytes": 11373,
-      "sha256": "a0bdc74ad3576d6a570a8eb9a704eb3957923da29e4cff48933243250077f3da"
+      "bytes": 10922,
+      "sha256": "5b214fb22750edf8e80af0d855b6d5ac5251f5dfd4e4a592203dfc8bae235238"
     },
     {
       "path": "frontend/src/FeedbackInbox.tsx",
@@ -304,8 +304,8 @@
     },
     {
       "path": "frontend/src/SettingsPanel.tsx",
-      "bytes": 5557,
-      "sha256": "70e6f56620c8f711f26b1a6c0868c7fc5db2198978a7782369359ff79f19d6ea"
+      "bytes": 5661,
+      "sha256": "e549ad58bf9006d629bee0938b045e1c4be9c09f5f0d5ac226481834c6d76d62"
     },
     {
       "path": "frontend/src/SkillsKnowledge.tsx",
@@ -344,8 +344,8 @@
     },
     {
       "path": "frontend/src/generated-api.ts",
-      "bytes": 13415,
-      "sha256": "860f54bd853584f74d5297abf520d761f27596108081c8b0e84f3cec720017e1"
+      "bytes": 13452,
+      "sha256": "4bdd7ac82259ef6ad049876c64670bfd22f83ee30c5b5f5442e3a1dd47aa2926"
     },
     {
       "path": "frontend/src/main.tsx",
@@ -394,8 +394,8 @@
     },
     {
       "path": "frontend/tests/classification.spec.ts",
-      "bytes": 14741,
-      "sha256": "99c7f7a8778ec5bb8712662112c7fbbe22eb6686e6763a3d0b403f837c3ee9cf"
+      "bytes": 14801,
+      "sha256": "b2c2176aeb4c37e2f33231fb01cc200e9ba7239bcbbf3809fa95342094ff7352"
     },
     {
       "path": "frontend/tests/diagnostics.spec.ts",
@@ -439,8 +439,8 @@
     },
     {
       "path": "frontend/tests/settings.spec.ts",
-      "bytes": 5077,
-      "sha256": "45009ebb5b1ace6812cc586295a6c4e9c4ae7ba63a59fcd1b3e4f898e3ce0619"
+      "bytes": 7428,
+      "sha256": "9619f6d46dc2a8463c3ab7b650226c30893ecfbc7b598f4b523ba81e74420d18"
     },
     {
       "path": "frontend/tests/workspace.spec.ts",
@@ -454,8 +454,8 @@
     },
     {
       "path": "frontend/unit/workspace.test.tsx",
-      "bytes": 44326,
-      "sha256": "0b00d411f60f4bb9e2093d4cf882411d311c5ba94b0a1711133c25b7817b42b9"
+      "bytes": 44983,
+      "sha256": "1dd9da5a0024501f8710b9321fe6087acc736461b299bed78bef529e0423576c"
     },
     {
       "path": "frontend/vite.config.ts",
@@ -479,8 +479,8 @@
     },
     {
       "path": "prototype/API_DESIGN.md",
-      "bytes": 8981,
-      "sha256": "6d9a549c1ebbe2ea9997adb20a1b9523db3e41d64ea4c2935029b1796f294017"
+      "bytes": 9307,
+      "sha256": "d2ae7695172867503dc075c2944845934986f9e173f46069bb4674fc58e32afb"
     },
     {
       "path": "prototype/BACKLOG.md",
@@ -499,8 +499,8 @@
     },
     {
       "path": "prototype/FOUNDATION_CHANGELOG.md",
-      "bytes": 40885,
-      "sha256": "b6fdfeae90b57b781fd68564ced971c072e7ae3081c42709d9ef0da9265fb4c0"
+      "bytes": 41288,
+      "sha256": "8f9be6a4c3f76a776d23ea47ba599a3677b21f0e2e9efad063e134d0d2e02dfa"
     },
     {
       "path": "prototype/FOUNDATION_PLAN.md",
@@ -509,8 +509,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 39209,
-      "sha256": "042ddfde937a8af634175a6fe7b9f051a083152d77812b2184555d9e2c86bc35"
+      "bytes": 39739,
+      "sha256": "ff4558a68f4bfeca4dc6a119d3a59b3bf307f29cfa0d925d15bc0a2fc709e0be"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",
@@ -539,8 +539,8 @@
     },
     {
       "path": "prototype/WORKSPACE_SPEC.md",
-      "bytes": 21897,
-      "sha256": "79cee854bbcc4d3439fe68f6479fa6b51b30863018b91426913458a580cececd"
+      "bytes": 22439,
+      "sha256": "dce3d8d94dfe5702a97f1de6068f0b0f2e73836f5c0715d7679e8aac9c2bd4bf"
     },
     {
       "path": "prototype/assets/ui-research/after-analytics-desktop.png",
@@ -609,8 +609,8 @@
     },
     {
       "path": "prototype/openapi.json",
-      "bytes": 188793,
-      "sha256": "4f0a8d68452d8d0e0ce94703c669ddbbc3bfac68e91801901aacdde0c37d9486"
+      "bytes": 188953,
+      "sha256": "d0c102216880edf7b81889e2391d680028e1fef8ccc3ff9227cbe2290441235e"
     },
     {
       "path": "prototype/render_blueprint.py",
@@ -1104,8 +1104,8 @@
     },
     {
       "path": "tests/test_settings.py",
-      "bytes": 7505,
-      "sha256": "56a1e9b9ea7b7cad74a9f716b48dd1a8287cebfd697f063b7ce61647595c8f2f"
+      "bytes": 8615,
+      "sha256": "adee38ffc7629d0544a82710ffd010e4d09f473e0fb7cc8b9f2b840bc359a594"
     },
     {
       "path": "tests/test_skill_adoption.py",
