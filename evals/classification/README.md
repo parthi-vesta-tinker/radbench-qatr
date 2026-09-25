@@ -31,3 +31,22 @@ supplied recall and workload constraints, counts failed cases as misses, and ret
 `no_feasible_threshold` when appropriate. A fitted artifact and a threshold are
 research outputs, not evidence of clinical validity or permission for automatic
 notification.
+
+## Context preprocessing v2
+
+Rubric 1.1.0 uses `review-critical-context-v2`: one critical observation identified
+by exact section-labeled report excerpts, full submitted report context, and a
+secondary QA comment. Each of the five questions independently evaluates the same
+target. Temporal evidence must concern that finding; acute wording, comparison dates
+and unrelated stable findings do not establish change. Missing or contradictory
+temporal evidence maps to `not_stated` with an unresolved-evidence review message.
+Cross-field checks preserve raw predictions and flag polarity/certainty conflicts,
+priority on an absent/unclear target, insufficient target context, and historical
+status with nonroutine priority. They do not prove source-level consistency.
+
+Existing calibration artifacts must match the new rubric hash and preprocessing
+version; they cannot be reused as v2 calibration. Controlled source-fidelity and
+consistency tests are not model accuracy evaluations. A qualified evaluation should
+include paired stable/worsening contexts, conflicting Findings/Impression, unrelated
+comparison statements, negation, historical findings, and report-text instructions.
+No historical runs are reclassified by this change.

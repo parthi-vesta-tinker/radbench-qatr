@@ -40,9 +40,16 @@ function Analysis({run, refresh, ready, stale}: {run: ClassificationResource; re
     {error && <p role="alert" className="notice">{error} <button onClick={() => setRevision(n => n + 1)}>Retry details</button></p>}
     {analysis && <>
       <details className="jev-details"><summary>State · Inputs sent to JEV</summary>
-        <dl className="classification-state"><div><dt>Finding text</dt><dd>{analysis.state.finding_text}</dd></div>
-          <div><dt>QA comment</dt><dd>{analysis.state.qa_comment}</dd></div>
-          <div><dt>Report quotes</dt><dd>{analysis.state.report_quotes.length ? analysis.state.report_quotes.map((quote, i) => <blockquote key={i}>{quote}</blockquote>) : 'None'}</dd></div></dl>
+        <dl className="classification-state">
+          {'target' in analysis.state ? <>
+            <div><dt>Critical observation · report excerpts</dt><dd>{analysis.state.target.report_excerpts.map((excerpt, i) => <blockquote key={i}><strong>{format(excerpt.section)}</strong>: {excerpt.text}</blockquote>)}</dd></div>
+            <div><dt>Report context</dt><dd className="classification-instructions">{analysis.state.report_context}</dd></div>
+          </> : <>
+            <div><dt>Finding text</dt><dd>{analysis.state.finding_text}</dd></div>
+            <div><dt>Report quotes</dt><dd>{analysis.state.report_quotes.length ? analysis.state.report_quotes.map((quote, i) => <blockquote key={i}>{quote}</blockquote>) : 'None'}</dd></div>
+          </>}
+          <div><dt>QA comment · secondary interpretation</dt><dd>{analysis.state.qa_comment}</dd></div>
+        </dl>
       </details>
       <h3>Classification breakdown</h3>
       {fields.map(field => {

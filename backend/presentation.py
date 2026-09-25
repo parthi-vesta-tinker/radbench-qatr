@@ -55,7 +55,7 @@ def classification_analysis(rid, input_data, config):
     from .classification import request_body
     body = request_body(input_data, config)
     return dict(classification_id=rid, model=body["model"],
-                state=pick(body["state"], {"finding_text", "qa_comment", "report_quotes"}),
+                state=pick(body["state"], {"finding_text", "qa_comment", "report_quotes", "target", "report_context"}),
                 questions={field: pick(question, {"type", "instructions", "criteria"})
                            for field, question in body["questions"].items()},
                 rubric_id=config["rubric"]["id"], rubric_version=config["rubric"]["version"],

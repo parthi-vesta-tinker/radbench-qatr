@@ -42,7 +42,7 @@ for (const width of [1536, 390]) {
     }] : []}); });
     await page.route('**/api/v1/classifications/jc-browser/analysis', route => {
       analysisReads++;
-      return route.fulfill({json:{classification_id:'jc-browser',model:'jev-1.13.0',state:{finding_text:'Acute right pneumothorax.',qa_comment:'Review the critical observation.',report_quotes:['Acute right pneumothorax.']},questions,rubric_id:'saved-rubric',rubric_version:'1.0.0',rubric_status:'draft_research',rubric_hash:'saved-hash'}});
+      return route.fulfill({json:{classification_id:'jc-browser',model:'jev-1.13.0',state: width === 1536 ? {target:{report_excerpts:[{section:'impression',text:'Acute right pneumothorax.'}]},report_context:'Findings: Acute right pneumothorax.\nImpression: Acute right pneumothorax.',qa_comment:'Review the critical observation.'} : {finding_text:'Acute right pneumothorax.',qa_comment:'Review the critical observation.',report_quotes:['Acute right pneumothorax.']},questions,rubric_id:'saved-rubric',rubric_version:'1.0.0',rubric_status:'draft_research',rubric_hash:'saved-hash'}});
     });
     page.on('request', request => { if(request.method() === 'POST' && request.url().includes('/classifications')) mutations++; });
     await page.goto('/');
@@ -104,6 +104,8 @@ for (const width of [1536, 390]) {
     await expect(pane.locator('.jev-finding').first()).toBeVisible();
     await pane.getByText('State · Inputs sent to JEV',{exact:true}).click();
     await expect(pane.locator('.classification-state')).toContainText('Acute right pneumothorax.');
+    if (width === 1536) await expect(pane.locator('.classification-state')).toContainText('Report context');
+    else await expect(pane.locator('.classification-state')).toContainText('Report quotes');
     await pane.getByText('Question and criteria',{exact:true}).first().click();
     await expect(pane).toContainText('Saved question for finding_group.');
     await expect(pane).toContainText('Saved criterion for this classification.');

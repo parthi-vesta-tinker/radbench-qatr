@@ -103,7 +103,9 @@ is available, with a chevron indicating expansion. Expanding reveals the finding
 Report certainty, Communication priority, inputs and feedback for each finding. The current
 classification contract has no subtype field; omit subtype until a governed contract supplies it. Inputs used is collapsed by
 default and distinguishes report excerpts plus the QA comment from comment-only
-fallback. The introductory JEV sentence and repeated expanded input are removed.
+fallback on saved legacy runs. New runs show section-labeled target excerpts, full
+submitted report context and the QA comment as secondary interpretation in the saved
+state disclosure. The introductory JEV sentence and repeated expanded input are removed.
 The Classification workspace includes all five fields, raw and available calibrated
 probabilities, provider confidence, margin, review flags, saved questions/criteria,
 exact JEV state and run details. Feedback remains separate from immutable predictions. A single **Something wrong?** button

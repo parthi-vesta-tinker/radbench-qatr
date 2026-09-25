@@ -91,11 +91,17 @@ Stakeholder outcome endpoints and schemas are retired; analytics no longer retur
 
 `GET /api/v1/classifications/{id}/analysis` uses the same tenant-bound review-read
 access as classification reads. It projects the selected run's saved JEV state
-(finding text, QA comment, quote text), questions, instructions, choice criteria,
+(target report excerpts with section labels, full submitted report context, and secondary
+QA comment for preprocessing v2; legacy finding text/comment/quotes for saved v1 runs),
+questions, instructions, choice criteria,
 model and rubric identity/version/status/hash. It does not expose private anchor
 metadata, credentials, report-QA prompts or DBOS storage. Inspection requires no
 current provider readiness and does not call a provider. `input.source` distinguishes
-`report_excerpts` from the `qa_comment` fallback. Review provenance includes the
+`report_excerpts` from the legacy `qa_comment` fallback. New classifications require
+report evidence, including exact synthetic demo excerpts; missing anchors never fall
+back to commentary. Full context is snapshotted and hashed at reservation, with a
+conservative UTF-8 byte context bound before dispatch; oversized input is rejected,
+never clipped. No historical classifications are rewritten. Review provenance includes the
 captured `jev_enabled_at_acceptance` flag for truthful asynchronous progress.
 
 ## Runtime settings — 2026-09-24

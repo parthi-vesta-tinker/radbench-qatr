@@ -478,6 +478,21 @@ class ClassificationState(BaseModel):
     report_quotes: list[str]
 
 
+class ClassificationExcerpt(BaseModel):
+    section: str
+    text: str
+
+
+class ClassificationTarget(BaseModel):
+    report_excerpts: list[ClassificationExcerpt]
+
+
+class ClassificationContextState(BaseModel):
+    target: ClassificationTarget
+    report_context: str
+    qa_comment: str
+
+
 class ClassificationQuestion(BaseModel):
     type: Literal["choice"]
     instructions: str
@@ -487,7 +502,7 @@ class ClassificationQuestion(BaseModel):
 class ClassificationAnalysis(BaseModel):
     classification_id: str
     model: str
-    state: ClassificationState
+    state: ClassificationContextState | ClassificationState
     questions: dict[str, ClassificationQuestion]
     rubric_id: str
     rubric_version: str

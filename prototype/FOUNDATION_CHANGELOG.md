@@ -1,5 +1,37 @@
 # Foundation implementation decisions and releases
 
+## Critical observation context for JEV — 2026-09-24
+
+Commit verification: all 40 classification, context and evaluation tests passed in
+an isolated checkout containing only this change, excluding concurrent workflow edits.
+
+Rubric 1.1.0 / preprocessing `review-critical-context-v2` targets one critical
+observation through exact section-labeled excerpts, supplies the entire submitted
+report as context, and marks the QA comment as secondary interpretation. The JEV
+state no longer repeats joined excerpts and a quotes list. The immutable input hash
+includes context. Known synthetic demos use exact report excerpts; missing live
+evidence fails instead of promoting commentary into evidence. Admission rejects
+oversized context with a conservative UTF-8 byte bound and never clips it.
+
+All five questions are self-contained because JEV evaluates them independently.
+Temporal instructions require evidence about the same finding, distinguish acute
+wording from new change, and use `not_stated` for unresolved temporal evidence.
+Local checks flag related-label conflicts without changing predictions or their
+probabilities. Unresolved temporal status carries a review message; these checks
+cannot prove source-level consistency. Old snapshots retain their saved request
+shape and rubric; no historical reclassification or calibration reuse occurs.
+
+Inspection exposes the exact new state while excluding private anchor offsets/IDs,
+and still renders saved legacy requests. Verification: 25 source/consistency tests,
+four classification browser regressions (desktop and mobile), frontend production
+build, generated contract checks and documentation checks passed. The combined
+classification/context/evaluation run had 39 passes and one automatic-dispatch failure
+(classification remained queued), reproduced in isolation with concurrent workflow
+edits present. This is an outstanding integration failure, not a context accuracy
+result. No live-provider
+accuracy evaluation or qualified clinical assessment was performed.
+
+
 ## Stage-linked review feedback — 2026-09-24
 
 Moved the single review context message from below the work title to below the journey.

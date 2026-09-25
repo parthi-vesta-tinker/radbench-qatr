@@ -69,8 +69,8 @@
     },
     {
       "path": "backend/classification.py",
-      "bytes": 7707,
-      "sha256": "b9f5f95407ba2f2e9490fae2c57396a09738ab43de3bfbeddac31ea7eb7a4ce8"
+      "bytes": 10149,
+      "sha256": "c6aac56e8e8eb50fd17ab1b9a3760fff7646866f4f5e63b6b3168cc48e1a11b9"
     },
     {
       "path": "backend/classification_calibration.py",
@@ -79,8 +79,8 @@
     },
     {
       "path": "backend/classification_store.py",
-      "bytes": 14989,
-      "sha256": "785229de7cef2450c123c243261a75c918d03eb33fc671ff554f034a6358105e"
+      "bytes": 16298,
+      "sha256": "07e4417a30bc39eba9d1e76cfa6207cb8619c60faafc60c905e10d8b1b67f932"
     },
     {
       "path": "backend/classification_workflow.py",
@@ -99,8 +99,8 @@
     },
     {
       "path": "backend/contracts.py",
-      "bytes": 23305,
-      "sha256": "2eddfab848b869af756785d1c9c5337382ebca83185e02f314b231d3b41d4781"
+      "bytes": 23621,
+      "sha256": "9ef4f635cf73e849018677935ddc1c72c5a1e308cf12f1dbd09da6f48e25a45e"
     },
     {
       "path": "backend/diagnostics.py",
@@ -139,8 +139,8 @@
     },
     {
       "path": "backend/presentation.py",
-      "bytes": 6237,
-      "sha256": "c1340c4b1b71e0e3f4e543a00d494ebc21b54505aca0651ea6aac26b8fdb92b2"
+      "bytes": 6265,
+      "sha256": "b21de42261a60ef1d98c182909d667939cc169f98adce8bc4b5fc99f87ce69b0"
     },
     {
       "path": "backend/records.py",
@@ -189,13 +189,13 @@
     },
     {
       "path": "config/jev/finding-rubric-v1.json",
-      "bytes": 4633,
-      "sha256": "69dae83c4e538bd063c892788d310cf772193c2bbdb6ef6b17bf5b8f1ae69ed3"
+      "bytes": 6151,
+      "sha256": "0c318113524de58490029c158f03ec89e89c5cc3d095893463cc94513a32be49"
     },
     {
       "path": "evals/classification/README.md",
-      "bytes": 2302,
-      "sha256": "c5a54b2491c574adf646dafabd6d8959322be0904428445c7584232daa7f8329"
+      "bytes": 3534,
+      "sha256": "b77415a98f41a46eca26752c69da95cb57ced71b195038a3b5667cc7a8d88031"
     },
     {
       "path": "evals/classification/example-cases.json",
@@ -249,8 +249,8 @@
     },
     {
       "path": "frontend/src/ClassificationView.tsx",
-      "bytes": 9579,
-      "sha256": "6333f81bedfd9fc59fa43b6ee4ca75c87b9b0bffcfdf351c762d7ef8013e1edc"
+      "bytes": 10068,
+      "sha256": "c77fcfd56f3c26beaad8fcd66d5dc9e13e74604949f5ab458f1099ade2190fcc"
     },
     {
       "path": "frontend/src/FeatureNotice.tsx",
@@ -344,8 +344,8 @@
     },
     {
       "path": "frontend/src/generated-api.ts",
-      "bytes": 12927,
-      "sha256": "562b2aac5a3cc737a18fa557c086775e707ca3d763458c94cb457d4f73615d79"
+      "bytes": 13249,
+      "sha256": "171e68cce8ea0b264787262c45ccebaad102ce5fbda9697ff66d9666b499e99f"
     },
     {
       "path": "frontend/src/main.tsx",
@@ -394,8 +394,8 @@
     },
     {
       "path": "frontend/tests/classification.spec.ts",
-      "bytes": 14296,
-      "sha256": "837fab80f4edd17935996d649bb4cbaddfc3c3fbcda4e89e67b5b471e6b5c6b7"
+      "bytes": 14741,
+      "sha256": "99c7f7a8778ec5bb8712662112c7fbbe22eb6686e6763a3d0b403f837c3ee9cf"
     },
     {
       "path": "frontend/tests/diagnostics.spec.ts",
@@ -479,8 +479,8 @@
     },
     {
       "path": "prototype/API_DESIGN.md",
-      "bytes": 7999,
-      "sha256": "6ca8ac8fd773cada9e342cfb999fabb6ff3ef622d4a719efcb3e6503b3d055bb"
+      "bytes": 8483,
+      "sha256": "63843c80aac7af99ce799354e200ed2f1f2600fd2205ca8b7dcceb71623ba0a3"
     },
     {
       "path": "prototype/BACKLOG.md",
@@ -489,8 +489,8 @@
     },
     {
       "path": "prototype/BLUEPRINT.html",
-      "bytes": 162456,
-      "sha256": "4f8ade179d9ac5d737f01be38207c74bd74a03c8853a9454d58d9231f673e2d3"
+      "bytes": 166547,
+      "sha256": "c35c8ca8a8d9a62c54f3f0d4798e9dd6b86558601311c7d0a39b2e7a35a4ac95"
     },
     {
       "path": "prototype/DBOS_VALIDATION.md",
@@ -499,8 +499,8 @@
     },
     {
       "path": "prototype/FOUNDATION_CHANGELOG.md",
-      "bytes": 37571,
-      "sha256": "15316d0b2bb2ac20964898e8089bb524de09421bc9ae5af36077606e65c28df1"
+      "bytes": 39596,
+      "sha256": "c379fb68aa4113694bd46b1668256962334152f1a6e4f16063d8b5ca359d9856"
     },
     {
       "path": "prototype/FOUNDATION_PLAN.md",
@@ -509,8 +509,8 @@
     },
     {
       "path": "prototype/IMPLEMENTATION_STATUS.md",
-      "bytes": 37081,
-      "sha256": "c8992d0d90a0e70fd8a038966651993ceae60b0ea039cdd445a5bf40e620e024"
+      "bytes": 38313,
+      "sha256": "ff30494b82fb9d93edb14418ed09179a7c93c1d55664d3600aa5902ebf85c4c3"
     },
     {
       "path": "prototype/PLAYGROUND_UX_SPEC.md",
@@ -539,8 +539,8 @@
     },
     {
       "path": "prototype/WORKSPACE_SPEC.md",
-      "bytes": 19821,
-      "sha256": "63ef4dd854288948852c82eeb5a132d99655bf2b5962511ad53b35106c45777e"
+      "bytes": 19997,
+      "sha256": "54282c4faf7b5ee52d513f696bd0061d6a1b3af8a6df5c031a74a2a373c5b2e8"
     },
     {
       "path": "prototype/assets/ui-research/after-analytics-desktop.png",
@@ -609,8 +609,8 @@
     },
     {
       "path": "prototype/openapi.json",
-      "bytes": 185838,
-      "sha256": "12bfdf9c1b5f5ff1aeac43b173d7fef936ba63f5ab76e32691b8657e137ad66d"
+      "bytes": 187439,
+      "sha256": "f0bc8a8661197acd3ae3749f5e53ed02ef62aab9b278c479198fbebab2742b95"
     },
     {
       "path": "prototype/render_blueprint.py",
@@ -999,8 +999,13 @@
     },
     {
       "path": "tests/test_classification.py",
-      "bytes": 12326,
-      "sha256": "a349137647db4b4a205256fce6e4ba88c09f7f4e49d67ffdd22f18c9757e6574"
+      "bytes": 12573,
+      "sha256": "eeda7dc3975fdad6676a8be0f3f8b9de122bb338b24e282e43cf4a41391cf500"
+    },
+    {
+      "path": "tests/test_classification_context.py",
+      "bytes": 7253,
+      "sha256": "c2b0e8b3a8d4b29e14cebee89a172e4df0b561a1141b6bf8acf0ece310055c74"
     },
     {
       "path": "tests/test_classification_evaluation.py",

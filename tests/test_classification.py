@@ -94,6 +94,10 @@ def test_critical_review_uses_one_five_question_jev_request(workspace, monkeypat
     assert run["result"]["human_review_required"] is True
     assert len(calls) == 1 and len(calls[0]["questions"]) == 5
     assert calls[0]["state"]["qa_comment"] == source["result"]["critical_comments"][0]["comment"]
+    assert calls[0]["state"]["report_context"] == source["input"]["report_text"]
+    assert calls[0]["state"]["target"]["report_excerpts"]
+    assert "finding_text" not in calls[0]["state"]
+    assert "report_quotes" not in calls[0]["state"]
     assert "Authorization" not in json.dumps(run)
     assert "report_quotes" not in run["input"]
     assert len(workspace.get(f'/api/v1/reviews/{source["id"]}/classifications').json()) == 1
@@ -225,9 +229,9 @@ def test_analysis_uses_saved_request_and_excludes_private_metadata(workspace, mo
     assert analysis["state"] == calls[0]["state"]
     assert analysis["questions"] == calls[0]["questions"]
     assert analysis["model"] == calls[0]["model"]
-    assert analysis["rubric_version"] == "1.0.0"
+    assert analysis["rubric_version"] == "1.1.0"
     assert analysis["rubric_status"] == "draft_research"
-    assert run["input"]["source"] == "qa_comment"
+    assert run["input"]["source"] == "report_excerpts"
     assert classification_store.job("different-tenant", run["id"]) is None
     from backend.access import principal, Principal
     from backend.main import app

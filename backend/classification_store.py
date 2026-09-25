@@ -1,10 +1,11 @@
 """Tenant-scoped immutable JEV runs, dispatch claims, and reviewer feedback."""
 
 import json
+import re
 
 from . import store
 from .classification import ClassificationProblem
-from .contracts import ClassificationLabels
+from .contracts import ClassificationLabels, section_index
 from . import presentation
 from .presentation import API_VERSION
 
@@ -36,18 +37,35 @@ def _source(conn, tenant, payload):
         raise ClassificationProblem("CRITICAL_FINDING_NOT_FOUND", "Critical finding not found in this review.")
     mapping = next((item for item in result.get("_candidate_mapping", [])
                     if item["observation_id"] == payload.observation_id), None)
-    quotes = []
+    report = review["input"]["report_text"]
+    excerpts = []
     for candidate in (mapping or {}).get("candidates", []):
         for anchor in candidate.get("grounded_anchors", []):
-            quote = anchor["quote"]
-            if quote not in quotes:
-                quotes.append(quote)
-    # Controlled demo reviews have no private candidates; the comment still identifies
-    # the selected critical observation. Live model reviews use exact grounded anchors.
-    finding = "\n".join(quotes) if quotes else observation["comment"]
+            excerpt = dict(section=anchor["section"], text=anchor["quote"])
+            if not excerpt["text"].strip() or excerpt["text"] not in report:
+                raise ClassificationProblem("CLASSIFICATION_INVALID_INPUT", "Critical finding evidence is unavailable.")
+            if excerpt not in excerpts:
+                excerpts.append(excerpt)
+    # Only the fixed synthetic demo samples can supply canned target anchors.
+    # Never promote an ungrounded QA comment into report evidence.
+    if not excerpts and review.get("provenance", {}).get("mode") == "demo":
+        from .reviewer import SAMPLES, normalized
+        if any(normalized(item["report_text"]) == normalized(report) and
+               item["id"] in {"mixed", "critical", "critical_documented", "critical_unflagged"}
+               for item in SAMPLES):
+            for section in section_index(report):
+                for match in re.finditer(r"acute\s+right\s+pneumothorax\.",
+                                         report[section["start"]:section["end"]], re.IGNORECASE):
+                    excerpts.append(dict(section=section["kind"], text=match.group()))
+    if not excerpts:
+        raise ClassificationProblem("CLASSIFICATION_INVALID_INPUT", "Critical finding evidence is unavailable.")
+    quotes = list(dict.fromkeys(item["text"] for item in excerpts))
+    finding = "\n".join(quotes)
     if not 1 <= len(finding) <= 4000 or len(observation["comment"]) > 4000:
         raise ClassificationProblem("CLASSIFICATION_INPUT_TOO_LARGE", "Critical finding text exceeds the JEV limit.")
-    return dict(finding_text=finding, qa_comment=observation["comment"], report_quotes=quotes)
+    return dict(finding_text=finding, qa_comment=observation["comment"], report_quotes=quotes,
+                target=dict(report_excerpts=excerpts), report_context=report)
+
 
 
 def reserve(tenant, key, payload, config, actor=None, automatic=False):
@@ -66,6 +84,8 @@ def reserve(tenant, key, payload, config, actor=None, automatic=False):
             if existing:
                 return store.receipt(200, resource(conn, tenant, existing["id"])), False
         input_data = _source(conn, tenant, payload)
+        from .classification import request_body, validate_context_size
+        validate_context_size(request_body(input_data, config))
         rid = store.new_id("jc")
         created = store.now()
         input_hash = store.digest(store.canonical(input_data))

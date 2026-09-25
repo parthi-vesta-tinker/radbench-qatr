@@ -77,6 +77,9 @@ def request_body(input_data: dict, config: dict):
         "qa_comment": input_data["qa_comment"],
         "report_quotes": input_data["report_quotes"],
     }
+    if config["rubric"].get("preprocessing_version") == "review-critical-context-v2":
+        state = {"target": input_data["target"], "report_context": input_data["report_context"],
+                 "qa_comment": input_data["qa_comment"]}
     questions = {
         field: {
             "type": "choice",
@@ -86,6 +89,34 @@ def request_body(input_data: dict, config: dict):
         for field in FIELDS
     }
     return {"model": config["model"], "state": state, "questions": questions}
+
+
+def validate_context_size(body):
+    """Conservative UTF-8 byte upper bound; reject instead of clipping report context."""
+    state_size = len(store.canonical(body["state"]).encode("utf-8"))
+    sizes = [len(store.canonical(question).encode("utf-8")) for question in body["questions"].values()]
+    if state_size + max(sizes) + 1024 > 32000 or state_size + sum(sizes) + 1024 > 64000:
+        raise ClassificationProblem("CLASSIFICATION_INPUT_TOO_LARGE", "Report context exceeds the JEV limit.")
+
+
+def consistency_reasons(labels):
+    """Flag related predictions; never rewrite model labels or probabilities."""
+    reasons = {field: [] for field in FIELDS}
+    def flag(fields, message):
+        for field in fields:
+            reasons[field].append(message)
+    if ((labels["polarity"] == "negated") != (labels["certainty"] == "not_applicable")):
+        flag(("polarity", "certainty"), "Polarity and certainty disagree about whether the finding is absent; review both labels.")
+    priority = labels["urgency"] != "cannot_determine"
+    if priority and labels["polarity"] in {"negated", "unclear"}:
+        flag(("polarity", "urgency"), "Communication priority was assigned to an absent or unclear finding; review the report evidence.")
+    if priority and labels["finding_group"] == "insufficient_context":
+        flag(("finding_group", "urgency"), "Communication priority was assigned without a clear target finding; review the target and context.")
+    if labels["temporal_status"] == "historical" and labels["urgency"] in {"minutes", "hours", "days"}:
+        flag(("temporal_status", "urgency"), "Historical status and nonroutine priority need review against the current report context.")
+    if labels["temporal_status"] == "not_stated":
+        reasons["temporal_status"].append("Temporal status is unresolved; check for missing, ambiguous or conflicting comparison/history evidence.")
+    return reasons
 
 
 def validate_response(raw: dict, config: dict, duration_ms: int | None):
@@ -122,8 +153,6 @@ def validate_response(raw: dict, config: dict, duration_ms: int | None):
             reasons.append("Communication priority cannot be determined from supplied text.")
         if field == "urgency" and answer["choice"] != "cannot_determine":
             reasons.append("Verify this draft communication priority against the report and local policy.")
-        if field == "certainty" and answer["choice"] != "not_applicable" and answers["polarity"].get("choice") == "negated":
-            reasons.append("Negated finding and certainty label need review.")
         calibrated = None
         artifact = config.get("calibration")
         if artifact and artifact["fields"].get(field, {}).get("status") == "fitted":
@@ -133,6 +162,12 @@ def validate_response(raw: dict, config: dict, duration_ms: int | None):
                              provider_confidence=float(confidence), top_probability=float(top),
                              margin=float(top - runner_up), calibrated_probabilities=calibrated,
                              review_reasons=reasons)
+    if config["rubric"].get("preprocessing_version") == "review-critical-context-v2":
+        checks = consistency_reasons({field: value["label"] for field, value in result.items()})
+        for field in FIELDS:
+            result[field]["review_reasons"].extend(checks[field])
+    elif result["certainty"]["label"] != "not_applicable" and result["polarity"]["label"] == "negated":
+        result["certainty"]["review_reasons"].append("Negated finding and certainty label need review.")
     usage = raw.get("usage")
     if not (isinstance(usage, dict) and set(usage) >= {"input_tokens", "output_tokens"} and
             all(isinstance(usage[k], int) and not isinstance(usage[k], bool) and usage[k] >= 0

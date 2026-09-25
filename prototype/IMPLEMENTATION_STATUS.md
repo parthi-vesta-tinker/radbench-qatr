@@ -1,5 +1,27 @@
 # Implementation status
 
+## JEV context update — 2026-09-24
+
+Commit verification: all 40 classification, context and evaluation tests passed in
+an isolated checkout containing only this change, excluding concurrent workflow edits.
+
+Critical observation targets now retain section-labeled source excerpts and the full
+submitted report as context. QA comments are secondary evidence interpretation;
+demo runs use exact synthetic report excerpts. Five independent questions and
+post-response consistency flags preserve raw predictions. Rubric 1.1.0 and
+preprocessing v2 invalidate old calibration bindings; existing saved runs are not
+reclassified. New and legacy saved requests remain inspectable.
+
+Verification: 25 focused source/consistency tests, four desktop/mobile classification
+browser tests, production build, generated contract checks and documentation checks
+passed. The combined classification/context/evaluation suite finished with 39 passes
+and one failure: automatic classification remained queued beyond the test deadline;
+the automatic-dispatch test also failed in isolation. Concurrent workflow/retry edits
+were present during these runs and are separate from this context change. No live
+JEV accuracy or clinical validation is claimed.
+
+
+
 Current release: application **0.15.0**, bundle **1.21**, foundation **F3**, API **2026-09-22**, SQLite schema **8**.
 
 ## Implemented

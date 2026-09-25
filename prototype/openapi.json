@@ -4299,7 +4299,15 @@
             "title": "Model"
           },
           "state": {
-            "$ref": "#/components/schemas/ClassificationState"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassificationContextState"
+              },
+              {
+                "$ref": "#/components/schemas/ClassificationState"
+              }
+            ],
+            "title": "State"
           },
           "questions": {
             "additionalProperties": {
@@ -4402,6 +4410,28 @@
         ],
         "title": "ClassificationConfig"
       },
+      "ClassificationContextState": {
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/ClassificationTarget"
+          },
+          "report_context": {
+            "type": "string",
+            "title": "Report Context"
+          },
+          "qa_comment": {
+            "type": "string",
+            "title": "Qa Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target",
+          "report_context",
+          "qa_comment"
+        ],
+        "title": "ClassificationContextState"
+      },
       "ClassificationCounts": {
         "properties": {
           "finding_groups": {
@@ -4421,6 +4451,24 @@
         },
         "type": "object",
         "title": "ClassificationCounts"
+      },
+      "ClassificationExcerpt": {
+        "properties": {
+          "section": {
+            "type": "string",
+            "title": "Section"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "section",
+          "text"
+        ],
+        "title": "ClassificationExcerpt"
       },
       "ClassificationFeedbackInput": {
         "properties": {
@@ -5016,6 +5064,22 @@
           "report_quotes"
         ],
         "title": "ClassificationState"
+      },
+      "ClassificationTarget": {
+        "properties": {
+          "report_excerpts": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationExcerpt"
+            },
+            "type": "array",
+            "title": "Report Excerpts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "report_excerpts"
+        ],
+        "title": "ClassificationTarget"
       },
       "ConfigResource": {
         "properties": {
