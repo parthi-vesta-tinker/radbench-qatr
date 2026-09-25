@@ -1,5 +1,5 @@
 import type { Review } from "./types";
-import { derivePostReviewGuidance } from "./postReviewGuidance.ts";
+import { derivePostReviewGuidance } from "./reviewGuidance";
 import { StudioDisclosure } from "./StudioDisclosure";
 
 function GuidanceSteps({ steps }: { steps: string[] }) {
